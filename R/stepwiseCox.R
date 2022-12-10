@@ -1,8 +1,8 @@
-#' Stepwise Logistic Regression
+#' Stepwise Cox Proportional Hazards Regression
 #' 
-#' Stepwise logistic regression analysis selects model based on information criteria and Wald or Score test with 'forward', 'backward', 'bidirection' and 'score' model selection method.
+#' Stepwise Cox regression analysis selects model based on information criteria and significant test with 'forward', 'backward', 'bidirection' and 'score' variable selection method.
 #' 
-#' @param formula Model formulae. The models fitted by the glm functions are specified in a compact symbolic form. The basic structure of a formula is the tilde symbol (~) and at least one independent (righthand) variable. In most (but not all) situations, a single dependent (lefthand) variable is also needed. Thus we can construct a formula quite simple formula (y ~ x). Multiple independent variables by simply separating them with the plus (+) symbol (y ~ x1 + x2). Variables in the formula are removed with a minus(-) symbol (y ~ x1 - x2). One particularly useful feature is the . operator when modelling with lots of variables (y ~ .). The %in% operator indicates that the terms on its left are nested within those on the right. For example y ~ x1 + x2 %in% x1 expands to the formula y ~ x1 + x1:x2. A model with no intercept can be specified as y ~ x - 1 or y ~ x + 0 or y ~ 0 + x.
+#' @param formula Model formulae. The models fitted by the coxph functions are specified in a compact symbolic form. The basic structure of a formula is the tilde symbol (~) and at least one independent (righthand) variable. In most (but not all) situations, a single dependent (lefthand) variable is also needed. Thus we can construct a formula quite simple formula (y ~ x). Multiple independent variables by simply separating them with the plus (+) symbol (y ~ x1 + x2). Variables in the formula are removed with a minus(-) symbol (y ~ x1 - x2). One particularly useful feature is the . operator when modelling with lots of variables (y ~ .). The %in% operator indicates that the terms on its left are nested within those on the right. For example y ~ x1 + x2 %in% x1 expands to the formula y ~ x1 + x1:x2.
 #' 
 #' @param data Data set including dependent and independent variables to be analyzed
 #' 
@@ -12,15 +12,17 @@
 #' 
 #' @param select Specify the criterion that uses to determine the order in which effects enter and leave at each step of the specified selection method including AIC, AICc, SBC, IC(1), IC(3/2), HQ, HQc and Significant Levels(SL)
 #' 
-#' @param sigMethod Specify the method of significant test for variable to be entered in the model. "Rao" and "LRT" cab be chosen for Rao's efficient score test and likelihood ratio test.
-#' 
 #' @param sle Specify the significance level for entry, default is 0.15
 #' 
 #' @param sls Specify the significance level for staying in the model, default is 0.15
 #' 
-#' @param weights Numeric vector to provide a weights for each observation in the input data set. Note that weights should be ranged from 0 to 1, while negative numbers are forcibly converted to 0, and numbers greater than 1 are forcibly converted to 1. If you do not specify a weights vector, each observation has a default weights of 1.
+#' @param method Specify the method for tie handling. If there are no tied death times all the methods are equivalent. Nearly all Cox regression programs use the Breslow method by default, but not this one. The Efron approximation is used as the default here, it is more accurate when dealing with tied death times, and is as efficient computationally. The “exact partial likelihood is equivalent to a conditional logistic model, and is appropriate when the times are a small set of discrete values.
+#' 
+#' @param weights Numeric vector to provide a weight for each observation in the input data set. Note that weights should be ranged from 0 to 1, while negative numbers are forcibly converted to 0, and numbers greater than 1 are forcibly converted to 1. If you do not specify a weight vector, each observation has a default weight of 1.
 #'
 #' @param best Control the number of models displayed in the output, default is NULL which means all possible model will be displayed
+#' 
+#' @import survival
 #' 
 #' @references 
 #' 
@@ -53,52 +55,47 @@
 #' Sawa, T. (1978). Information criteria for discriminating among alternative regression models. Econometrica, 46(6), 1273-1291.
 #' 
 #' Schwarz, G. (1978). Estimating the dimension of a model. Annals of Statistics, 6(2), pags. 15-18.
-#' 
-#' @author Junhui Li 
+#'
+#' @author Junhui Li
 #' 
 #' @examples
-#' formula=vs ~ .
-#' stepwiseLogit(formula,
-#'               data=mtcars,
-#'               include=NULL,
-#'               selection="bidirection",
-#'               select="SL",
-#'               sle=0.15,
-#'               sls=0.15,
-#'               sigMethod="Rao",
-#'               weights=NULL,
-#'               best=NULL)
+#' lung <- survival::lung
+#' my.data <- na.omit(lung)
+#' my.data$status1 <- ifelse(my.data$status==2,1,0)
+#' data <- my.data
+#' formula = Surv(time, status1) ~ . - status
 #' 
-#' @keywords stepwise logistic regression
-#'
-#' @export stepwiseLogit
+#' stepwiseCox(formula,
+#' data,
+#' include=NULL,
+#' selection=c("bidirection"),
+#' select="HQ",
+#' method=c("efron"),
+#' sle=0.15,
+#' sls=0.15,
+#' weights=NULL,
+#' best=NULL)
+#' 
+#' @export stepwiseCox
 
-stepwiseLogit <- function(formula,
-                          data,
-                          include=NULL,
-                          selection=c("forward","backward","bidirection","score"),
-                          select=c("SL","AIC","AICc","SBC","HQ","HQc","IC(3/2)","IC(1)"),
-                          sle=0.15,
-                          sls=0.15,
-                          sigMethod=c("Rao","LRT"),
-                          weights=NULL,
-                          best=NULL){
+stepwiseCox <- function(formula,
+                        data,
+                        include=NULL,
+                        selection=c("forward","backward","bidirection","score"),
+                        select=c("SL","AIC","AICc","SBC","HQ","HQc","IC(3/2)","IC(1)"),
+                        sle=0.15,
+                        sls=0.15,
+                        method=c("efron","breslow","exact"), 
+                        weights=NULL,
+                        best=NULL){
   selection <- match.arg(selection)
   select <- match.arg(select)
-  sigMethod <- match.arg(sigMethod)
-  if(class(formula)!="formula"){
-    stop("class of formula object isn't 'formula'")
-  }else{
-    termForm <- terms(formula,data=data)
-    vars <- as.character(attr(termForm, "variables"))[-1]
-    yName <- vars[attr(termForm, "response")]
-    xName <- attr(termForm,"term.labels")
-    if(attr(termForm, "intercept")==0){
-      intercept <- "0"
-    }else{
-      intercept <- "1"
-    }
-  }
+  method <- match.arg(method)
+  stopifnot(inherits(formula, "formula"))
+  termForm <- terms(formula,data=data)
+  vars <- as.character(attr(termForm, "variables"))[-1]
+  yName <- vars[attr(termForm, "response")]
+  xName <- attr(termForm,"term.labels")
   if(is.character(include)){
     if(!all(include %in% xName)){
       stop("variable in include is not included formula or dataset")
@@ -112,10 +109,8 @@ stepwiseLogit <- function(formula,
   }else{
     stop("include should be character vector indicating variable to be included in all models")
   }
-  #fit <- glm(formula,data=data, weights=weights, family="binomial")
-  #https://stackoverflow.com/questions/8218196/object-not-found-error-when-passing-model-formula-to-another-function
-  fmFull <- reformulate(c(intercept,xName),yName)
-  fitFull <- glm(fmFull,data=data, weights=weights, family="binomial")
+  fmFull <- reformulate(c(xName),yName)
+  fitFull <- coxph(fmFull,data=data, weights=weights,method=method)
   allVarClass <- attr(fitFull$terms,"dataClasses")
   classTable <- as.data.frame(table(allVarClass))
   colnames(classTable) <- c("class","variable")
@@ -144,8 +139,8 @@ stepwiseLogit <- function(formula,
   xName <- setdiff(xName,mulcolX)
   n <- nrow(data)
   result <- list()
-  ModInf <- matrix(NA,9,1)
-  ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,selection,select,sle,sle,sigMethod,mulcolMergeName,intercept),9,1))
+  ModInf <- matrix(NA,8,1)
+  ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,selection,select,sle,sle,method,mulcolMergeName),8,1))
   ModInf <- data.frame(ModInf)
   colnames(ModInf) <- c("","")
   ModInf[,1] <- c("Response Variable = ",
@@ -154,9 +149,8 @@ stepwiseLogit <- function(formula,
                   "Select Criterion = ",
                   "Entry Significance Level(sle) = ",
                   "Stay Significance Level(sls) = ",
-                  "Variable significance test = ",
                   "Multicollinearity Terms = ",
-                  "Intercept = ")
+                  "Method = ")
   if(select=="SL"){
     if(selection=="forward"){
       ModInf <- ModInf[-6,]
@@ -176,55 +170,53 @@ stepwiseLogit <- function(formula,
     singSet <- matrix(NA,1,3)
     colnames(singSet) <- c("NumberOfVariables",select,"VariablesInModel")
     finalResult <- singSet
-    fmReduce <- reformulate(c(intercept), yName)
-    fitReduce <- glm(fmReduce,data=data, weights=weights, family="binomial")
     if(length(includeName)!=0){
-      fm <- reformulate(c(intercept,includeName), yName)
-      #fit <- multinom(fm, data = YXdata, weights = weights)
-      fit <- glm(fm,data=data, weights=weights, family="binomial")
+      fm <- reformulate(c(includeName), yName)
+      fit <- coxph(fm,data=data, weights=weights,method=method)
       if(select=="SL"){
-        PIC <- anova(fitReduce,fit,test="Rao")[2,"Rao"]
+        #PIC <- summary(fit)[[sigMethod]][1]
+        PIC <- fit$score
       }else{
-        PIC <- modelFitStat(select,fit,"Likelihood")
+        PIC <- modelFitStat(select,fit,"Likelihood",TRUE)
       }
-      singSet[1,1:3] <- c(fit$rank,PIC,paste0(c(intercept,includeName),collapse=" "))
+      singSet[1,1:3] <- c(length(attr(fit$terms,"term.labels")),PIC,paste0(c(includeName),collapse=" "))
       includeSubSet <- singSet
       xCheck <- setdiff(xName,includeName)
     }else{
-	    includeSubSet <- NULL
-	    xCheck <- xName
+      includeSubSet <- NULL
+      xCheck <- xName
     }
     for(nv in 1:length(xCheck)){
-	    subSet <- NULL
+      subSet <- NULL
       comTable <- combn(xCheck,nv)
       for(ncom in 1:ncol(comTable)){
-        comVar <- c(intercept,includeName,comTable[,ncom])
+        comVar <- c(includeName,comTable[,ncom])
         fm <- reformulate(comVar, yName)
-        fit <- glm(fm,data = data,weights=weights,family="binomial")
+        fit <- coxph(fm,data = data,weights=weights,method=method)
         if(select=="SL"){
-          PIC <- anova(fitReduce,fit, test="Rao")[2,"Rao"] 
+          PIC <- fit$score
         }else{
-          PIC <- modelFitStat(select,fit,"Likelihood")
+          PIC <- modelFitStat(select,fit,"Likelihood",TRUE)
         }
-        singSet[1,1:3] <- c(fit$rank,PIC,paste0(comVar,collapse=" "))
+        singSet[1,1:3] <- c(attr(logLik(fit),"df"),PIC,paste0(comVar,collapse=" "))
         subSet <- rbind(subSet,singSet)
       }
-	    bestSubSet <- as.data.frame(subSet)
+      bestSubSet <- as.data.frame(subSet)
       bestSubSet[,2] <- as.numeric(bestSubSet[,2])
       if(select=="SL"){
         subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = TRUE),]
       }else{
         subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = FALSE),]
       }
-	    if(is.null(best)){
-	      nbest <- nrow(subResultSort)
-	    }else{
-	      if(nrow(subResultSort)<best){
-	        nbest <- nrow(subResultSort)
-	      }else{
-	        nbest <- best
-	      }
-	    }
+      if(is.null(best)){
+        nbest <- nrow(subResultSort)
+      }else{
+        if(nrow(subResultSort)<best){
+          nbest <- nrow(subResultSort)
+        }else{
+          nbest <- best
+        }
+      }
       finalResult <- rbind(finalResult,subResultSort[1:nbest,])
     }
     finalResult <- finalResult[-1,]
@@ -242,66 +234,64 @@ stepwiseLogit <- function(formula,
     bestPoint <- subBestPoint
     if(selection=="backward"){
       addVar <- FALSE
-      xModel <- c(intercept,includeName,setdiff(xName,includeName))
+      xModel <- c(includeName,setdiff(xName,includeName))
       xResidual <- NULL
       fmFull <- reformulate(xModel, yName)
-      fitFull <- glm(fmFull,data=data,weights=weights,family="binomial")
+      fitFull <- coxph(fmFull,data=data,weights=weights,method=method)
       if(select=="SL"){
         PIC <- 1
       }else{
-        PIC <- modelFitStat(select,fitFull,"Likelihood")
+        PIC <- modelFitStat(select,fitFull,"Likelihood",TRUE)
       }
-      bestPoint[1,-1] <- c("","",fitFull$rank,fitFull$rank,PIC)
+      k <- attr(logLik(fitFull),"df")
+      bestPoint[1,-1] <- c("","","",k,PIC)
     }else{
       addVar <- TRUE
-      xModel <- c(intercept,includeName)
+      xModel <- c(includeName)
       xResidual <- setdiff(xName,includeName)
-      fmInt <- reformulate(intercept, yName)
-      fitInt <- glm(fmInt,data=data,weights=weights,family="binomial")
       if(select=="SL"){
         PIC <- 1
       }else{
-        if(intercept=="0"){
-          PIC <- Inf
-        }else{
-          PIC <- modelFitStat(select,fitInt,"Likelihood")
-        }
+        PIC <- Inf
       }
-      bestPoint[1,-1] <- c(intercept,"",fitInt$rank,fitInt$rank,PIC)
+      bestPoint[1,] <- c(0,"","",0,0,PIC)
       if(!is.null(includeName)){
-        fmInc <- reformulate(xModel, yName)
-        fitInc <- glm(fmInc,data=data,weights=weights,family="binomial")
+        fmInt <- reformulate("0",yName)
+        fitInt <- coxph(fmInt,data=data,weights=weights,method=method)
+        fmInc <- reformulate(includeName,yName)
+        fitInc <- coxph(fmInc,data=data,weights=weights,method=method)
         if(select=="SL"){
-          PIC <- anova(fitInt,fitInc,test=sigMethod)[2,'Pr(>Chi)']
+          PIC <- anova(fitInt,fitInc)[2,'P(>|Chi|)']
         }else{
-          PIC <- modelFitStat(select,fitInc,"Likelihood")
+          PIC <- modelFitStat(select,fitInc,"Likelihood",TRUE)
         }
-        subBestPoint[1,-1] <- c(paste0(includeName,collapse=" "),"",anova(fitInt,fitInc)[2,'Df'],fitInc$rank,PIC)
+        k <- attr(logLik(fitInc),"df")
+        subBestPoint[1,-1] <- c(paste0(includeName,collapse=" "),"",anova(fitInt,fitInc)[2,'Df'],k,PIC)
         bestPoint <- rbind(bestPoint,subBestPoint)
       }
     }
     while(TRUE){
       if(addVar==TRUE){
-        fm0 <- reformulate(xModel, yName)
-        fit0 <- glm(fm0,data = data,weights=weights,family="binomial")
-        if(length(xResidual)==0){
-          break
+        if(is.null(xModel)){
+          xMod <- "0"
+        }else{
+          xMod <- xModel
         }
+        fm0 <- reformulate(xMod, yName)
+        fit0 <- coxph(fm0,data = data,weights=weights,method=method)
+		if(length(xResidual)==0){
+		  break
+		}
         xResidualList <- as.list(xResidual)
         names(xResidualList) <- xResidual
         fm1 <- lapply(xResidualList,function(x){reformulate(c(xModel,x),yName)})
-        fit1 <- lapply(fm1,function(x){glm(x,data=data,weights=weights,family="binomial")})
-        rank1 <- lapply(fit1,function(x){x$rank})
-        mulColVar <- names(which(fit0$rank == rank1))
-        if(length(mulColVar)>0){
-          fit1 <- fit1[!names(fit1) %in% mulColVar]
-        }
+        fit1 <- lapply(fm1,function(x){coxph(x,data = data,weights=weights,method=method)})
         if(select=="SL"){
           threshold <- sle
-          PICset <- sapply(fit1,function(x){anova(fit0,x,test=sigMethod)[2,'Pr(>Chi)']})
+          PICset <- sapply(fit1,function(x){anova(fit0,x)[2,'P(>|Chi|)']})
         }else{
           threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
-          PICset <- sapply(fit1,function(x){modelFitStat(select,x,"Likelihood")})
+          PICset <- sapply(fit1,function(x){modelFitStat(select,x,"Likelihood",TRUE)})
         }
         mPIC <- min(PICset)
         minmaxVar <- names(which.min(PICset))
@@ -310,25 +300,30 @@ stepwiseLogit <- function(formula,
           indicator <- TRUE
           xModel <- append(xModel,minmaxVar)
           xResidual <- setdiff(xResidual,minmaxVar)
-          subBestPoint[1,-1] <- c(minmaxVar,"",anova(fit0,minmaxFit1)[2,'Df'],minmaxFit1$rank,mPIC)
+          k <- attr(logLik(minmaxFit1),"df")
+          subBestPoint[1,-1] <- c(minmaxVar,"",anova(fit0,minmaxFit1)[2,'Df'],k,mPIC)
           bestPoint <- rbind(bestPoint,subBestPoint)
         }else{
           indicator <- FALSE
         }
       }else{
         fm1 <- reformulate(xModel,yName)
-        fit1 <- glm(fm1,data=data,weights=weights,family="binomial")
-        xChcek <- setdiff(xModel,c(intercept,includeName))
+        fit1 <- coxph(fm1,data=data,weights=weights,method=method)
+        xChcek <- setdiff(xModel,c(includeName))
         if(is.null(xChcek)){
           break
+        }else if(length(xChcek)==1){
+          fm0 <- list(reformulate("0",yName))
+          names(fm0) <- xChcek
+        }else{
+          xChcekList <- as.list(xChcek)
+          names(xChcekList) <- xChcek
+          fm0 <- lapply(xChcekList,function(x){reformulate(setdiff(xModel,x),yName)})
         }
-        xChcekList <- as.list(xChcek)
-        names(xChcekList) <- xChcek
-        fm0 <- lapply(xChcekList,function(x){reformulate(setdiff(xModel,x),yName)})
-        fit0 <- lapply(fm0,function(x){glm(x,data=data,weights=weights,family="binomial")})
+        fit0 <- lapply(fm0,function(x){coxph(x,data=data,weights=weights,method=method)})
         if(select=="SL"){
           threshold <- sls
-          PIC <- sapply(fit0,function(x){anova(x,fit1,test=sigMethod)[2,'Pr(>Chi)']})
+          PIC <- sapply(fit0,function(x){anova(x,fit1)[2,'P(>|Chi|)']})
           mPIC <- max(PIC)
           minmaxVar <- names(which.max(PIC))
           if(mPIC > threshold){
@@ -338,7 +333,7 @@ stepwiseLogit <- function(formula,
           }
         }else{
           threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
-          PIC <- sapply(fit0,function(x){modelFitStat(select,x,"Likelihood")})
+          PIC <- sapply(fit0,function(x){modelFitStat(select,x,"Likelihood",TRUE)})
           mPIC <- min(PIC)
           minmaxVar <- names(which.min(PIC))
           if(mPIC < threshold){
@@ -351,7 +346,8 @@ stepwiseLogit <- function(formula,
           minmaxFit0 <- fit0[[minmaxVar]]
           xResidual <- append(xResidual,minmaxVar)
           xModel <- setdiff(xModel,minmaxVar)
-          subBestPoint[1,-1] <- c("",minmaxVar,anova(minmaxFit0)[2,'Df'],minmaxFit0$rank,mPIC)
+          k <- attr(logLik(minmaxFit0),"df")
+          subBestPoint[1,-1] <- c("",minmaxVar,anova(minmaxFit0)[2,'Df'],k,mPIC)
           bestPoint <- rbind(bestPoint,subBestPoint)
         }
       }
@@ -379,20 +375,21 @@ stepwiseLogit <- function(formula,
       }
     }#while
     if(selection!="backward"){
+      bestPoint <- bestPoint[-1,]
       if(is.null(includeName)){
         nInc <- 0
       }else{
         nInc <- 1
       }
-      if(1+nInc<nrow(bestPoint)){
-        bestPoint[,1] <- c(rep(0,1+nInc),1:(nrow(bestPoint)-1-nInc))
+      if(nInc<nrow(bestPoint)){
+        bestPoint[,1] <- c(rep(0,nInc),1:(nrow(bestPoint)-nInc))
       }
     }else{
-      bestPoint[,1] <- c(1:nrow(bestPoint))
+      bestPoint[,1] <- c(1:nrow(bestPoint)-1)
     }
     
     lastModel <- reformulate(xModel,yName)
-    lastFit <- glm(lastModel,data=data,weights=weights,family="binomial")
+    lastFit <- coxph(lastModel,data,weights=weights,method=method)
     MLE <- coef(summary(lastFit))
     result$Process <- bestPoint
     result$Variables <- xModel
