@@ -149,8 +149,8 @@ stepwiseCox <- function(formula,
                   "Select Criterion = ",
                   "Entry Significance Level(sle) = ",
                   "Stay Significance Level(sls) = ",
-                  "Multicollinearity Terms = ",
-                  "Method = ")
+                  "Method = ",
+                  "Multicollinearity Terms = ")
   if(select=="SL"){
     if(selection=="forward"){
       ModInf <- ModInf[-6,]
