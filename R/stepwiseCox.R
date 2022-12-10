@@ -63,7 +63,7 @@
 #' my.data <- na.omit(lung)
 #' my.data$status1 <- ifelse(my.data$status==2,1,0)
 #' data <- my.data
-#' formula = Surv(time, status1) ~ . - status
+#' formula = Surv(time, status1) ~ . - status 
 #' 
 #' stepwiseCox(formula,
 #' data,
@@ -149,8 +149,8 @@ stepwiseCox <- function(formula,
                   "Select Criterion = ",
                   "Entry Significance Level(sle) = ",
                   "Stay Significance Level(sls) = ",
-                  "Multicollinearity Terms = ",
-                  "Method = ")
+                  "Method = ",
+                  "Multicollinearity Terms = ")
   if(select=="SL"){
     if(selection=="forward"){
       ModInf <- ModInf[-6,]
