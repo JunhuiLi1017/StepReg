@@ -4,10 +4,12 @@
 \alias{print.StepReg}
 \title{Prints from a StepReg object}
 \usage{
-\method{print}{StepReg}(x)
+\method{print}{StepReg}(x, ...)
 }
 \arguments{
 \item{x}{each dataframe from outputlist}
+
+\item{...}{further paramters}
 }
 \value{
 formatted dataframe
