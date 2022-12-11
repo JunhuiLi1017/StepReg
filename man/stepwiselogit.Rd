@@ -42,17 +42,14 @@ stepwiseLogit(
 Stepwise logistic regression analysis selects model based on information criteria and Wald or Score test with 'forward', 'backward', 'bidirection' and 'score' model selection method.
 }
 \examples{
-formula=vs ~ .
+formula <- vs ~ .
 stepwiseLogit(formula,
               data=mtcars,
-              include=NULL,
               selection="bidirection",
               select="SL",
               sle=0.15,
               sls=0.15,
-              sigMethod="Rao",
-              weights=NULL,
-              best=NULL)
+              sigMethod="Rao")
 
 }
 \references{
