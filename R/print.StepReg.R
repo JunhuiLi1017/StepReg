@@ -3,6 +3,8 @@
 #' print.StepReg prints to console the from an object of class StepReg
 #'
 #' @param x each dataframe from outputlist
+#' 
+#' @param ... further paramters
 #'
 #' @return formatted dataframe
 #' 
@@ -13,7 +15,7 @@
 #' @importFrom dplyr `%>%` mutate_if
 #' 
 #' @export
-print.StepReg <- function(x){
+print.StepReg <- function(x,...){
   x %>% mutate_if(is.factor, as.character) -> x
   if(nrow(x)==1){
     dfLen <- sapply(x,nchar)
