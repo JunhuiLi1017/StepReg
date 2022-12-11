@@ -6,24 +6,19 @@
 #'
 #' @return formatted dataframe
 #' 
-#' @importFrom purrr pmap_dfc map_int pmap_chr
-#' 
-#' @importFrom stringr str_trim
+#' @importFrom purrr pmap_dfc pmap_chr
 #' 
 #' @importFrom dplyr `%>%`
 #' 
 #' @export
 print.StepReg <- function(x){
-  nameLen <- map_int(colnames(x),maxnchar)
-  dfLen <- map_int(x,maxnchar)
+  
+  nameLen <- nchar(colnames(x),keepNA =FALSE)
+  dfLen <- apply(sapply(x,nchar),2,max)
   lengths <- pmax(nameLen,dfLen)+2
   
-  dfHeader <- str_trim(colnames(x),"both")
-  
   side <- rep("both",ncol(x))
-  list(dfHeader,lengths,side) %>% pmap_chr(str_pad) -> dfHeader
-  side <- c("right","right",rep("left",ncol(x)-2))
-  
+  list(colnames(x),lengths,side) %>% pmap_chr(str_pad) -> dfHeader
   list(x,lengths,side) %>% pmap_dfc(str_pad) -> dataFrame
   
   cat(paste0(rep("\u2017",sum(lengths)),collapse=""));cat("\n")
