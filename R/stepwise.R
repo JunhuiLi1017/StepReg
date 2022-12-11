@@ -182,16 +182,16 @@ stepwise <- function(formula,
   ModInf <- matrix(NA,9,1)
   ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,selection,select,sle,sle,approxF,mulcolMergeName,intercept),9,1))
   ModInf <- data.frame(ModInf)
-  colnames(ModInf) <- c("","")
-  ModInf[,1] <- c("Response Variable = ",
-                  "Included Variable = ",
-                  "Selection Method = ",
-                  "Select Criterion = ",
-                  "Entry Significance Level(sle) = ",
-                  "Stay Significance Level(sls) = ",
-                  "Variable significance test = ",
-                  "Multicollinearity Terms = ",
-                  "Intercept = ")
+  colnames(ModInf) <- c("condition","value")
+  ModInf[,1] <- c("Response Variable",
+                  "Included Variable",
+                  "Selection Method",
+                  "Select Criterion",
+                  "Entry Significance Level(sle)",
+                  "Stay Significance Level(sls)",
+                  "Variable significance test",
+                  "Multicollinearity Terms",
+                  "Intercept")
   if(select=="SL"){
     if(selection=="forward"){
       ModInf <- ModInf[-6,]
@@ -204,6 +204,7 @@ stepwise <- function(formula,
     ModInf <- ModInf[-c(5:6),]
   }
   rownames(ModInf) <- 1:nrow(ModInf)
+  class(ModInf) <- class(classTable) <- c("StepReg","data.frame")
   result$'Basic Information' <- ModInf
   result$'Variable Class' <- classTable
   if(selection=="score"){
@@ -426,18 +427,28 @@ stepwise <- function(formula,
       parEstList <- list()
       if(nY>1){
         for(i in names(parEst)){
-          parEstList[i] <- list(parEst[[i]]$coefficients)
+          subParEst <- parEst[[i]]$coefficients
+          subParEst <- data.frame(rownames(subParEst),subParEst)
+          colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","Pr")
+          class(subParEst) <- c("StepReg","data.frame")
+          parEstList[i] <- list(subParEst)
         }
       }else{
-        parEstList <- list(parEst$coefficients)
+        subParEst <- parEst$coefficients
+        subParEst <- data.frame(rownames(subParEst),subParEst)
+        colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","Pr")
+        class(subParEst) <- c("StepReg","data.frame")
+        parEstList <- list(subParEst)
         names(parEstList) <- yName
       }
     }
     bestPoint$DF <- abs(as.numeric(bestPoint$DF))
     bestPoint$DF[is.na(bestPoint$DF)] <- ""
-    class(bestPoint) <- class(xModel) <- class(parEstList) <- c("StepReg","data.frame")
+    variables <- as.data.frame(t(data.frame(xModel)))
+    colnames(variables) <- paste0("variables",1:length(xModel))
+    class(bestPoint) <- class(variables) <- c("StepReg","data.frame")
     result$Process <- bestPoint
-    result$Varaibles <- xModel
+    result$Varaibles <- variables
     result$Coefficients <- parEstList
   }
   return(result)
