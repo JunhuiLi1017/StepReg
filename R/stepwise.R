@@ -430,7 +430,7 @@ stepwise <- function(formula,
       }else{
         subParEst <- parEst$coefficients
         subParEst <- data.frame(rownames(subParEst),subParEst)
-        colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","Pr")
+        colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","P.value")
         class(subParEst) <- c("StepReg","data.frame")
         parEstList <- list(subParEst)
         names(parEstList) <- yName
@@ -441,7 +441,7 @@ stepwise <- function(formula,
     variables <- as.data.frame(t(data.frame(xModel)))
     colnames(variables) <- paste0("variables",1:length(xModel))
     class(bestPoint) <- class(variables) <- c("StepReg","data.frame")
-    result$'Process of selection' <- bestPoint
+    result$'Process of Selection' <- bestPoint
     result$'Selected Varaibles' <- variables
     result$'Coefficients of the Selected Variables' <- parEstList
   }

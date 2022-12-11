@@ -57,21 +57,18 @@
 #' @author Junhui Li 
 #' 
 #' @examples
-#' formula=vs ~ .
+#' formula <- vs ~ .
 #' stepwiseLogit(formula,
 #'               data=mtcars,
-#'               include=NULL,
 #'               selection="bidirection",
 #'               select="SL",
 #'               sle=0.15,
 #'               sls=0.15,
-#'               sigMethod="Rao",
-#'               weights=NULL,
-#'               best=NULL)
+#'               sigMethod="Rao")
 #' 
 #' @keywords stepwise logistic regression
 #'
-#' @export stepwiseLogit
+#' @export
 
 stepwiseLogit <- function(formula,
                           data,
@@ -122,7 +119,6 @@ stepwiseLogit <- function(formula,
   for(i in names(table(allVarClass))){
     classTable[names(table(allVarClass)) %in% i,2] <- paste0(names(allVarClass[allVarClass %in% i]),collapse=" ")
   }
-  classTable$class <- paste0(classTable$class,":")
   ## detect multicollinearity
   if(any(allVarClass=="factor")){
     factVar <- names(which(allVarClass=="factor"))
@@ -147,16 +143,16 @@ stepwiseLogit <- function(formula,
   ModInf <- matrix(NA,9,1)
   ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,selection,select,sle,sle,sigMethod,mulcolMergeName,intercept),9,1))
   ModInf <- data.frame(ModInf)
-  colnames(ModInf) <- c("","")
-  ModInf[,1] <- c("Response Variable = ",
-                  "Included Variable = ",
-                  "Selection Method = ",
-                  "Select Criterion = ",
-                  "Entry Significance Level(sle) = ",
-                  "Stay Significance Level(sls) = ",
-                  "Variable significance test = ",
-                  "Multicollinearity Terms = ",
-                  "Intercept = ")
+  colnames(ModInf) <- c("Paramters","Value")
+  ModInf[,1] <- c("Response Variable",
+                  "Included Variable",
+                  "Selection Method",
+                  "Select Criterion",
+                  "Entry Significance Level(sle)",
+                  "Stay Significance Level(sls)",
+                  "Variable significance test",
+                  "Multicollinearity Terms",
+                  "Intercept")
   if(select=="SL"){
     if(selection=="forward"){
       ModInf <- ModInf[-6,]
@@ -169,8 +165,9 @@ stepwiseLogit <- function(formula,
     ModInf <- ModInf[-c(5:6),]
   }
   rownames(ModInf) <- 1:nrow(ModInf)
-  result$'Basic Information' <- ModInf
-  result$'Variable Class' <- classTable
+  class(ModInf) <- class(classTable) <- c("StepReg","data.frame")
+  result$'Summary of Parameters' <- ModInf
+  result$'Variables Type' <- classTable
   if(selection=="score"){ #score
     bestSubSet <- NULL
     singSet <- matrix(NA,1,3)
@@ -230,7 +227,8 @@ stepwiseLogit <- function(formula,
     finalResult <- finalResult[-1,]
     RegPIC <- rbind(includeSubSet,finalResult)
     rownames(RegPIC) <- c(1:nrow(RegPIC))
-    result$Process <- RegPIC
+    class(RegPIC) <- c("StepReg","data.frame")
+    result$'Process of Selection' <- RegPIC
   }else{ #forward # bidirection # backward
     subBestPoint <- data.frame(Step=numeric(),
                                EnteredEffect=character(),
@@ -394,9 +392,14 @@ stepwiseLogit <- function(formula,
     lastModel <- reformulate(xModel,yName)
     lastFit <- glm(lastModel,data=data,weights=weights,family="binomial")
     MLE <- coef(summary(lastFit))
-    result$Process <- bestPoint
-    result$Variables <- xModel
-    result$Coefficients <- MLE
+    MLE <- data.frame(rownames(MLE),MLE)
+    colnames(MLE) <- c("Variable","Estimate","StdError","t.value","P.value")
+    variables <- as.data.frame(t(data.frame(xModel)))
+    colnames(variables) <- paste0("variables",1:length(xModel))
+    class(MLE) <- class(bestPoint) <- class(variables) <- c("StepReg","data.frame")
+    result$'Process of Selection' <- bestPoint
+    result$'Selected Varaibles' <- variables
+    result$'Coefficients of the Selected Variables' <- MLE
   }
   return(result)
 }

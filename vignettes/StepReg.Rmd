@@ -26,7 +26,7 @@ library(StepReg)
 
 ## linear stepwise regression with data mtcar
 
-* 1) linear stepwise regression using 'forward' method for variable selection and 'AIC' as criteria for stop rules
+### linear stepwise regression using 'forward' method for variable selection and 'AIC' as criteria for stop rules
 ```{r}
 data(mtcars)
 formula <- mpg ~ .
@@ -38,6 +38,58 @@ sForwAIC
 ```
 
 From the above result, we can see that stepwise() output a list with 5 tables. 
+
+* 'Summary of Parameters' tells you what parameters is used for this function, where Intercept equals to 1 showing that this stepwise regression has a intercept, otherwise 0 has not a intercept.
+
+* 'Variables Type' is the summary of the type of all variables.
+
+* 'Process of Selection' let you know how variables are selected, we used AIC as the criteria so the last column is value of AIC.
+
+* 'Coefficients of the Selected Variables' is the coefficients of all selected variable.
+
+### linear stepwise regression using 'bidirection' method for variable selection and 'SL' as criteria for stop rules, and we set significant level for entry(sle) is 0.15, and significant level of stay(sls) is 0.15 too.
+
+```{r}
+data(mtcars)
+formula <- mpg ~ .
+sBidiSL <- stepwise(formula=formula,
+         data=mtcars,
+         selection="bidirection",
+         select="SL",
+         sle=0.15,
+         sls=0.15)
+sBidiSL
+```
+
+The output of this time is similar to the last time except that the last column name of 'Process of Selection' is SL.
+
+### linear stepwise regression using 'backward' method for variable selection and 'SBC' as criteria for stop rules and without intercept in stepwise regression.
+
+```{r}
+data(mtcars)
+#formula <- mpg ~ . -1
+formula <- mpg ~ . + 0
+sBackSBC <- stepwise(formula=formula,
+                     data=mtcars,
+                     selection="backward",
+                     select="SBC")
+sBackSBC
+```
+
+Note that 0 instead of 1 in table 'Summary of Parameters' and 'Selected Varaibles'.
+
+### linear stepwise regression using 'score' method for variable selection, 'AICc' as criteria and we perform multivariable multiple stepwise regression with mpg and dra as dependent variables, besides, we select cyl disp hp wt vs am as independent variables, where wt is included always.
+ 
+```{r}
+data(mtcars)
+formula <- cbind(mpg,drat) ~ cyl+disp+hp+wt+vs+am
+stepwise(formula=formula,
+        data=mtcars,
+        include='wt',
+        selection="score",
+        select="AICc")
+```
+
 
 
 

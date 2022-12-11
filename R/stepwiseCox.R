@@ -65,18 +65,13 @@
 #' data <- my.data
 #' formula = Surv(time, status1) ~ . - status 
 #' 
-#' stepwiseCox(formula,
-#' data,
-#' include=NULL,
-#' selection=c("bidirection"),
+#' stepwiseCox(formula=formula,
+#' data=my.data,
+#' selection="bidirection",
 #' select="HQ",
-#' method=c("efron"),
-#' sle=0.15,
-#' sls=0.15,
-#' weights=NULL,
-#' best=NULL)
+#' method="efron")
 #' 
-#' @export stepwiseCox
+#' @export
 
 stepwiseCox <- function(formula,
                         data,
@@ -110,14 +105,13 @@ stepwiseCox <- function(formula,
     stop("include should be character vector indicating variable to be included in all models")
   }
   fmFull <- reformulate(c(xName),yName)
-  fitFull <- coxph(fmFull,data=data, weights=weights,method=method)
+  fitFull <- survival::coxph(fmFull,data=data, weights=weights,method=method)
   allVarClass <- attr(fitFull$terms,"dataClasses")
   classTable <- as.data.frame(table(allVarClass))
   colnames(classTable) <- c("class","variable")
   for(i in names(table(allVarClass))){
     classTable[names(table(allVarClass)) %in% i,2] <- paste0(names(allVarClass[allVarClass %in% i]),collapse=" ")
   }
-  classTable$class <- paste0(classTable$class,":")
   ## detect multicollinearity
   if(any(allVarClass=="factor")){
     factVar <- names(which(allVarClass=="factor"))
@@ -142,15 +136,15 @@ stepwiseCox <- function(formula,
   ModInf <- matrix(NA,8,1)
   ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,selection,select,sle,sle,method,mulcolMergeName),8,1))
   ModInf <- data.frame(ModInf)
-  colnames(ModInf) <- c("","")
-  ModInf[,1] <- c("Response Variable = ",
-                  "Included Variable = ",
-                  "Selection Method = ",
-                  "Select Criterion = ",
-                  "Entry Significance Level(sle) = ",
-                  "Stay Significance Level(sls) = ",
-                  "Method = ",
-                  "Multicollinearity Terms = ")
+  colnames(ModInf) <- c("Paramters","Value")
+  ModInf[,1] <- c("Response Variable",
+                  "Included Variable",
+                  "Selection Method",
+                  "Select Criterion",
+                  "Entry Significance Level(sle)",
+                  "Stay Significance Level(sls)",
+                  "Method",
+                  "Multicollinearity Terms")
   if(select=="SL"){
     if(selection=="forward"){
       ModInf <- ModInf[-6,]
@@ -163,8 +157,9 @@ stepwiseCox <- function(formula,
     ModInf <- ModInf[-c(5:6),]
   }
   rownames(ModInf) <- 1:nrow(ModInf)
-  result$'Basic Information' <- ModInf
-  result$'Variable Class' <- classTable
+  class(ModInf) <- class(classTable) <- c("StepReg","data.frame")
+  result$'Summary of Parameters' <- ModInf
+  result$'Variables Type' <- classTable
   if(selection=="score"){ #score
     bestSubSet <- NULL
     singSet <- matrix(NA,1,3)
@@ -172,7 +167,7 @@ stepwiseCox <- function(formula,
     finalResult <- singSet
     if(length(includeName)!=0){
       fm <- reformulate(c(includeName), yName)
-      fit <- coxph(fm,data=data, weights=weights,method=method)
+      fit <- survival::coxph(fm,data=data, weights=weights,method=method)
       if(select=="SL"){
         #PIC <- summary(fit)[[sigMethod]][1]
         PIC <- fit$score
@@ -192,7 +187,7 @@ stepwiseCox <- function(formula,
       for(ncom in 1:ncol(comTable)){
         comVar <- c(includeName,comTable[,ncom])
         fm <- reformulate(comVar, yName)
-        fit <- coxph(fm,data = data,weights=weights,method=method)
+        fit <- survival::coxph(fm,data = data,weights=weights,method=method)
         if(select=="SL"){
           PIC <- fit$score
         }else{
@@ -222,7 +217,8 @@ stepwiseCox <- function(formula,
     finalResult <- finalResult[-1,]
     RegPIC <- rbind(includeSubSet,finalResult)
     rownames(RegPIC) <- c(1:nrow(RegPIC))
-    result$Process <- RegPIC
+    class(RegPIC) <- c("StepReg","data.frame")
+    result$'Process of Selection' <- RegPIC
   }else{ #forward # bidirection # backward
     subBestPoint <- data.frame(Step=numeric(),
                                EnteredEffect=character(),
@@ -237,7 +233,7 @@ stepwiseCox <- function(formula,
       xModel <- c(includeName,setdiff(xName,includeName))
       xResidual <- NULL
       fmFull <- reformulate(xModel, yName)
-      fitFull <- coxph(fmFull,data=data,weights=weights,method=method)
+      fitFull <- survival::coxph(fmFull,data=data,weights=weights,method=method)
       if(select=="SL"){
         PIC <- 1
       }else{
@@ -257,9 +253,9 @@ stepwiseCox <- function(formula,
       bestPoint[1,] <- c(0,"","",0,0,PIC)
       if(!is.null(includeName)){
         fmInt <- reformulate("0",yName)
-        fitInt <- coxph(fmInt,data=data,weights=weights,method=method)
+        fitInt <- survival::coxph(fmInt,data=data,weights=weights,method=method)
         fmInc <- reformulate(includeName,yName)
-        fitInc <- coxph(fmInc,data=data,weights=weights,method=method)
+        fitInc <- survival::coxph(fmInc,data=data,weights=weights,method=method)
         if(select=="SL"){
           PIC <- anova(fitInt,fitInc)[2,'P(>|Chi|)']
         }else{
@@ -278,14 +274,14 @@ stepwiseCox <- function(formula,
           xMod <- xModel
         }
         fm0 <- reformulate(xMod, yName)
-        fit0 <- coxph(fm0,data = data,weights=weights,method=method)
+        fit0 <- survival::coxph(fm0,data = data,weights=weights,method=method)
 		if(length(xResidual)==0){
 		  break
 		}
         xResidualList <- as.list(xResidual)
         names(xResidualList) <- xResidual
         fm1 <- lapply(xResidualList,function(x){reformulate(c(xModel,x),yName)})
-        fit1 <- lapply(fm1,function(x){coxph(x,data = data,weights=weights,method=method)})
+        fit1 <- lapply(fm1,function(x){survival::coxph(x,data = data,weights=weights,method=method)})
         if(select=="SL"){
           threshold <- sle
           PICset <- sapply(fit1,function(x){anova(fit0,x)[2,'P(>|Chi|)']})
@@ -308,7 +304,7 @@ stepwiseCox <- function(formula,
         }
       }else{
         fm1 <- reformulate(xModel,yName)
-        fit1 <- coxph(fm1,data=data,weights=weights,method=method)
+        fit1 <- survival::coxph(fm1,data=data,weights=weights,method=method)
         xChcek <- setdiff(xModel,c(includeName))
         if(is.null(xChcek)){
           break
@@ -320,7 +316,7 @@ stepwiseCox <- function(formula,
           names(xChcekList) <- xChcek
           fm0 <- lapply(xChcekList,function(x){reformulate(setdiff(xModel,x),yName)})
         }
-        fit0 <- lapply(fm0,function(x){coxph(x,data=data,weights=weights,method=method)})
+        fit0 <- lapply(fm0,function(x){survival::coxph(x,data=data,weights=weights,method=method)})
         if(select=="SL"){
           threshold <- sls
           PIC <- sapply(fit0,function(x){anova(x,fit1)[2,'P(>|Chi|)']})
@@ -389,11 +385,17 @@ stepwiseCox <- function(formula,
     }
     
     lastModel <- reformulate(xModel,yName)
-    lastFit <- coxph(lastModel,data,weights=weights,method=method)
+    lastFit <- survival::coxph(lastModel,data,weights=weights,method=method)
     MLE <- coef(summary(lastFit))
-    result$Process <- bestPoint
-    result$Variables <- xModel
-    result$Coefficients <- MLE
+    MLE <- as.data.frame(cbind(rownames(MLE),MLE))
+    colnames(MLE)[1] <- c("Variable")
+    
+    variables <- as.data.frame(t(data.frame(xModel)))
+    colnames(variables) <- paste0("variables",1:length(xModel))
+    class(MLE) <- class(bestPoint) <- class(variables) <- c("StepReg","data.frame")
+    result$'Process of Selection' <- bestPoint
+    result$'Selected Varaibles' <- variables
+    result$'Coefficients of the Selected Variables' <- MLE
   }
   return(result)
 }
