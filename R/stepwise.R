@@ -78,7 +78,8 @@
 #' 
 #' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms
 #' 
-#' @export stepwise
+#' @export
+#' 
 stepwise <- function(formula,
                      data,
                      include=NULL,
@@ -249,6 +250,7 @@ stepwise <- function(formula,
     }
     finalResult <- finalResult[-1,]
     rownames(finalResult) <- 1:nrow(finalResult)
+    class(finalResult) <- c("StepReg","data.frame")
     result$Process <- finalResult
   }else{
     subBestPoint <- data.frame(Step=numeric(),
@@ -433,16 +435,10 @@ stepwise <- function(formula,
     }
     bestPoint$DF <- abs(as.numeric(bestPoint$DF))
     bestPoint$DF[is.na(bestPoint$DF)] <- ""
+    class(bestPoint) <- class(xModel) <- class(parEstList) <- c("StepReg","data.frame")
     result$Process <- bestPoint
     result$Varaibles <- xModel
     result$Coefficients <- parEstList
   }
   return(result)
 }
-
-
-
-
-
-
-

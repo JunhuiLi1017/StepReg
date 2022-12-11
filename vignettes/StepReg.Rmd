@@ -1,0 +1,41 @@
+---
+title: "StepReg: An R package for stepwise regression"
+author:
+- name: Junhui Li
+  affiliation: CAU and Umass
+  email: junhuili@cau.edu.cn
+package: StepReg
+output:
+  BiocStyle::html_document
+abstract: |
+  Stepwise regression is a popular data-mining method to identify a useful subset of the predictors to be used in a multiple regression model. We developed an R package StepReg, which allow users to perform linear, logistic and cox proportional hazard stepwise regression with a widely used selection criteria and stop rules are available in forward selection, backward elimination, both-direcition and best subset method. User can specify effects to be included in all models and do multivariate multiple stepwise regression.
+vignette: |
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+Here we applied StepReg to the well-known mtcars data and lung data. linear, logistic and Cox stepwise regression were performed.
+
+```{r library}
+#install.package("StepReg")
+library(StepReg)
+```
+
+## mtcars data
+
+### linear stepwise regression using 'forward' method for variable selection and 'AIC' as criteria for stop rules
+```{r fetchSequences1}
+data(mtcars)
+formula <- mpg ~ .
+stepwise(formula=formula,
+         data=mtcars,
+         selection="bidirection",
+         select="AIC")
+```
+
+```{r sessionInfo, echo=FALSE}
+sessionInfo()
+```

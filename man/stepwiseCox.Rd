@@ -18,7 +18,7 @@ stepwiseCox(
 )
 }
 \arguments{
-\item{formula}{Model formulae. The models fitted by the coxph functions are specified in a compact symbolic form. The basic structure of a formula is the tilde symbol (~) and at least one independent (righthand) variable. In most (but not all) situations, a single dependent (lefthand) variable is also needed. Thus we can construct a formula quite simple formula (y ~ x). Multiple independent variables by simply separating them with the plus (+) symbol (y ~ x1 + x2). Variables in the formula are removed with a minus(-) symbol (y ~ x1 - x2). One particularly useful feature is the . operator when modelling with lots of variables (y ~ .). The \%in\% operator indicates that the terms on its left are nested within those on the right. For example y ~ x1 + x2 \%in\% x1 expands to the formula y ~ x1 + x1:x2.}
+\item{formula}{Model formulae. The models fitted by the coxph functions are specified in a compact symbolic form. The basic structure of a formula is the tilde symbol (~) and at least one independent (righthand) variable. In most (but not all) situations, a single dependent (lefthand) variable is also needed. Thus we can construct a formula quite simple formula (y ~ x). Multiple independent variables by simply separating them with the plus (+) symbol (y ~ x1 + x2). Variables in the formula are removed with a minus(-) symbol (y ~ x1 - x2). One particularly useful feature is the . operator when modelling with lots of variables (y ~ .). The %in% operator indicates that the terms on its left are nested within those on the right. For example y ~ x1 + x2 %in% x1 expands to the formula y ~ x1 + x1:x2.}
 
 \item{data}{Data set including dependent and independent variables to be analyzed}
 
@@ -46,7 +46,7 @@ lung <- survival::lung
 my.data <- na.omit(lung)
 my.data$status1 <- ifelse(my.data$status==2,1,0)
 data <- my.data
-formula = Surv(time, status1) ~ . - status
+formula = Surv(time, status1) ~ . - status 
 
 stepwiseCox(formula,
 data,
