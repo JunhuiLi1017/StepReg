@@ -138,7 +138,6 @@ stepwise <- function(formula,
   for(i in names(table(allVarClass))){
     classTable[names(table(allVarClass)) %in% i,2] <- paste0(names(allVarClass[allVarClass %in% i]),collapse=" ")
   }
-  classTable$class <- paste0(classTable$class,":")
   ## detect multicollinearity
   if(any(allVarClass=="factor")){
     factVar <- names(which(allVarClass=="factor"))

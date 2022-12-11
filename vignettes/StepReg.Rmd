@@ -1,5 +1,5 @@
 ---
-title: "StepReg: An R package for stepwise regression"
+title: "StepReg Vignette"
 author:
 - name: Junhui Li
   affiliation: CAU and Umass
@@ -10,7 +10,7 @@ output:
 abstract: |
   Stepwise regression is a popular data-mining method to identify a useful subset of the predictors to be used in a multiple regression model. We developed an R package StepReg, which allow users to perform linear, logistic and cox proportional hazard stepwise regression with a widely used selection criteria and stop rules are available in forward selection, backward elimination, both-direcition and best subset method. User can specify effects to be included in all models and do multivariate multiple stepwise regression.
 vignette: |
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{StepReg Vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

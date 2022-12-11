@@ -8,13 +8,19 @@
 #' 
 #' @importFrom purrr pmap_dfc pmap_chr
 #' 
-#' @importFrom dplyr `%>%`
+#' @importFrom stringr str_pad
+#' 
+#' @importFrom dplyr `%>%` mutate_if
 #' 
 #' @export
 print.StepReg <- function(x){
-  
+  x %>% mutate_if(is.factor, as.character) -> x
+  if(nrow(x)==1){
+    dfLen <- sapply(x,nchar)
+  }else{
+    dfLen <- apply(sapply(x,nchar),2,max)
+  }
   nameLen <- nchar(colnames(x),keepNA =FALSE)
-  dfLen <- apply(sapply(x,nchar),2,max)
   lengths <- pmax(nameLen,dfLen)+2
   
   side <- rep("both",ncol(x))
