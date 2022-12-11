@@ -27,13 +27,14 @@ library(StepReg)
 ## mtcars data
 
 ### linear stepwise regression using 'forward' method for variable selection and 'AIC' as criteria for stop rules
-```{r fetchSequences1}
+```{r}
 data(mtcars)
 formula <- mpg ~ .
-stepwise(formula=formula,
+a <- stepwise(formula=formula,
          data=mtcars,
          selection="bidirection",
          select="AIC")
+a
 ```
 
 ```{r sessionInfo, echo=FALSE}

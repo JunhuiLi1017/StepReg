@@ -712,7 +712,7 @@ function toggle_visibility(id1) {
 <h4 class="abstract">Abstract</h4>
 <p>Stepwise regression is a popular data-mining method to identify a useful subset of the predictors to be used in a multiple regression model. We developed an R package StepReg, which allow users to perform linear, logistic and cox proportional hazard stepwise regression with a widely used selection criteria and stop rules are available in forward selection, backward elimination, both-direcition and best subset method. User can specify effects to be included in all models and do multivariate multiple stepwise regression.</p>
 <h4 class="package">Package</h4>
-<p>StepReg 1.4.3</p>
+<p>StepReg 1.4.4</p>
 
 </div>
 
@@ -740,46 +740,58 @@ library(StepReg)</code></pre>
 <h3><span class="header-section-number">1.1.1</span> linear stepwise regression using ‘forward’ method for variable selection and ‘AIC’ as criteria for stop rules</h3>
 <pre class="r"><code>data(mtcars)
 formula &lt;- mpg ~ .
-stepwise(formula=formula,
+a &lt;- stepwise(formula=formula,
          data=mtcars,
          selection=&quot;bidirection&quot;,
-         select=&quot;AIC&quot;)</code></pre>
+         select=&quot;AIC&quot;)
+a</code></pre>
 <pre><code>## $`Basic Information`
-##                                            
-## 1          Response Variable =          mpg
-## 2          Included Variable =         NULL
-## 3           Selection Method =  bidirection
-## 4           Select Criterion =          AIC
-## 5 Variable significance test =            F
-## 6    Multicollinearity Terms =         NULL
-## 7                  Intercept =            1
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##          condition              value    
+## —————————————————————————————————————————
+##      Response Variable           mpg      
+##      Included Variable          NULL      
+##       Selection Method       bidirection  
+##       Select Criterion           AIC      
+##  Variable significance test       F       
+##   Multicollinearity Terms       NULL      
+##          Intercept                1       
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## $`Variable Class`
-##      class                                     variable
-## 1 numeric: mpg cyl disp hp drat wt qsec vs am gear carb
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   class                     variable                   
+## ———————————————————————————————————————————————————————
+##  numeric  mpg cyl disp hp drat wt qsec vs am gear carb  
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## $Process
-##   Step EnteredEffect RemovedEffect DF NumberEffectIn NumberParmsIn
-## 1    0             1                1              0             1
-## 2    1            wt                1              1             2
-## 3    2           cyl                1              2             3
-## 4    3            hp                1              3             4
-##                AIC
-## 1 149.943449990894
-## 2 107.217362866777
-## 3 97.1979989461637
-## 4 96.6645623851593
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn        AIC        
+## —————————————————————————————————————————————————————————————————————————————————————————
+##   0          1                       1         0               1        149.943449990894  
+##   1         wt                       1         1               2        107.217362866777  
+##   2         cyl                      1         2               3        97.1979989461637  
+##   3         hp                       1         3               4        96.6645623851593  
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## $Varaibles
-## [1] &quot;1&quot;   &quot;wt&quot;  &quot;cyl&quot; &quot;hp&quot; 
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  variables1  variables2  variables3  variables4 
+## ————————————————————————————————————————————————
+##      1           wt         cyl          hp      
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## $Coefficients
 ## $Coefficients$mpg
-##               Estimate Std. Error   t value     Pr(&gt;|t|)
-## (Intercept) 38.7517874 1.78686403 21.687038 4.799399e-19
-## wt          -3.1669731 0.74057588 -4.276365 1.994765e-04
-## cyl         -0.9416168 0.55091638 -1.709183 9.848010e-02
-## hp          -0.0180381 0.01187625 -1.518838 1.400152e-01</code></pre>
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   Variable         Estimate             StdError            t.value                Pr          
+## ———————————————————————————————————————————————————————————————————————————————————————————————
+##  (Intercept)   38.7517873728655     1.78686402942753   21.6870375891336   4.7993988012846e-19   
+##      wt        -3.16697311074858   0.740575879267817   -4.27636546018709  0.000199476497472232  
+##      cyl      -0.941616811990739   0.550916381450763   -1.70918281556834   0.0984800974797216   
+##      hp       -0.0180381021431068  0.0118762499454497  -1.51883820448035   0.140015155016129    
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
 <pre><code>## R version 4.1.3 (2022-03-10)
 ## Platform: x86_64-apple-darwin17.0 (64-bit)
 ## Running under: macOS Big Sur/Monterey 10.16
@@ -795,20 +807,24 @@ stepwise(formula=formula,
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] StepReg_1.4.3    BiocStyle_2.22.0
+## [1] StepReg_1.4.4    BiocStyle_2.22.0
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] rstudioapi_0.14     knitr_1.41          magrittr_2.0.3     
-##  [4] splines_4.1.3       lattice_0.20-45     R6_2.5.1           
-##  [7] rlang_1.0.6         fastmap_1.1.0       stringr_1.5.0      
-## [10] tools_4.1.3         grid_4.1.3          xfun_0.35          
-## [13] cli_3.4.1           jquerylib_0.1.4     htmltools_0.5.4    
-## [16] survival_3.4-0      yaml_2.3.6          digest_0.6.30      
-## [19] lifecycle_1.0.3     bookdown_0.30       Matrix_1.5-3       
-## [22] BiocManager_1.30.19 sass_0.4.4          vctrs_0.5.1        
-## [25] glue_1.6.2          cachem_1.0.6        evaluate_0.18      
-## [28] rmarkdown_2.18      stringi_1.7.8       compiler_4.1.3     
-## [31] bslib_0.4.1         jsonlite_1.8.4</code></pre>
+##  [1] bslib_0.4.1         compiler_4.1.3      pillar_1.8.1       
+##  [4] BiocManager_1.30.19 jquerylib_0.1.4     tools_4.1.3        
+##  [7] digest_0.6.30       jsonlite_1.8.4      evaluate_0.18      
+## [10] lifecycle_1.0.3     tibble_3.1.8        lattice_0.20-45    
+## [13] pkgconfig_2.0.3     rlang_1.0.6         Matrix_1.5-3       
+## [16] DBI_1.1.3           cli_3.4.1           rstudioapi_0.14    
+## [19] yaml_2.3.6          xfun_0.35           fastmap_1.1.0      
+## [22] withr_2.5.0         stringr_1.5.0       dplyr_1.0.10       
+## [25] knitr_1.41          generics_0.1.3      vctrs_0.5.1        
+## [28] sass_0.4.4          tidyselect_1.2.0    grid_4.1.3         
+## [31] glue_1.6.2          R6_2.5.1            fansi_1.0.3        
+## [34] survival_3.4-0      rmarkdown_2.18      bookdown_0.30      
+## [37] purrr_0.3.5         magrittr_2.0.3      htmltools_0.5.4    
+## [40] splines_4.1.3       assertthat_0.2.1    utf8_1.2.2         
+## [43] stringi_1.7.8       cachem_1.0.6</code></pre>
 </div>
 </div>
 </div>
