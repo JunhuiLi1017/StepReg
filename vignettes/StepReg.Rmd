@@ -17,25 +17,29 @@ vignette: |
 
 # Introduction
 
-Here we applied StepReg to the well-known mtcars data and lung data. linear, logistic and Cox stepwise regression were performed.
+Here we applied StepReg to the well-known mtcars data and lung data for clarifying how to perform linear, logistic and Cox stepwise regression.
 
 ```{r library}
 #install.package("StepReg")
 library(StepReg)
 ```
 
-## mtcars data
+## linear stepwise regression with data mtcar
 
-### linear stepwise regression using 'forward' method for variable selection and 'AIC' as criteria for stop rules
+* 1) linear stepwise regression using 'forward' method for variable selection and 'AIC' as criteria for stop rules
 ```{r}
 data(mtcars)
 formula <- mpg ~ .
-a <- stepwise(formula=formula,
+sForwAIC <- stepwise(formula=formula,
          data=mtcars,
-         selection="bidirection",
+         selection="forward",
          select="AIC")
-a
+sForwAIC
 ```
+
+From the above result, we can see that stepwise() output a list with 5 tables. 
+
+
 
 ```{r sessionInfo, echo=FALSE}
 sessionInfo()

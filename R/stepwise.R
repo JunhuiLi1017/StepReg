@@ -176,7 +176,7 @@ stepwise <- function(formula,
   ModInf <- matrix(NA,9,1)
   ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,selection,select,sle,sle,approxF,mulcolMergeName,intercept),9,1))
   ModInf <- data.frame(ModInf)
-  colnames(ModInf) <- c("condition","value")
+  colnames(ModInf) <- c("Paramters","Value")
   ModInf[,1] <- c("Response Variable",
                   "Included Variable",
                   "Selection Method",
@@ -199,8 +199,8 @@ stepwise <- function(formula,
   }
   rownames(ModInf) <- 1:nrow(ModInf)
   class(ModInf) <- class(classTable) <- c("StepReg","data.frame")
-  result$'Basic Information' <- ModInf
-  result$'Variable Class' <- classTable
+  result$'Summary of Parameters' <- ModInf
+  result$'Variables Type' <- classTable
   if(selection=="score"){
     ## best subset model selection
     tempresult <- matrix(NA,1,4)
@@ -246,7 +246,7 @@ stepwise <- function(formula,
     finalResult <- finalResult[-1,]
     rownames(finalResult) <- 1:nrow(finalResult)
     class(finalResult) <- c("StepReg","data.frame")
-    result$Process <- finalResult
+    result$'Process of Selection' <- finalResult
   }else{
     subBestPoint <- data.frame(Step=numeric(),
                                EnteredEffect=character(),
@@ -423,7 +423,7 @@ stepwise <- function(formula,
         for(i in names(parEst)){
           subParEst <- parEst[[i]]$coefficients
           subParEst <- data.frame(rownames(subParEst),subParEst)
-          colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","Pr")
+          colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","P.value")
           class(subParEst) <- c("StepReg","data.frame")
           parEstList[i] <- list(subParEst)
         }
@@ -441,9 +441,9 @@ stepwise <- function(formula,
     variables <- as.data.frame(t(data.frame(xModel)))
     colnames(variables) <- paste0("variables",1:length(xModel))
     class(bestPoint) <- class(variables) <- c("StepReg","data.frame")
-    result$Process <- bestPoint
-    result$Varaibles <- variables
-    result$Coefficients <- parEstList
+    result$'Process of selection' <- bestPoint
+    result$'Selected Varaibles' <- variables
+    result$'Coefficients of the Selected Variables' <- parEstList
   }
   return(result)
 }
