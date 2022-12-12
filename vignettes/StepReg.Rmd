@@ -1,9 +1,8 @@
 ---
 title: "StepReg Vignette"
 author:
-- name: Junhui Li
-  affiliation: CAU and Umass
-  email: junhuili@cau.edu.cn
+  - Junhui Li^[China Agricultural University, junhuili@cau.edu.cn]
+  - Junhui Li^[University of Massachusset Chan medical school, junhui.li11@umassmed.edu]
 package: StepReg
 output:
   BiocStyle::html_document
@@ -86,22 +85,14 @@ stepwise(formula=formula,
         select="AICc")
 ```
 
-## logistic stepwise regression with data Affairs
+## logistic stepwise regression with data mtcars
 
 ### logistic stepwise regression using 'forward' method for variable selection and 'AIC' as criteria for stop rules
 
 ```{r warning=FALSE}
-#install.packages("AER")
-library("AER")
-data(Affairs, package="AER")
-
-Affairs$ynaffair[Affairs$affairs >  0] <- 1
-Affairs$ynaffair[Affairs$affairs == 0] <- 0
-Affairs$ynaffair <- factor(Affairs$ynaffair,levels=c(0,1), labels=c("No","Yes"))
-
-formula <- ynaffair ~ .
+formula <- am ~ .
 stepwiseLogit(formula=formula,
-              data=Affairs,
+              data=mtcars,
               selection="forward",
               select="AIC")
 ```
@@ -109,9 +100,9 @@ stepwiseLogit(formula=formula,
 ### logistic stepwise regression using 'score' method for variable selection and 'SL' as criteria and only output the first 3 best model.
 
 ```{r warning=FALSE}
-formula <- ynaffair ~ affairs+gender+age+yearsmarried+religiousness+occupation
+formula <- am ~ .
 stepwiseLogit(formula=formula,
-              data=Affairs,
+              data=mtcars,
               selection="score",
               select="SL",
               best=3)

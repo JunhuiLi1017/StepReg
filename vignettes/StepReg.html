@@ -9,6 +9,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Junhui Li" />
+<meta name="author" content="Junhui Li" />
 
 <meta name="date" content="2022-12-11" />
 
@@ -705,9 +707,7 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">StepReg Vignette</h1>
-<p class="author-name">Junhui Li<span class="affil-mark">1*</span></p>
-<p class="author-affiliation"><span class="affil-mark">1</span>CAU and Umass</p>
-<p class="author-email"><span class="affil-mark">*</span><a href="mailto:junhuili@cau.edu.cn">junhuili@cau.edu.cn</a></p>
+<p class="author-name">Junhui Li^[China Agricultural University, junhuili@cau.edu.cn] and Junhui Li^[University of Massachusset Chan medical school, junhui.li11@umassmed.edu]</p>
 <h4 class="date">11 December 2022</h4>
 <h4 class="abstract">Abstract</h4>
 <p>Stepwise regression is a popular data-mining method to identify a useful subset of the predictors to be used in a multiple regression model. We developed an R package StepReg, which allow users to perform linear, logistic and cox proportional hazard stepwise regression with a widely used selection criteria and stop rules are available in forward selection, backward elimination, both-direcition and best subset method. User can specify effects to be included in all models and do multivariate multiple stepwise regression.</p>
@@ -728,7 +728,7 @@ function toggle_visibility(id1) {
 <li><a href="#linear-stepwise-regression-using-backward-method-for-variable-selection-and-sbc-as-criteria-for-stop-rules-and-without-intercept-in-stepwise-regression." id="toc-linear-stepwise-regression-using-backward-method-for-variable-selection-and-sbc-as-criteria-for-stop-rules-and-without-intercept-in-stepwise-regression."><span class="toc-section-number">1.1.3</span> linear stepwise regression using ‘backward’ method for variable selection and ‘SBC’ as criteria for stop rules and without intercept in stepwise regression.</a></li>
 <li><a href="#linear-stepwise-regression-using-score-method-for-variable-selection-aicc-as-criteria-and-we-perform-multivariable-multiple-stepwise-regression-with-mpg-and-dra-as-dependent-variables-besides-we-select-cyl-disp-hp-wt-vs-am-as-independent-variables-where-wt-is-included-always." id="toc-linear-stepwise-regression-using-score-method-for-variable-selection-aicc-as-criteria-and-we-perform-multivariable-multiple-stepwise-regression-with-mpg-and-dra-as-dependent-variables-besides-we-select-cyl-disp-hp-wt-vs-am-as-independent-variables-where-wt-is-included-always."><span class="toc-section-number">1.1.4</span> linear stepwise regression using ‘score’ method for variable selection, ‘AICc’ as criteria and we perform multivariable multiple stepwise regression with mpg and dra as dependent variables, besides, we select cyl disp hp wt vs am as independent variables, where wt is included always.</a></li>
 </ul></li>
-<li><a href="#logistic-stepwise-regression-with-data-affairs" id="toc-logistic-stepwise-regression-with-data-affairs"><span class="toc-section-number">1.2</span> logistic stepwise regression with data Affairs</a>
+<li><a href="#logistic-stepwise-regression-with-data-mtcars" id="toc-logistic-stepwise-regression-with-data-mtcars"><span class="toc-section-number">1.2</span> logistic stepwise regression with data mtcars</a>
 <ul>
 <li><a href="#logistic-stepwise-regression-using-forward-method-for-variable-selection-and-aic-as-criteria-for-stop-rules" id="toc-logistic-stepwise-regression-using-forward-method-for-variable-selection-and-aic-as-criteria-for-stop-rules"><span class="toc-section-number">1.2.1</span> logistic stepwise regression using ‘forward’ method for variable selection and ‘AIC’ as criteria for stop rules</a></li>
 <li><a href="#logistic-stepwise-regression-using-score-method-for-variable-selection-and-sl-as-criteria-and-only-output-the-first-3-best-model." id="toc-logistic-stepwise-regression-using-score-method-for-variable-selection-and-sl-as-criteria-and-only-output-the-first-3-best-model."><span class="toc-section-number">1.2.2</span> logistic stepwise regression using ‘score’ method for variable selection and ‘SL’ as criteria and only output the first 3 best model.</a></li>
@@ -739,6 +739,7 @@ function toggle_visibility(id1) {
 <li><a href="#cox-stepwise-regression-using-score-method-for-variable-selection-and-sl-as-criteria-and-only-output-the-first-3-best-model." id="toc-cox-stepwise-regression-using-score-method-for-variable-selection-and-sl-as-criteria-and-only-output-the-first-3-best-model."><span class="toc-section-number">1.3.2</span> cox stepwise regression using ‘score’ method for variable selection and ‘SL’ as criteria and only output the first 3 best model.</a></li>
 </ul></li>
 </ul></li>
+<li><a href="#session-info" id="toc-session-info"><span class="toc-section-number">2</span> Session Info</a></li>
 </ul>
 </div>
 
@@ -1002,128 +1003,121 @@ stepwise(formula=formula,
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
 </div>
 </div>
-<div id="logistic-stepwise-regression-with-data-affairs" class="section level2" number="1.2">
-<h2><span class="header-section-number">1.2</span> logistic stepwise regression with data Affairs</h2>
+<div id="logistic-stepwise-regression-with-data-mtcars" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> logistic stepwise regression with data mtcars</h2>
 <div id="logistic-stepwise-regression-using-forward-method-for-variable-selection-and-aic-as-criteria-for-stop-rules" class="section level3" number="1.2.1">
 <h3><span class="header-section-number">1.2.1</span> logistic stepwise regression using ‘forward’ method for variable selection and ‘AIC’ as criteria for stop rules</h3>
-<pre class="r"><code>#install.packages(&quot;AER&quot;)
-library(&quot;AER&quot;)</code></pre>
-<pre><code>## Loading required package: car</code></pre>
-<pre><code>## Loading required package: carData</code></pre>
-<pre><code>## Loading required package: lmtest</code></pre>
-<pre><code>## Loading required package: zoo</code></pre>
-<pre><code>## 
-## Attaching package: &#39;zoo&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     as.Date, as.Date.numeric</code></pre>
-<pre><code>## Loading required package: sandwich</code></pre>
-<pre><code>## Loading required package: survival</code></pre>
-<pre class="r"><code>data(Affairs, package=&quot;AER&quot;)
-
-Affairs$ynaffair[Affairs$affairs &gt;  0] &lt;- 1
-Affairs$ynaffair[Affairs$affairs == 0] &lt;- 0
-Affairs$ynaffair &lt;- factor(Affairs$ynaffair,levels=c(0,1), labels=c(&quot;No&quot;,&quot;Yes&quot;))
-
-formula &lt;- ynaffair ~ .
+<pre class="r"><code>formula &lt;- am ~ .
 stepwiseLogit(formula=formula,
-              data=Affairs,
+              data=mtcars,
               selection=&quot;forward&quot;,
               select=&quot;AIC&quot;)</code></pre>
 <pre><code>## $`Summary of Parameters`
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##          Paramters            Value   
-## ——————————————————————————————————————
-## Response Variable           ynaffair   
-## Included Variable           NULL       
-## Selection Method            forward    
-## Select Criterion            AIC        
-## Variable significance test  Rao        
-## Multicollinearity Terms     NULL       
-## Intercept                   1          
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##          Paramters            Value  
+## —————————————————————————————————————
+## Response Variable           am        
+## Included Variable           NULL      
+## Selection Method            forward   
+## Select Criterion            AIC       
+## Variable significance test  Rao       
+## Multicollinearity Terms     NULL      
+## Intercept                   1         
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## $`Variables Type`
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##   class                                variable                              
-## —————————————————————————————————————————————————————————————————————————————
-## factor   ynaffair gender children                                             
-## numeric  affairs age yearsmarried religiousness education occupation rating   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   class                     variable                   
+## ———————————————————————————————————————————————————————
+## numeric  am mpg cyl disp hp drat wt qsec vs gear carb   
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## $`Process of Selection`
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  Step  EnteredEffect  RemovedEffect  DF  NumberIn        AIC        
 ## ————————————————————————————————————————————————————————————————————
-## 0     1                             1   1         677.376982851027   
-## 1     affairs                       1   2         4.00000004971323   
+## 0     1                             1   1         45.2297332768578   
+## 1     gear                          1   2         19.2763400880433   
+## 2     wt                            1   3         6.00000000576112   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## $`Selected Varaibles`
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  variables1  variables2 
-## ————————————————————————
-## 1           affairs      
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  variables1  variables2  variables3 
+## ————————————————————————————————————
+## 1           gear        wt           
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## $`Coefficients of the Selected Variables`
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##   Variable        Estimate           StdError            t.value             P.value      
-## ——————————————————————————————————————————————————————————————————————————————————————————
-## (Intercept)  -24.2540739132037  5278.10531666687  -0.0045952235618747  0.996333554970038   
-## affairs      46.0483297868606   7709.25681495404  0.00597312177972049  0.995234166691562   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   Variable        Estimate           StdError            t.value              P.value      
+## ———————————————————————————————————————————————————————————————————————————————————————————
+## (Intercept)  24.9779264690071   211732.148224506  0.000117969456591553  0.999905873992158   
+## gear         105.57256202697    68256.4892424417  0.00154670366435027   0.998765909518129   
+## wt           -148.465697432972  84415.1659816875  -0.00175875621052714  0.998596716296849   
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
 </div>
 <div id="logistic-stepwise-regression-using-score-method-for-variable-selection-and-sl-as-criteria-and-only-output-the-first-3-best-model." class="section level3" number="1.2.2">
 <h3><span class="header-section-number">1.2.2</span> logistic stepwise regression using ‘score’ method for variable selection and ‘SL’ as criteria and only output the first 3 best model.</h3>
-<pre class="r"><code>formula &lt;- ynaffair ~ affairs+gender+age+yearsmarried+religiousness+occupation
+<pre class="r"><code>formula &lt;- am ~ .
 stepwiseLogit(formula=formula,
-              data=Affairs,
+              data=mtcars,
               selection=&quot;score&quot;,
               select=&quot;SL&quot;,
               best=3)</code></pre>
 <pre><code>## $`Summary of Parameters`
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##          Paramters            Value   
-## ——————————————————————————————————————
-## Response Variable           ynaffair   
-## Included Variable           NULL       
-## Selection Method            score      
-## Select Criterion            SL         
-## Variable significance test  Rao        
-## Multicollinearity Terms     NULL       
-## Intercept                   1          
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##          Paramters           Value 
+## ———————————————————————————————————
+## Response Variable           am      
+## Included Variable           NULL    
+## Selection Method            score   
+## Select Criterion            SL      
+## Variable significance test  Rao     
+## Multicollinearity Terms     NULL    
+## Intercept                   1       
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## $`Variables Type`
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##   class                       variable                      
-## ————————————————————————————————————————————————————————————
-## factor   ynaffair gender                                     
-## numeric  affairs age yearsmarried religiousness occupation   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   class                     variable                   
+## ———————————————————————————————————————————————————————
+## numeric  am mpg cyl disp hp drat wt qsec vs gear carb   
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## $`Process of Selection`
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  NumberOfVariables         SL                              VariablesInModel                      
-## —————————————————————————————————————————————————————————————————————————————————————————————————
-## 2                  352.573806777735  1 affairs                                                    
-## 2                  11.8303613489112  1 yearsmarried                                               
-## 2                  10.1709970071728  1 religiousness                                              
-## 3                  353.632431195087  1 affairs gender                                             
-## 3                  352.805123034445  1 affairs religiousness                                      
-## 3                  352.721844979598  1 affairs age                                                
-## 4                  353.982281227228  1 affairs gender age                                         
-## 4                  353.940129730436  1 affairs gender occupation                                  
-## 4                  353.87324197611   1 affairs gender religiousness                               
-## 5                  354.332054630833  1 affairs gender age yearsmarried                            
-## 5                  354.238722054596  1 affairs gender age occupation                              
-## 5                  354.204988442342  1 affairs gender religiousness occupation                    
-## 6                  354.551118328836  1 affairs gender age yearsmarried occupation                 
-## 6                  354.544662081305  1 affairs gender age yearsmarried religiousness              
-## 6                  354.403208580745  1 affairs gender age religiousness occupation                
-## 7                  354.78800113348   1 affairs gender age yearsmarried religiousness occupation   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  NumberOfVariables         SL                      VariablesInModel               
+## ——————————————————————————————————————————————————————————————————————————————————
+## 2                  20.1769382094272  1 gear                                        
+## 2                  16.2546289388823  1 drat                                        
+## 2                  15.3455899772529  1 wt                                          
+## 3                  23.024782257184   1 cyl qsec                                    
+## 3                  22.7277547701151  1 wt gear                                     
+## 3                  22.1620072021874  1 mpg gear                                    
+## 4                  24.4804946492056  1 mpg qsec gear                               
+## 4                  24.2615455927147  1 cyl qsec gear                               
+## 4                  23.8832404475897  1 mpg cyl qsec                                
+## 5                  25.1574753593028  1 mpg cyl qsec gear                           
+## 5                  24.8193142254911  1 mpg drat qsec gear                          
+## 5                  24.725686315042   1 mpg disp qsec gear                          
+## 6                  25.4015158698094  1 mpg cyl qsec vs gear                        
+## 6                  25.2573360971424  1 mpg cyl drat qsec gear                      
+## 6                  25.1642182693208  1 mpg cyl qsec gear carb                      
+## 7                  25.5008153935662  1 mpg cyl drat qsec vs gear                   
+## 7                  25.4324233741306  1 mpg cyl hp qsec vs gear                     
+## 7                  25.4137814512785  1 mpg cyl disp qsec vs gear                   
+## 8                  25.5274280754659  1 mpg cyl hp drat qsec vs gear                
+## 8                  25.5104718026612  1 mpg cyl disp drat qsec vs gear              
+## 8                  25.5083472740736  1 mpg cyl drat wt qsec vs gear                
+## 9                  25.5604248548793  1 mpg cyl disp hp drat qsec vs gear           
+## 9                  25.5461866446911  1 mpg cyl hp drat wt qsec vs gear             
+## 9                  25.5290367298355  1 mpg cyl hp drat qsec vs gear carb           
+## 10                 25.5733835910141  1 mpg cyl disp hp drat qsec vs gear carb      
+## 10                 25.5616277385224  1 mpg cyl disp hp drat wt qsec vs gear        
+## 10                 25.5462397486206  1 mpg cyl hp drat wt qsec vs gear carb        
+## 11                 25.57543199853    1 mpg cyl disp hp drat wt qsec vs gear carb   
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
 </div>
 </div>
 <div id="cox-stepwise-regression-with-data-lung" class="section level2" number="1.3">
@@ -1248,6 +1242,11 @@ stepwiseCox(formula=formula,
 ## 7                  30.5707472827073  inst age sex ph.ecog ph.karno meal.cal wt.loss             
 ## 8                  32.5131173841979  inst age sex ph.ecog ph.karno pat.karno meal.cal wt.loss   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
+</div>
+</div>
+</div>
+<div id="session-info" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Session Info</h1>
 <pre><code>## R version 4.1.3 (2022-03-10)
 ## Platform: x86_64-apple-darwin17.0 (64-bit)
 ## Running under: macOS Big Sur/Monterey 10.16
@@ -1263,9 +1262,7 @@ stepwiseCox(formula=formula,
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] AER_1.2-10       survival_3.4-0   sandwich_3.0-2   lmtest_0.9-40   
-## [5] zoo_1.8-11       car_3.1-1        carData_3.0-5    StepReg_1.4.4   
-## [9] BiocStyle_2.22.0
+## [1] StepReg_1.4.4    BiocStyle_2.22.0
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] bslib_0.4.1         compiler_4.1.3      pillar_1.8.1       
@@ -1279,12 +1276,17 @@ stepwiseCox(formula=formula,
 ## [25] knitr_1.41          generics_0.1.3      vctrs_0.5.1        
 ## [28] sass_0.4.4          tidyselect_1.2.0    grid_4.1.3         
 ## [31] glue_1.6.2          R6_2.5.1            fansi_1.0.3        
-## [34] rmarkdown_2.18      bookdown_0.30       Formula_1.2-4      
+## [34] survival_3.4-0      rmarkdown_2.18      bookdown_0.30      
 ## [37] purrr_0.3.5         magrittr_2.0.3      htmltools_0.5.4    
-## [40] splines_4.1.3       abind_1.4-5         assertthat_0.2.1   
-## [43] utf8_1.2.2          stringi_1.7.8       cachem_1.0.6</code></pre>
+## [40] splines_4.1.3       assertthat_0.2.1    utf8_1.2.2         
+## [43] stringi_1.7.8       cachem_1.0.6</code></pre>
 </div>
-</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>China Agricultural University, <a href="mailto:junhuili@cau.edu.cn" class="email">junhuili@cau.edu.cn</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn2"><p>University of Massachusset Chan medical school, <a href="mailto:junhui.li11@umassmed.edu" class="email">junhui.li11@umassmed.edu</a><a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+</ol>
 </div>
 
 
