@@ -12,7 +12,7 @@
 <meta name="author" content="Junhui Li" />
 <meta name="author" content="Junhui Li" />
 
-<meta name="date" content="2022-12-11" />
+<meta name="date" content="2022-12-12" />
 
 <title>StepReg Vignette</title>
 
@@ -708,7 +708,7 @@ function toggle_visibility(id1) {
 
 <h1 class="title toc-ignore">StepReg Vignette</h1>
 <p class="author-name">Junhui Li^[China Agricultural University, junhuili@cau.edu.cn] and Junhui Li^[University of Massachusset Chan medical school, junhui.li11@umassmed.edu]</p>
-<h4 class="date">11 December 2022</h4>
+<h4 class="date">12 December 2022</h4>
 <h4 class="abstract">Abstract</h4>
 <p>Stepwise regression is a popular data-mining method to identify a useful subset of the predictors to be used in a multiple regression model. We developed an R package StepReg, which allow users to perform linear, logistic and cox proportional hazard stepwise regression with a widely used selection criteria and stop rules are available in forward selection, backward elimination, both-direcition and best subset method. User can specify effects to be included in all models and do multivariate multiple stepwise regression.</p>
 <h4 class="package">Package</h4>
@@ -758,7 +758,7 @@ sForwAIC &lt;- stepwise(formula=formula,
          selection=&quot;forward&quot;,
          select=&quot;AIC&quot;)
 sForwAIC</code></pre>
-<pre><code>## $`Summary of Parameters`
+<pre><code>##    Table 1. Summary of Parameters    
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##          Paramters            Value  
 ## —————————————————————————————————————
@@ -771,14 +771,14 @@ sForwAIC</code></pre>
 ## Intercept                   1         
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Variables Type`
+##                 Table 2. Variables Type                
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##   class                     variable                   
 ## ———————————————————————————————————————————————————————
 ## numeric  mpg cyl disp hp drat wt qsec vs am gear carb   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Process of Selection`
+##                               Table 3. Process of Selection                              
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn        AIC        
 ## —————————————————————————————————————————————————————————————————————————————————————————
@@ -788,15 +788,14 @@ sForwAIC</code></pre>
 ## 3     hp                            1   3               4              96.6645623851593   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Selected Varaibles`
+##           Table 4. Selected Varaibles           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  variables1  variables2  variables3  variables4 
 ## ————————————————————————————————————————————————
 ## 1           wt          cyl         hp           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Coefficients of the Selected Variables`
-## $`Coefficients of the Selected Variables`$mpg
+##                     Table 5. Coefficients of the Selected Variables for mpg                    
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##   Variable         Estimate             StdError            t.value             P.value        
 ## ———————————————————————————————————————————————————————————————————————————————————————————————
@@ -823,7 +822,7 @@ sBidiSL &lt;- stepwise(formula=formula,
          sle=0.15,
          sls=0.15)
 sBidiSL</code></pre>
-<pre><code>## $`Summary of Parameters`
+<pre><code>##        Table 1. Summary of Parameters       
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##            Paramters               Value    
 ## ————————————————————————————————————————————
@@ -838,14 +837,14 @@ sBidiSL</code></pre>
 ## Intercept                      1             
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Variables Type`
+##                 Table 2. Variables Type                
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##   class                     variable                   
 ## ———————————————————————————————————————————————————————
 ## numeric  mpg cyl disp hp drat wt qsec vs am gear carb   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Process of Selection`
+##                                 Table 3. Process of Selection                                
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn           SL          
 ## —————————————————————————————————————————————————————————————————————————————————————————————
@@ -855,15 +854,14 @@ sBidiSL</code></pre>
 ## 3     hp                            1   3               4              0.140015155016129      
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Selected Varaibles`
+##           Table 4. Selected Varaibles           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  variables1  variables2  variables3  variables4 
 ## ————————————————————————————————————————————————
 ## 1           wt          cyl         hp           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Coefficients of the Selected Variables`
-## $`Coefficients of the Selected Variables`$mpg
+##                     Table 5. Coefficients of the Selected Variables for mpg                    
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##   Variable         Estimate             StdError            t.value             P.value        
 ## ———————————————————————————————————————————————————————————————————————————————————————————————
@@ -883,7 +881,7 @@ sBackSBC &lt;- stepwise(formula=formula,
                      selection=&quot;backward&quot;,
                      select=&quot;SBC&quot;)
 sBackSBC</code></pre>
-<pre><code>## $`Summary of Parameters`
+<pre><code>##     Table 1. Summary of Parameters    
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##          Paramters            Value   
 ## ——————————————————————————————————————
@@ -896,14 +894,14 @@ sBackSBC</code></pre>
 ## Intercept                   0          
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Variables Type`
+##                 Table 2. Variables Type                
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##   class                     variable                   
 ## ———————————————————————————————————————————————————————
 ## numeric  mpg cyl disp hp drat wt qsec vs am gear carb   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Process of Selection`
+##                               Table 3. Process of Selection                              
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn        SBC        
 ## —————————————————————————————————————————————————————————————————————————————————————————
@@ -917,15 +915,14 @@ sBackSBC</code></pre>
 ## 7                    disp           1   3               3              65.8158985591381   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Selected Varaibles`
+##           Table 4. Selected Varaibles           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  variables1  variables2  variables3  variables4 
 ## ————————————————————————————————————————————————
 ## 0           wt          qsec        am           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Coefficients of the Selected Variables`
-## $`Coefficients of the Selected Variables`$mpg
+##                  Table 5. Coefficients of the Selected Variables for mpg                 
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  Variable      Estimate           StdError            t.value             P.value        
 ## —————————————————————————————————————————————————————————————————————————————————————————
@@ -943,7 +940,7 @@ stepwise(formula=formula,
         include=&#39;wt&#39;,
         selection=&quot;score&quot;,
         select=&quot;AICc&quot;)</code></pre>
-<pre><code>## $`Summary of Parameters`
+<pre><code>##         Table 1. Summary of Parameters        
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##          Paramters                Value       
 ## ——————————————————————————————————————————————
@@ -956,7 +953,7 @@ stepwise(formula=formula,
 ## Intercept                   1                  
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Variables Type`
+##      Table 2. Variables Type     
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##    class          variable       
 ## —————————————————————————————————
@@ -964,7 +961,7 @@ stepwise(formula=formula,
 ## numeric    cyl disp hp wt vs am   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Process of Selection`
+##                   Table 3. Process of Selection                   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  NoVariable  RankModel        AICc        VariablesEnteredinModel 
 ## ——————————————————————————————————————————————————————————————————
@@ -1000,7 +997,34 @@ stepwise(formula=formula,
 ## 5           6          192.868991967306  1 wt cyl hp vs am         
 ## 5           6          194.381840779641  1 wt disp hp vs am        
 ## 6           7          198.745196549042  1 wt cyl disp hp vs am    
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## 
+##           Table 4. Selected Varaibles           
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  variables1  variables2  variables3  variables4 
+## ————————————————————————————————————————————————
+## 1           wt          cyl         am           
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## 
+##               Table 5. Coefficients of the Selected Variables for Response mpg              
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   Variable        Estimate           StdError            t.value             P.value        
+## ————————————————————————————————————————————————————————————————————————————————————————————
+## (Intercept)  39.4179334351865   2.6414572997099    14.9227978962656   7.42499755293912e-15   
+## wt           -3.12514220026708  0.910882701148664  -3.43089422636541  0.00188589438685631    
+## cyl          -1.5102456624971   0.422279222208057  -3.57641480582487  0.00129160458914754    
+## am           0.176493157719669  1.30445145498685   0.135300671439281  0.89334214792396       
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## 
+##                Table 6. Coefficients of the Selected Variables for Response drat               
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   Variable         Estimate            StdError            t.value              P.value        
+## ———————————————————————————————————————————————————————————————————————————————————————————————
+## (Intercept)  4.31421082403332     0.332409660876704  12.9785963881282    2.29282220122696e-13   
+## wt           -0.0579982631143607  0.114628470360106  -0.505967347659431  0.616840130742605      
+## cyl          -0.116490969949067   0.053141004045333  -2.19211081991774   0.0368483162012922     
+## am           0.467038681922974    0.164156454783472  2.84508265324694    0.00821005565960176    
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
 </div>
 </div>
 <div id="logistic-stepwise-regression-with-data-mtcars" class="section level2" number="1.2">
@@ -1012,7 +1036,7 @@ stepwiseLogit(formula=formula,
               data=mtcars,
               selection=&quot;forward&quot;,
               select=&quot;AIC&quot;)</code></pre>
-<pre><code>## $`Summary of Parameters`
+<pre><code>##    Table 1. Summary of Parameters    
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##          Paramters            Value  
 ## —————————————————————————————————————
@@ -1025,14 +1049,14 @@ stepwiseLogit(formula=formula,
 ## Intercept                   1         
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Variables Type`
+##                 Table 2. Variables Type                
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##   class                     variable                   
 ## ———————————————————————————————————————————————————————
 ## numeric  am mpg cyl disp hp drat wt qsec vs gear carb   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Process of Selection`
+##                    Table 3. Process of Selection                    
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  Step  EnteredEffect  RemovedEffect  DF  NumberIn        AIC        
 ## ————————————————————————————————————————————————————————————————————
@@ -1041,14 +1065,14 @@ stepwiseLogit(formula=formula,
 ## 2     wt                            1   3         6.00000000576112   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Selected Varaibles`
+##     Table 4. Selected Varaibles     
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  variables1  variables2  variables3 
 ## ————————————————————————————————————
 ## 1           gear        wt           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Coefficients of the Selected Variables`
+##                       Table 5. Coefficients of the Selected Variables                      
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##   Variable        Estimate           StdError            t.value              P.value      
 ## ———————————————————————————————————————————————————————————————————————————————————————————
@@ -1065,7 +1089,7 @@ stepwiseLogit(formula=formula,
               selection=&quot;score&quot;,
               select=&quot;SL&quot;,
               best=3)</code></pre>
-<pre><code>## $`Summary of Parameters`
+<pre><code>##   Table 1. Summary of Parameters   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##          Paramters           Value 
 ## ———————————————————————————————————
@@ -1078,14 +1102,14 @@ stepwiseLogit(formula=formula,
 ## Intercept                   1       
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Variables Type`
+##                 Table 2. Variables Type                
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##   class                     variable                   
 ## ———————————————————————————————————————————————————————
 ## numeric  am mpg cyl disp hp drat wt qsec vs gear carb   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Process of Selection`
+##                           Table 3. Process of Selection                           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  NumberOfVariables         SL                      VariablesInModel               
 ## ——————————————————————————————————————————————————————————————————————————————————
@@ -1117,7 +1141,31 @@ stepwiseLogit(formula=formula,
 ## 10                 25.5616277385224  1 mpg cyl disp hp drat wt qsec vs gear        
 ## 10                 25.5462397486206  1 mpg cyl hp drat wt qsec vs gear carb        
 ## 11                 25.57543199853    1 mpg cyl disp hp drat wt qsec vs gear carb   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## 
+##                                                      Table 4. Selected Varaibles                                                      
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  variables1  variables2  variables3  variables4  variables5  variables6  variables7  variables8  variables9  variables10  variables11 
+## ——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+## 1           mpg         cyl         disp        hp          drat        wt          qsec        vs          gear         carb          
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## 
+##                        Table 5. Coefficients of the Selected Variables                       
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   Variable         Estimate           StdError             t.value              P.value      
+## —————————————————————————————————————————————————————————————————————————————————————————————
+## (Intercept)  -11.6408164177017   1840046.55622753  -6.3263705900832e-06   0.99999495228658    
+## mpg          -0.880883528085447  28843.372501277   -3.0540240328916e-05   0.999975632413762   
+## cyl          2.52681917330733    123556.890881509  2.04506535837855e-05   0.999983682739248   
+## disp         -0.415506274171229  2570.02592605466  -0.000161673962102432  0.999871002842317   
+## hp           0.343715471343463   2194.50394230898  0.000156625588460697   0.999875030861652   
+## drat         23.2030530410442    215892.85221756   0.000107474855247463   0.999914247472489   
+## wt           7.43558654593573    310702.702473842  2.39315155186386e-05   0.999980905413253   
+## qsec         -7.57708489509811   55096.6897542608  -0.000137523414362877  0.999890272191277   
+## vs           -47.0120531406395   240518.468503821  -0.000195461302548135  0.999844044445455   
+## gear         42.855441100866     271926.299875359  0.000157599471329214   0.999874253815556   
+## carb         -21.5677679539988   107605.517416698  -0.000200433662434599  0.999840077076349   
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
 </div>
 </div>
 <div id="cox-stepwise-regression-with-data-lung" class="section level2" number="1.3">
@@ -1134,7 +1182,7 @@ stepwiseCox(formula=formula,
   data=my.data,
   selection=&quot;forward&quot;,
   select=&quot;IC(1)&quot;)</code></pre>
-<pre><code>## $`Summary of Parameters`
+<pre><code>##         Table 1. Summary of Parameters        
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##         Paramters                Value        
 ## ——————————————————————————————————————————————
@@ -1146,7 +1194,7 @@ stepwiseCox(formula=formula,
 ## Multicollinearity Terms  NULL                  
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Variables Type`
+##                        Table 2. Variables Type                       
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##    class                            variable                         
 ## —————————————————————————————————————————————————————————————————————
@@ -1154,7 +1202,7 @@ stepwiseCox(formula=formula,
 ## numeric    inst age sex ph.ecog ph.karno pat.karno meal.cal wt.loss   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Process of Selection`
+##                    Table 3. Process of Selection                    
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  Step  EnteredEffect  RemovedEffect  DF  NumberIn       IC(1)       
 ## ————————————————————————————————————————————————————————————————————
@@ -1167,14 +1215,14 @@ stepwiseCox(formula=formula,
 ## 7     age                           1   7         989.5365169151     
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Selected Varaibles`
+##                             Table 4. Selected Varaibles                             
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  variables1  variables2  variables3  variables4  variables5  variables6  variables7 
 ## ————————————————————————————————————————————————————————————————————————————————————
 ## ph.ecog     sex         inst        wt.loss     ph.karno    pat.karno   age          
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Coefficients of the Selected Variables`
+##                                 Table 5. Coefficients of the Selected Variables                                 
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  Variable          coef              exp(coef)           se(coef)               z                Pr(&gt;|z|)       
 ## ————————————————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -1195,7 +1243,7 @@ stepwiseCox(formula=formula,
   selection=&quot;score&quot;,
   select=&quot;SL&quot;,
   best=3)</code></pre>
-<pre><code>## $`Summary of Parameters`
+<pre><code>##         Table 1. Summary of Parameters        
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##         Paramters                Value        
 ## ——————————————————————————————————————————————
@@ -1207,7 +1255,7 @@ stepwiseCox(formula=formula,
 ## Multicollinearity Terms  NULL                  
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Variables Type`
+##                        Table 2. Variables Type                       
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##    class                            variable                         
 ## —————————————————————————————————————————————————————————————————————
@@ -1215,7 +1263,7 @@ stepwiseCox(formula=formula,
 ## numeric    inst age sex ph.ecog ph.karno pat.karno meal.cal wt.loss   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## $`Process of Selection`
+##                                  Table 3. Process of Selection                                 
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  NumberOfVariables         SL                             VariablesInModel                     
 ## ———————————————————————————————————————————————————————————————————————————————————————————————
@@ -1241,7 +1289,28 @@ stepwiseCox(formula=formula,
 ## 7                  31.9273069224212  inst sex ph.ecog ph.karno pat.karno meal.cal wt.loss       
 ## 7                  30.5707472827073  inst age sex ph.ecog ph.karno meal.cal wt.loss             
 ## 8                  32.5131173841979  inst age sex ph.ecog ph.karno pat.karno meal.cal wt.loss   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## 
+##                                   Table 4. Selected Varaibles                                   
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  variables1  variables2  variables3  variables4  variables5  variables6  variables7  variables8 
+## ————————————————————————————————————————————————————————————————————————————————————————————————
+## inst        age         sex         ph.ecog     ph.karno    pat.karno   meal.cal    wt.loss      
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## 
+##                                   Table 5. Coefficients of the Selected Variables                                   
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  Variable           coef              exp(coef)           se(coef)                 z                 Pr(&gt;|z|)       
+## ————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+## inst       -0.0303685592659294   0.97008793275763   0.0131188382544396   -2.31488175072607    0.0206194043459998     
+## age        0.0128110652843044    1.01289347853898   0.0119427514304991   1.07270634902338     0.283402890823254      
+## sex        -0.566644726715653    0.567426117961668  0.201352245143781    -2.81419621773288    0.00488993706146962    
+## ph.ecog    0.907380784608605     2.4778240717187    0.238601969045798    3.80290568530237     0.000143008810713775   
+## ph.karno   0.0265846510127879    1.02694117519292   0.0116272658879958   2.28640604497008     0.0222305150198986     
+## pat.karno  -0.0109109725399694   0.989148336219512  0.00814092662689389  -1.34026174660812    0.180160263382842      
+## meal.cal   2.60198066453765e-06  1.00000260198405   0.00026768513236283  0.00972030325916956  0.992244442233114      
+## wt.loss    -0.0167116544277056   0.983427210638073  0.00791098319435414  -2.11246238515995    0.0346468089838536     
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
 </div>
 </div>
 </div>

@@ -157,7 +157,6 @@ stepwiseCox <- function(formula,
     ModInf <- ModInf[-c(5:6),]
   }
   rownames(ModInf) <- 1:nrow(ModInf)
-  class(ModInf) <- class(classTable) <- c("StepReg","data.frame")
   result$'Summary of Parameters' <- ModInf
   result$'Variables Type' <- classTable
   if(selection=="score"){ #score
@@ -217,8 +216,12 @@ stepwiseCox <- function(formula,
     finalResult <- finalResult[-1,]
     RegPIC <- rbind(includeSubSet,finalResult)
     rownames(RegPIC) <- c(1:nrow(RegPIC))
-    class(RegPIC) <- c("StepReg","data.frame")
     result$'Process of Selection' <- RegPIC
+    if(select=="SL"){
+      xModel <- unlist(strsplit(RegPIC[which.max(as.numeric(RegPIC[,2])),3]," "))
+    }else{
+      xModel <- unlist(strsplit(RegPIC[which.min(as.numeric(RegPIC[,2])),3]," "))
+    }
   }else{ #forward # bidirection # backward
     subBestPoint <- data.frame(Step=numeric(),
                                EnteredEffect=character(),
@@ -383,19 +386,17 @@ stepwiseCox <- function(formula,
     }else{
       bestPoint[,1] <- c(1:nrow(bestPoint)-1)
     }
-    
-    lastModel <- reformulate(xModel,yName)
-    lastFit <- survival::coxph(lastModel,data,weights=weights,method=method)
-    MLE <- coef(summary(lastFit))
-    MLE <- as.data.frame(cbind(rownames(MLE),MLE))
-    colnames(MLE)[1] <- c("Variable")
-    
-    variables <- as.data.frame(t(data.frame(xModel)))
-    colnames(variables) <- paste0("variables",1:length(xModel))
-    class(MLE) <- class(bestPoint) <- class(variables) <- c("StepReg","data.frame")
     result$'Process of Selection' <- bestPoint
-    result$'Selected Varaibles' <- variables
-    result$'Coefficients of the Selected Variables' <- MLE
   }
+  lastModel <- reformulate(xModel,yName)
+  lastFit <- survival::coxph(lastModel,data,weights=weights,method=method)
+  MLE <- coef(summary(lastFit))
+  MLE <- as.data.frame(cbind(rownames(MLE),MLE))
+  colnames(MLE)[1] <- c("Variable")
+  variables <- as.data.frame(t(data.frame(xModel)))
+  colnames(variables) <- paste0("variables",1:length(xModel))
+  result$'Selected Varaibles' <- variables
+  result$'Coefficients of the Selected Variables' <- MLE
+  class(result) <- c("StepReg","list")
   return(result)
 }

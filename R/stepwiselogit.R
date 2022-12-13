@@ -165,7 +165,6 @@ stepwiseLogit <- function(formula,
     ModInf <- ModInf[-c(5:6),]
   }
   rownames(ModInf) <- 1:nrow(ModInf)
-  class(ModInf) <- class(classTable) <- c("StepReg","data.frame")
   result$'Summary of Parameters' <- ModInf
   result$'Variables Type' <- classTable
   if(selection=="score"){ #score
@@ -227,8 +226,13 @@ stepwiseLogit <- function(formula,
     finalResult <- finalResult[-1,]
     RegPIC <- rbind(includeSubSet,finalResult)
     rownames(RegPIC) <- c(1:nrow(RegPIC))
-    class(RegPIC) <- c("StepReg","data.frame")
     result$'Process of Selection' <- RegPIC
+    RegPIC[,2] %in% min(RegPIC[,2])
+    if(select=="SL"){
+      xModel <- unlist(strsplit(RegPIC[which.max(as.numeric(RegPIC[,2])),3]," "))
+    }else{
+      xModel <- unlist(strsplit(RegPIC[which.min(as.numeric(RegPIC[,2])),3]," "))
+    }
   }else{ #forward # bidirection # backward
     subBestPoint <- data.frame(Step=numeric(),
                                EnteredEffect=character(),
@@ -388,18 +392,17 @@ stepwiseLogit <- function(formula,
     }else{
       bestPoint[,1] <- c(1:nrow(bestPoint))
     }
-    
-    lastModel <- reformulate(xModel,yName)
-    lastFit <- glm(lastModel,data=data,weights=weights,family="binomial")
-    MLE <- coef(summary(lastFit))
-    MLE <- data.frame(rownames(MLE),MLE)
-    colnames(MLE) <- c("Variable","Estimate","StdError","t.value","P.value")
-    variables <- as.data.frame(t(data.frame(xModel)))
-    colnames(variables) <- paste0("variables",1:length(xModel))
-    class(MLE) <- class(bestPoint) <- class(variables) <- c("StepReg","data.frame")
     result$'Process of Selection' <- bestPoint
-    result$'Selected Varaibles' <- variables
-    result$'Coefficients of the Selected Variables' <- MLE
   }
+  lastModel <- reformulate(xModel,yName)
+  lastFit <- glm(lastModel,data=data,weights=weights,family="binomial")
+  MLE <- coef(summary(lastFit))
+  MLE <- data.frame(rownames(MLE),MLE)
+  colnames(MLE) <- c("Variable","Estimate","StdError","t.value","P.value")
+  variables <- as.data.frame(t(data.frame(xModel)))
+  colnames(variables) <- paste0("variables",1:length(xModel))
+  result$'Selected Varaibles' <- variables
+  result$'Coefficients of the Selected Variables' <- MLE
+  class(result) <- c("StepReg","list")
   return(result)
 }

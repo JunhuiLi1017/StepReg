@@ -64,7 +64,6 @@
 #' formula <- cbind(mpg,drat) ~ . + 0
 #' stepwise(formula=formula,
 #'          data=mtcars,
-#'          include=NULL,
 #'          selection="bidirection",
 #'          select="AIC")
 #' @keywords stepwise regression
@@ -198,7 +197,6 @@ stepwise <- function(formula,
     ModInf <- ModInf[-c(5:6),]
   }
   rownames(ModInf) <- 1:nrow(ModInf)
-  class(ModInf) <- class(classTable) <- c("StepReg","data.frame")
   result$'Summary of Parameters' <- ModInf
   result$'Variables Type' <- classTable
   if(selection=="score"){
@@ -245,8 +243,12 @@ stepwise <- function(formula,
     }
     finalResult <- finalResult[-1,]
     rownames(finalResult) <- 1:nrow(finalResult)
-    class(finalResult) <- c("StepReg","data.frame")
     result$'Process of Selection' <- finalResult
+    if(select=="Rsq" | select=="adjRsq"){
+      xModel <- unlist(strsplit(finalResult[which.max(as.numeric(finalResult[,3])),4]," "))
+    }else{
+      xModel <- unlist(strsplit(finalResult[which.min(as.numeric(finalResult[,3])),4]," "))
+    }
   }else{
     subBestPoint <- data.frame(Step=numeric(),
                                EnteredEffect=character(),
@@ -414,36 +416,34 @@ stepwise <- function(formula,
         }
       }
     }#while
-    if(is.null(xModel)){
-      parEst <- NULL
-    }else{
-      parEst <- summary(lm(reformulate(xModel,yName),data=weightData))
-      parEstList <- list()
-      if(nY>1){
-        for(i in names(parEst)){
-          subParEst <- parEst[[i]]$coefficients
-          subParEst <- data.frame(rownames(subParEst),subParEst)
-          colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","P.value")
-          class(subParEst) <- c("StepReg","data.frame")
-          parEstList[i] <- list(subParEst)
-        }
-      }else{
-        subParEst <- parEst$coefficients
-        subParEst <- data.frame(rownames(subParEst),subParEst)
-        colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","P.value")
-        class(subParEst) <- c("StepReg","data.frame")
-        parEstList <- list(subParEst)
-        names(parEstList) <- yName
-      }
-    }
     bestPoint$DF <- abs(as.numeric(bestPoint$DF))
     bestPoint$DF[is.na(bestPoint$DF)] <- ""
-    variables <- as.data.frame(t(data.frame(xModel)))
-    colnames(variables) <- paste0("variables",1:length(xModel))
-    class(bestPoint) <- class(variables) <- c("StepReg","data.frame")
     result$'Process of Selection' <- bestPoint
-    result$'Selected Varaibles' <- variables
-    result$'Coefficients of the Selected Variables' <- parEstList
   }
+  if(is.null(xModel)){
+    parEst <- NULL
+  }else{
+    parEst <- summary(lm(reformulate(xModel,yName),data=weightData))
+    parEstList <- list()
+    if(nY>1){
+      for(i in names(parEst)){
+        subParEst <- parEst[[i]]$coefficients
+        subParEst <- data.frame(rownames(subParEst),subParEst)
+        colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","P.value")
+        parEstList[i] <- list(subParEst)
+      }
+    }else{
+      subParEst <- parEst$coefficients
+      subParEst <- data.frame(rownames(subParEst),subParEst)
+      colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","P.value")
+      parEstList <- list(subParEst)
+      names(parEstList) <- yName
+    }
+  }
+  variables <- as.data.frame(t(data.frame(xModel)))
+  colnames(variables) <- paste0("variables",1:length(xModel))
+  result$'Selected Varaibles' <- variables
+  result$'Coefficients of the Selected Variables' <- parEstList
+  class(result) <- c("StepReg","list")
   return(result)
 }

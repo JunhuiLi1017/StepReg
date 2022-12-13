@@ -47,7 +47,6 @@ mtcars$yes <- mtcars$wt
 formula <- cbind(mpg,drat) ~ . + 0
 stepwise(formula=formula,
          data=mtcars,
-         include=NULL,
          selection="bidirection",
          select="AIC")
 }

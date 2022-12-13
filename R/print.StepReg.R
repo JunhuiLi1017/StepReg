@@ -15,7 +15,24 @@
 #' @importFrom dplyr `%>%` mutate_if
 #' 
 #' @export
-print.StepReg <- function(x,...){
+#' 
+print.StepReg <- function(x, ...){
+  for(i in 1:length(x)){
+    y <- x[[i]]
+    yName <- names(x)[i]
+    if(is.data.frame(y)){
+      outputStepReg(y,text=paste0("Table ",i,". ",yName))
+    }else if(is.list(y)){
+      for(j in 1:length(y)){
+        ySubName <- paste(yName,"for",names(y)[j],sep=" ")
+        suby <- y[[j]]
+        outputStepReg(suby,text=paste0("Table ",i+j-1,". ",ySubName))
+      }
+    }
+  }
+}
+
+outputStepReg <- function(x,text){
   x %>% mutate_if(is.factor, as.character) -> x
   if(nrow(x)==1){
     dfLen <- sapply(x,nchar)
@@ -29,7 +46,7 @@ print.StepReg <- function(x,...){
   list(colnames(x),lengths,side) %>% pmap_chr(str_pad) -> dfHeader
   side <- rep("right",ncol(x))
   list(x,lengths,side) %>% pmap_dfc(str_pad) -> dataFrame
-  
+  cat(format(text, width = sum(lengths), justify = "centre"));cat("\n")
   cat(paste0(rep("\u2017",sum(lengths)),collapse=""));cat("\n")
   cat(paste0(dfHeader,collapse=""));cat("\n")
   cat(paste0(rep("\u2014",sum(lengths)),collapse=""));cat("\n")
@@ -37,5 +54,5 @@ print.StepReg <- function(x,...){
   for(i in 1:nrow(dataFrame)){
     cat(paste0(dataFrame[i,],collapse=""),"\n")
   }
-  cat(paste0(rep("\u2017",sum(lengths)),collapse=""));cat("\n")
+  cat(paste0(rep("\u2017",sum(lengths)),collapse=""));cat("\n");cat("\n")
 }
