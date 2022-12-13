@@ -260,7 +260,7 @@ stepwiseCox <- function(formula,
         fmInc <- reformulate(includeName,yName)
         fitInc <- survival::coxph(fmInc,data=data,weights=weights,method=method)
         if(select=="SL"){
-          PIC <- anova(fitInt,fitInc)[2,'P(>|Chi|)']
+          PIC <- anova(fitInt,fitInc)[2,'Pr(>|Chi|)']
         }else{
           PIC <- modelFitStat(select,fitInc,"Likelihood",TRUE)
         }
@@ -278,16 +278,16 @@ stepwiseCox <- function(formula,
         }
         fm0 <- reformulate(xMod, yName)
         fit0 <- survival::coxph(fm0,data = data,weights=weights,method=method)
-		if(length(xResidual)==0){
-		  break
-		}
+	if(length(xResidual)==0){
+		break
+	}
         xResidualList <- as.list(xResidual)
         names(xResidualList) <- xResidual
         fm1 <- lapply(xResidualList,function(x){reformulate(c(xModel,x),yName)})
         fit1 <- lapply(fm1,function(x){survival::coxph(x,data = data,weights=weights,method=method)})
         if(select=="SL"){
           threshold <- sle
-          PICset <- sapply(fit1,function(x){anova(fit0,x)[2,'P(>|Chi|)']})
+          PICset <- sapply(fit1,function(x){anova(fit0,x)[2,'Pr(>|Chi|)']})
         }else{
           threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
           PICset <- sapply(fit1,function(x){modelFitStat(select,x,"Likelihood",TRUE)})
@@ -322,7 +322,7 @@ stepwiseCox <- function(formula,
         fit0 <- lapply(fm0,function(x){survival::coxph(x,data=data,weights=weights,method=method)})
         if(select=="SL"){
           threshold <- sls
-          PIC <- sapply(fit0,function(x){anova(x,fit1)[2,'P(>|Chi|)']})
+          PIC <- sapply(fit0,function(x){anova(x,fit1)[2,'Pr(>|Chi|)']})
           mPIC <- max(PIC)
           minmaxVar <- names(which.max(PIC))
           if(mPIC > threshold){

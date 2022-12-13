@@ -57,6 +57,7 @@
 #' @author Junhui Li 
 #' 
 #' @examples
+#' data(mtcars)
 #' formula <- vs ~ .
 #' stepwiseLogit(formula,
 #'               data=mtcars,
