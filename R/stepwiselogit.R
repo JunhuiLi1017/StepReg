@@ -84,18 +84,15 @@ stepwiseLogit <- function(formula,
   selection <- match.arg(selection)
   select <- match.arg(select)
   sigMethod <- match.arg(sigMethod)
-  if(class(formula)!="formula"){
-    stop("class of formula object isn't 'formula'")
+  stopifnot(inherits(formula, "formula"))
+  termForm <- terms(formula,data=data)
+  vars <- as.character(attr(termForm, "variables"))[-1]
+  yName <- vars[attr(termForm, "response")]
+  xName <- attr(termForm,"term.labels")
+  if(attr(termForm, "intercept")==0){
+    intercept <- "0"
   }else{
-    termForm <- terms(formula,data=data)
-    vars <- as.character(attr(termForm, "variables"))[-1]
-    yName <- vars[attr(termForm, "response")]
-    xName <- attr(termForm,"term.labels")
-    if(attr(termForm, "intercept")==0){
-      intercept <- "0"
-    }else{
-      intercept <- "1"
-    }
+    intercept <- "1"
   }
   if(is.character(include)){
     if(!all(include %in% xName)){

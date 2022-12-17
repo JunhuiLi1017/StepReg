@@ -92,20 +92,17 @@ stepwise <- function(formula,
     stop("select = 'SL' is not allowed when specifing selection = 'score'")
   }
   ## extract response, independent variable and intercept
-  if(class(formula)!="formula"){
-    stop("class of formula object isn't 'formula'")
+  stopifnot(inherits(formula, "formula"))
+  termForm <- terms(formula,data=data)
+  #yName <- rownames(attr(termForm,"factors"))[1]
+  #yName <- all.vars(formula)[1]
+  vars <- as.character(attr(termForm, "variables"))[-1]
+  yName <- vars[attr(termForm, "response")]
+  xName <- attr(termForm,"term.labels")
+  if(attr(termForm, "intercept")==0){
+    intercept <- "0"
   }else{
-    termForm <- terms(formula,data=data)
-    #yName <- rownames(attr(termForm,"factors"))[1]
-    #yName <- all.vars(formula)[1]
-    vars <- as.character(attr(termForm, "variables"))[-1]
-    yName <- vars[attr(termForm, "response")]
-    xName <- attr(termForm,"term.labels")
-    if(attr(termForm, "intercept")==0){
-      intercept <- "0"
-    }else{
-      intercept <- "1"
-    }
+    intercept <- "1"
   }
   if(is.character(include)){
     if(!all(include %in% xName)){
