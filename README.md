@@ -1,8 +1,8 @@
 # StepReg
 
-StepReg — Stepwise Regression Analysis  
+StepReg — Stepwise Regression Analysis  
 
-Version: v1.4.3
+Version: v1.4.4
 
 ![StepReg logo](man/figures/logo.png) 
 
