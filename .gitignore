@@ -1,3 +1,6 @@
+.gitignore
+.Rbuildignore
+MD5
 .Rproj.user
 .Rhistory
 .Rdata
