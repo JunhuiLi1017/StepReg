@@ -6,21 +6,21 @@
 ![StepReg logo](man/figures/logo.png)
 
 ## Table of Contents
-[1. Introduction](#introduction)
-- [Feature selection](#Feature_selection)
-- [Stepwise regression](#Stepwise_regression)
+[1. Introduction](#1-introduction)
+- [Feature selection](#feature-selection)
+- [Stepwise regression](#stepwise-regression)
 
-[2. Algorithms implemented in StepReg](#2._Algorithms_implemented_in_StepReg)
-- [Stepwise algorithms](#Stepwise_algorithms)
-- [Best Subsets algorithm](#Best_Subsets_algorithm)
-- [Selection criterion](#Selection_criterion)
-- [Multicollinearity](#Multicollinearity)
+[2. Algorithms implemented in StepReg](#2-algorithms-implemented-in-stepreg)
+- [Stepwise algorithms](#stepwise-algorithms)
+- [Best Subsets algorithm](#best-subsets-algorithm)
+- [Selection criterion](#selection-criterion)
+- [Multicollinearity](#multicollinearity)
 
-[3. Usage and examples](#3._Usage_and_examples)
+[3. Usage and examples](#3-usage-and-examples)
 
-[4. Validation](#4._Validation)
+[4. Validation](#4-validation)
 
-[5. Support](#5._Support)
+[5. Support](#5-support)
 
 ## 1. Introduction
 
