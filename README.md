@@ -22,6 +22,8 @@
 
 [5. Support](#5-support)
 
+[6. How to cite](#6-how-to-cite)
+
 ## 1. Introduction
 
 ### Feature selection
@@ -70,11 +72,11 @@ The *selection criterion* is another name for the aforementioned *model fit scor
   - BIC: Bayesian information criterion
   - Mallows's Cp
   - HQ: Hannan-Quinn information criterion
-  - HQc: sample-size adjusted HQ?
+  - HQc: Corrected Hannan and Quinn information criterion, reference see [here](https://www.jstatsoft.org/article/view/v007i12)
   - Rsq: R-squared
   - adjRsq: adjusted Rseq
   - SBC: Schwarz information criterion
-  - SL(Pvalue): ?
+  - SL (Pvalue): Significance level
 - For logistic regression
   - the score test
   - the Wald test
@@ -97,6 +99,16 @@ install.package("StepReg")
 library(StepReg)
 ```
 
+#### Getting help
+```
+help(package = "StepReg")
+?stepwise
+?stepwiseCox
+?stepwiseLogit
+```
+
+### Examples
+
 #### Stepwise linear regression
 ```
 # remove intercept and add new variable yes which is the same as variable wt in mtcars dataset
@@ -104,31 +116,21 @@ library(StepReg)
 data(mtcars)
 mtcars$yes <- mtcars$wt
 formula    <- cbind(mpg,drat) ~ . + 0
-stepwise(formula=formula,
-         data=mtcars,
-         include=NULL,
-         selection="bidirection",
-         select="AIC",
-         sle=0.15,
-         sls=0.15,
-         multivarStat="Pillai",
-         weights=NULL,
-         best=NULL)
+stepwise(formula    = formula,
+         data       = mtcars,
+         selection  = "bidirection",
+         select     = "AIC")
 ```
 
 #### Stepwise logistic regression
 ```
 formula=vs ~ .
 stepwiseLogit(formula,
-              data=mtcars,
-              include=NULL,
-              selection="bidirection",
-              select="SL",
-              sle=0.15,
-              sls=0.15,
-              sigMethod="Rao",
-              weights=NULL,
-              best=NULL)
+              data      = mtcars,
+              selection = "bidirection",
+              select    = "SL",
+              sle       = 0.15,
+              sls       = 0.15)
 ```
 
 #### Stepwise Cox regression
@@ -139,26 +141,31 @@ my.data$status1 <- ifelse(my.data$status==2,1,0)
 data <- my.data
 formula = Surv(time, status1) ~ . - status
 
-stepwiseCox(formula,
-data,
-include=NULL,
-selection=c("bidirection"),
-select="SL",
-method=c("efron"),
-sle=0.15,
-sls=0.15,
-weights=NULL,
-best=NULL)
+stepwiseCox(formula     = formula,
+            data        = data,
+            selection   = c("bidirection"),
+            select      = "SL",
+            sle         = 0.15,
+            sls         = 0.15)
 ```
 
 ## 4. Validation
 
-  - Output from StepReg for multivariate stepwise regression was cross-validated with the reference. (?)
+  - Output from StepReg for multivariate stepwise regression was cross-validated with the reference. (see [publications](#publications))
 
-  - Final results using StepReg for three datasets are consistent with that using SAS software. (?)
+  - Final results using StepReg for three datasets are consistent with that using SAS software.
     - Dataset1 without class effect: 13 dependent variable, 129 independent variable, and 216 samples.
     - Dataset2 with 4 class effect: 12 dependent variable, 1270 independent variable, and 647 samples.
     - Dataset3 with 6 class effect: 5 dependent variable, 2068 independent variable, and 412 samples.
 
 ## 5. Support
 For bug reports and feature requests, raise an [issue](https://github.com/JunhuiLi1017/StepReg/issues/new).
+
+## 6. How to cite
+
+### Publications
+Please kindly cite the following publications if you find **StepReg** useful:
+  - journal: [to be added]
+  - bioRxiv: [to be added]
+  - R CRAN package: https://cran.r-project.org/web/packages/StepReg/
+  - Zenodo page: [to be added]
