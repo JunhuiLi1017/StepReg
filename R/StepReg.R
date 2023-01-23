@@ -1,4 +1,4 @@
-#' StepReg: an R package for stepwise regression analysis
+#' An R package for stepwise regression analysis
 #'
 #' The package provides functions to perform Stepwise Regression using various algorithms, e.g., Forward Selection, Backward Elimination, and Bidirectional Elimination. Meanwhile, it also supports the Best Subset method. Multiple selection criteria (stopping criteria) are supported, including AIC, AICc, BIC, HQ, and more.
 #'

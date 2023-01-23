@@ -98,6 +98,11 @@ In StepReg, [QC Matrix Decomposition](https://towardsdatascience.com/qr-matrix-f
 install.package("StepReg")
 library(StepReg)
 ```
+Developer's version:
+```
+library(devtools)
+install_github("JunhuiLi1017/StepReg")
+```
 
 #### Getting help
 ```
