@@ -107,6 +107,9 @@ install_github("JunhuiLi1017/StepReg")
 #### Getting help
 ```
 help(package = "StepReg")
+# Or
+?StepReg
+
 ?stepwise
 ?stepwiseCox
 ?stepwiseLogit
