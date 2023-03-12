@@ -6,22 +6,26 @@
 #' 
 #' @author Junhui Li, Kai Hu
 validateInputStepwise <- function(type = c("linear", "logit", "cox"),
-																	formula,
-																	data,
-																	include = NULL,
-																	strategy = c("forward", "backward", "bidirectional", "subset"),
-																	metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
-																	sle = 0.15,
-																	sls = 0.15,
-																	test_method = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy", "Rao", "LRT", "efron", "breslow", "exact"),
-																	weights = NULL,
-																	best_n = NULL) {
+                                  formula,
+                                  data,
+                                  include = NULL,
+                                  strategy = c("forward", "backward", "bidirectional", "subset"),
+                                  metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
+                                  sle = 0.15,
+                                  sls = 0.15,
+                                  test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
+                                  test_method_logit = c("Rao", "LRT"),
+                                  test_method_cox = c("efron", "breslow", "exact"),
+                                  weights = NULL,
+                                  best_n = Inf) {
 	## check required parameters
 	type <- match.arg(type)
 	strategy <- match.arg(strategy)
 	metric <- match.arg(metric)
-	test_method <- match.arg(test_method)
-	
+	test_method_linear <- match.arg(test_method_linear)
+    test_method_logit <- match.arg(test_method_logit)
+    test_method_cox <- match.arg(test_method_cox)
+    
 	if(missing(data)){ 
 		stop("'data' parameter is missing.") 
 	}else{
@@ -78,39 +82,19 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
 	logit_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	cox_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	
-	linear_test_method = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy")
-	logit_test_method = c("Rao", "LRT")
-	cox_test_method = c("efron", "breslow", "exact")
-	
 	if(type == "linear"){
 		if(!metric %in% linear_metric){
 			stop("for type 'linear': 'metric' must be from one of the c('", paste0(linear_metric, collapse = "','"),"').")
 		}
-		## check "test_method" for type "linear": if only one response variable, must use exact?
-		if(response_variable_n > 1){
-			if(!test_method %in% linear_test_method){
-				stop("for type 'linear' with more than one response variable (multivariate): 'test_method' must be from one of the c('", paste0(linear_test_method, collapse = "','"),"').")
-			}
-		}else{
-			if(!test_method %in% c("exact")){ # not sure?
-				stop("for type 'linear' with one response variable: 'test_method' must be 'exact'.")
-			}
-		}
-		
+
 	}else if(type == "logit"){
 		if(!metric %in% logit_metric){
 			stop("for type 'logit': 'metric' must be from one of the c('", paste0(logit_metric, collapse = "','"),"').")
-		}
-		if(!test_method %in% logit_test_method){
-			stop("for type 'logit': 'test_method' must be from one of the c('", paste0(logit_test_method, collapse = "','"),"').")
 		}
 		
 	}else if(type == 'cox'){
 		if(!metric %in% cox_metric){
 			stop("for type 'cox': 'metric' must be from one of the c('", paste0(cox_metric, collapse = "','"),"').")
-		}
-		if(!test_method %in% cox_test_method){
-			stop("for type 'cox': 'test_method' must be from one of the c('",paste0(cox_test_method, collapse = "','"),"').")
 		}
 	}
 	
@@ -122,16 +106,13 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
 			stop("the length of the 'weights' vector must equal the number of predictor variables specified in the 'formula'.")
 		}
 	}else{
-		weights <- 1
+		weights <- rep(1,nrow(data))
 	}
-
+	
 	## check 'best_n'
-	if(!is.null(best_n)){
+	if(!is.infinite(best_n)){
 		if(!is.integer(best_n)){
 			stop("the 'best_n' must be an integer.")
 		}
-	}else{
-		# to be added
 	}
-	
 }

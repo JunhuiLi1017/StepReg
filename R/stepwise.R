@@ -3,16 +3,30 @@
 #' Stepwise regression is a common technique used for automatically selecting predictor variable(s) (independent) to determine an optimal model for the prediction of the response variable(s) (dependent). The StepReg package supports three types of models: linear regression, logistic regression, and Cox regression. Meanwhile, multiple model fit scoring methods are implemented.
 #' 
 #' @param type (character) The stepwise regression type. Choose from 'linear', 'logit', and 'cox'. Default is 'linear'.
+#' 
 #' @param formula (formula) The formula used for model fitting. The formula takes the form of a '~' (tilde) symbol, with the response variable(s) on the left-hand side, and the predictor variable(s) on the right-hand side. The 'lm()' function uses this formula to fit a regression model. A formula can be as simple as 'y ~ x'. For multiple predictors, they must be separated by the '+' (plus) symbol, e.g. 'y ~ x1 + x2'. To include an interaction term between variables, use the ':' (colon) symbol: 'y ~ x1 + x1:x2'. Use the '.' (dot) symbol to indicate that all other variables in the dataset should be included as predictors, e.g. 'y ~ .'. In the case of multiple response variables (multivariate), the formula can be specified as 'cbind(y1, y2) ~ x1 + x2'. By default, an intercept term is always included in the models, to exclude it, include '0' or '- 1' in your formula: 'y ~ 0 + x1', 'y ~ x1 + 0', and 'y ~ x1 - 1'.
+#' 
 #' @param data (data.frame) A dataset consisting of predictor variable(s) and response variable(s).
+#' 
 #' @param include (NULL|character) A character vector specifying predictor variables that will always stay in the model. A subset of the predictors in the dataset.
+#' 
 #' @param strategy (character) The model selection strategy. Choose from 'forward', 'backward', 'bidirectional' and 'subset'. Default is 'forward'. More information, see [StepReg](https://github.com/JunhuiLi1017/StepReg#stepwise-regression)
+#' 
 #' @param metric (character) The model selection criterion (model fit score). Used for the evaluation of the predictive performance of an intermediate model. Choose from 'AIC', 'AICc', 'BIC', 'CP', 'HQ', 'HQc', 'Rsq', 'adjRsq', 'SL', 'SBC', 'IC(3/2)', 'IC(1)'. Default is 'AIC'.
+#' 
 #' @param sle (numeric) Significance Level to Enter. It is the statistical significance level that a predictor variable must meet to be included in the model. E.g. if 'sle = 0.05', a predictor with a P-value less than 0.05 will 'enter' the model. Default is 0.15.
+#' 
 #' @param sls (numeric) Significance Level to Stay. Similar to 'sle', 'sls' is the statistical significance level that a predictor variable must meet to 'stay' in the model. E.g. if 'sls = 0.1', a predictor that was previously included in the model but whose P-value is now greater than 0.1 will be removed.
-#' @param weights (NULL|numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weights reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weights should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is NULL, which means that all weights are set to 1.
-#' @param test_method (character) Test method for multivariate regression analysis. When 'type' is set to 'linear', choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'; when 'type' is 'logit', choose from 'Rao', 'LRT'; when 'type' is 'cox', choose from 'efron', 'breslow', 'exact'. Default is 'Pillai'.
-#' @param best_n (NULL|numeric(integer)) The number of models to keep in the final output. Default is NULL, which means that all models will be displayed.
+#' 
+#' @param weights (numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weights reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weights should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is 1, which means that all weights are set to 1.
+#' 
+#' @param test_method_linear (character) Test method for multivariate linear regression analysis, choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'. Default is 'Pillai'. For univariate regression, 'F-test' will be used. 
+#' 
+#' @param test_method_logit (character) Test method for univariate logit regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'.
+#' 
+#' @param test_method_cox (character) Test method for cox regression analysis, choose from 'efron', 'breslow', 'exact'. Default is 'efron'.
+#' 
+#' @param best_n (numeric(integer)) The number of models to keep in the final output. Default is Inf, which means that all models will be displayed.
 #' 
 #' @references
 #' 
@@ -58,11 +72,19 @@ stepwise <- function(type = c("linear", "logit", "cox"),
                      metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
                      sle = 0.15,
                      sls = 0.15,
-                     test_method = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy", "Rao", "LRT", "efron", "breslow", "exact"),
-                     weights = NULL,
-                     best_n = NULL){
+                     test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
+                     test_method_logit = c("Rao", "LRT"),
+                     test_method_cox = c("efron", "breslow", "exact"),
+                     weights = 1,
+                     best_n = Inf){
 	## validate input:
-	validateInputStepwise(type = type, formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method = test_method, weights = weights, best_n = best_n)
-	
+	validateInputStepwise(type = type, formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, weights = weights, best_n = best_n)
+	if(type == "linear"){
+	  result <- stepwiseLinear(formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, weights = weights, best_n = best_n)
+	}else if(type == "logit"){
+	  result <- stepwiseLogit(formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_logit = test_method_logit, weights = weights, best_n = best_n)
+	}else if(type == "cox"){
+	  result <- stepwiseCox(formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_cox = test_method_cox, weights = weights, best_n = best_n)
+	}
 }
 

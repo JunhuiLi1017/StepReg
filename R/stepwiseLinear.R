@@ -1,19 +1,19 @@
 #' Stepwise Linear Model Regression
 #' 
-#' Stepwise linear regression analysis selects model based on information criteria and F or approximate F test with 'forward', 'backward', 'bidirection' and 'score' model selection method.
+#' Stepwise linear regression analysis selects model based on information criteria and F or approximate F test with 'forward', 'backward', 'bidirection' and 'subset' model strategy method.
 #' 
-#' @param formula Model formulae. The models fitted by the lm functions are specified in a compact symbolic form. The basic structure of a formula is the tilde symbol (~) and at least one independent (righthand) variable. In most (but not all) situations, a single dependent (lefthand) variable is also needed. Thus we can construct a formula quite simple formula (y ~ x). Multiple independent variables by simply separating them with the plus (+) symbol (y ~ x1 + x2). Variables in the formula are removed with a minus(-) symbol (y ~ x1 - x2). One particularly useful feature is the . operator when modelling with lots of variables (y ~ .). The \%in\% operator indicates that the terms on its left are nested within those on the right. For example y ~ x1 + x2 \%in\% x1 expands to the formula y ~ x1 + x1:x2. A model with no intercept can be specified as y ~ x - 1 or y ~ x + 0 or y ~ 0 + x. Multivariate multiple regression can be specified as cbind(y1,y2) ~ x1 + x2.
-#' @param data Data set including dependent and independent variables to be analyzed
-#' @param include Force vector of effects name to be included in all models.
-#' @param selection Model selection method including "forward", "backward", "bidirection" and 'score',forward selection starts with no effects in the model and adds effects, backward selection starts with all effects in the model and removes effects, while bidirection regression is similar to the forward method except that effects already in the model do not necessarily stay there, and score method requests specifies the best-subset selection method, which uses the branch-and-bound technique to efficiently search for subsets of model effects that best predict the response variable.
-#' @param select Specify the criterion that uses to determine the order in which effects enter and leave at each step of the specified selection method including "AIC","AICc","BIC","CP","HQ","HQc","Rsq","adjRsq","SBC" and "SL".
-#' @param sle Specify the significance level for entry, default is 0.15
-#' @param sls Specify the significance level for staying in the model, default is 0.15
-#' @param weights Numeric vector to provide a weight for each observation in the input data set. Note that weights should be ranged from 0 to 1, while negative numbers are forcibly converted to 0, and numbers greater than 1 are forcibly converted to 1. If you do not specify a weight vector, each observation has a default weight of 1.
-#' @param multivarStat Statistic for multivariate regression analysis, including Wilks' lamda ("Wilks"), Pillai Trace ("Pillai"), Hotelling-Lawley's Trace ("Hotelling"), Roy's Largest Root ("Roy")
-#' @param best Control the number of models displayed in the output, default is NULL, which means all possible model will be displayed.
+#' @param formula (formula) The formula used for model fitting. The formula takes the form of a '~' (tilde) symbol, with the response variable(s) on the left-hand side, and the predictor variable(s) on the right-hand side. The 'lm()' function uses this formula to fit a regression model. A formula can be as simple as 'y ~ x'. For multiple predictors, they must be separated by the '+' (plus) symbol, e.g. 'y ~ x1 + x2'. To include an interaction term between variables, use the ':' (colon) symbol: 'y ~ x1 + x1:x2'. Use the '.' (dot) symbol to indicate that all other variables in the dataset should be included as predictors, e.g. 'y ~ .'. In the case of multiple response variables (multivariate), the formula can be specified as 'cbind(y1, y2) ~ x1 + x2'. By default, an intercept term is always included in the models, to exclude it, include '0' or '- 1' in your formula: 'y ~ 0 + x1', 'y ~ x1 + 0', and 'y ~ x1 - 1'.
+#' @param data (data.frame) A dataset consisting of predictor variable(s) and response variable(s).
+#' @param include (NULL|character) A character vector specifying predictor variables that will always stay in the model. A subset of the predictors in the dataset.
+#' @param strategy (character) The model selection strategy. Choose from 'forward', 'backward', 'bidirectional' and 'subset'. Default is 'forward'. More information, see [StepReg](https://github.com/JunhuiLi1017/StepReg#stepwise-regression)
+#' @param metric (character) The model selection criterion (model fit score). Used for the evaluation of the predictive performance of an intermediate model. Choose from 'AIC', 'AICc', 'BIC', 'CP', 'HQ', 'HQc', 'Rsq', 'adjRsq', 'SL', 'SBC'. Default is 'AIC'.
+#' @param sle (numeric) Significance Level to Enter. It is the statistical significance level that a predictor variable must meet to be included in the model. E.g. if 'sle = 0.05', a predictor with a P-value less than 0.05 will 'enter' the model. Default is 0.15.
+#' @param sls (numeric) Significance Level to Stay. Similar to 'sle', 'sls' is the statistical significance level that a predictor variable must meet to 'stay' in the model. E.g. if 'sls = 0.1', a predictor that was previously included in the model but whose P-value is now greater than 0.1 will be removed.
+#' @param weights (numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weights reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weights should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is 1, which means that all weights are set to 1.
+#' @param test_method_linear (character) Test method for multivariate linear regression analysis, choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'. Default is 'Pillai'. For univariate regression, 'F-test' will be used. 
+#' @param best_n (numeric(integer)) The number of models to keep in the final output. Default is Inf, which means that all models will be displayed.
 #' 
-#' @author Junhui Li 
+#' @author Junhui Li, Kai Hu
 #' 
 #' @references 
 #' Alsubaihi, A. A., Leeuw, J. D., and Zeileis, A. (2002). Variable selection in multivariable regression using sas/iml. , 07(i12).
@@ -37,34 +37,35 @@
 #' data(mtcars)
 #' mtcars$yes <- mtcars$wt
 #' formula <- cbind(mpg,drat) ~ . + 0
-#' stepwise(formula=formula,
+#' stepwiseLinear(formula=formula,
 #'          data=mtcars,
-#'          selection="bidirection",
-#'          select="AIC")
+#'          strategy="bidirection",
+#'          metric="AIC")
 #'          
-#' @keywords stepwise regression
+#' @keywords stepwise linear regression
 #' 
 #' @importFrom utils combn
 #' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms
 #' 
 #' @export
 #' 
-stepwise <- function(formula,
+stepwiseLinear <- function(
+                     formula,
                      data,
-                     include=NULL,
-                     selection=c("forward","backward","bidirection","score"),
-                     select=c("AIC","AICc","BIC","CP","HQ","HQc","Rsq","adjRsq","SL","SBC"),
-                     sle=0.15,
-                     sls=0.15,
-                     multivarStat=c("Pillai","Wilks","Hotelling-Lawley","Roy"),
-                     weights=NULL,
-                     best=NULL){
-  selection <- match.arg(selection)
-  select <- match.arg(select)
-  multivarStat <- match.arg(multivarStat)
-  ## score and SL
-  if(selection=="score" & select=="SL"){
-    stop("select = 'SL' is not allowed when specifing selection = 'score'")
+                     include = NULL,
+                     strategy = c("forward", "backward", "bidirection", "subset"),
+                     metric = c("AIC","AICc","BIC","CP","HQ","HQc","Rsq","adjRsq","SL","SBC"),
+                     sle = 0.15,
+                     sls = 0.15,
+                     test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
+                     weights = NULL,
+                     best_n = Inf){
+  strategy <- match.arg(strategy)
+  metric <- match.arg(metric)
+  test_method_linear <- match.arg(test_method_linear)
+  ## subset and SL
+  if(strategy=="subset" & metric=="SL"){
+    stop("metric = 'SL' is not allowed when specifing strategy = 'subset'")
   }
   ## extract response, independent variable and intercept
   stopifnot(inherits(formula, "formula"))
@@ -135,34 +136,34 @@ stepwise <- function(formula,
   if(nY==1){
     approxF <- "F"
   }else{
-    approxF <- multivarStat
-    if(any(c(select)==c("BIC","CP","Rsq","adjRsq"))){
+    approxF <- test_method_linear
+    if(any(c(metric)==c("BIC","CP","Rsq","adjRsq"))){
       stop("Can't specify 'BIC','CP','Rsq' or 'adjRsq' when using multivariate multiple regression")
     }
   }
-  if((select=="CP" | select=='BIC') & lmFull$rank >= nObs){
-    stop("'select' can't specify 'CP' or 'BIC' when variable number is greater than number of observation")
+  if((metric=="CP" | metric=='BIC') & lmFull$rank >= nObs){
+    stop("'metric' can't specify 'CP' or 'BIC' when variable number is greater than number of observation")
   }
   result <- list()
   ModInf <- matrix(NA,9,1)
-  ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,selection,select,sle,sle,approxF,mulcolMergeName,intercept),9,1))
+  ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,strategy,metric,sle,sle,approxF,mulcolMergeName,intercept),9,1))
   ModInf <- data.frame(ModInf)
   colnames(ModInf) <- c("Paramters","Value")
   ModInf[,1] <- c("Response Variable",
                   "Included Variable",
-                  "Selection Method",
-                  "Select Criterion",
+                  "Strategy Method",
+                  "Metric Criterion",
                   "Entry Significance Level(sle)",
                   "Stay Significance Level(sls)",
                   "Variable significance test",
                   "Multicollinearity Terms",
                   "Intercept")
-  if(select=="SL"){
-    if(selection=="forward"){
+  if(metric=="SL"){
+    if(strategy=="forward"){
       ModInf <- ModInf[-6,]
-    }else if(selection=="backward"){
+    }else if(strategy=="backward"){
       ModInf <- ModInf[-5,]
-    }else if(selection=="score"){
+    }else if(strategy=="subset"){
       ModInf <- ModInf[-c(5:6),]
     }
   }else{
@@ -171,15 +172,15 @@ stepwise <- function(formula,
   rownames(ModInf) <- 1:nrow(ModInf)
   result$'Summary of Parameters' <- ModInf
   result$'Variables Type' <- classTable
-  if(selection=="score"){
+  if(strategy=="subset"){
     ## best subset model selection
     tempresult <- matrix(NA,1,4)
-    colnames(tempresult) <- c("NoVariable","RankModel",select,"VariablesEnteredinModel")
+    colnames(tempresult) <- c("NoVariable","RankModel",metric,"VariablesEnteredinModel")
     finalResult <- tempresult
     if(!is.null(includeName)){
       lmIncForm <- reformulate(c(intercept,includeName), yName)
       lmInc <- lm(lmIncForm,data=weightData)
-      tempresult[1,c(1:4)] <- c(length(attr(lmInc$terms,"term.labels")),lmInc$rank,modelFitStat(select,lmInc,"LeastSquare"),paste(c(intercept,includeName),collapse=" "))
+      tempresult[1,c(1:4)] <- c(length(attr(lmInc$terms,"term.labels")),lmInc$rank,modelFitStat(metric,lmInc,"LeastSquare"),paste(c(intercept,includeName),collapse=" "))
       finalResult <- rbind(finalResult,tempresult)
       checkX <- xName[!xName %in% includeName]
     }else{
@@ -192,21 +193,21 @@ stepwise <- function(formula,
         comVar <- c(intercept,includeName,checkX[comTable[,ncom]])
         tempFormula <- reformulate(comVar, yName)
         lmresult <- lm(tempFormula,data=weightData)
-        tempresult[1,1:4] <- c(length(attr(lmresult$terms,"term.labels")),lmresult$rank,modelFitStat(select,lmresult,"LeastSquare"),paste(comVar,collapse=" "))
+        tempresult[1,1:4] <- c(length(attr(lmresult$terms,"term.labels")),lmresult$rank,modelFitStat(metric,lmresult,"LeastSquare"),paste(comVar,collapse=" "))
         subSet <- rbind(subSet,tempresult)
       }
-      if(is.null(best)){
+      if(is.null(best_n)){
         nbest <- nrow(subSet)
       }else{
-        if(nrow(subSet)>best){
-          nbest <- best
+        if(nrow(subSet)>best_n){
+          nbest <- best_n
         }else{
           nbest <- nrow(subSet)
         }
       }
       bestSubSet <- as.data.frame(subSet)
       bestSubSet[,2] <- as.numeric(bestSubSet[,2])
-      if(select=="Rsq" | select=="adjRsq"){
+      if(metric=="Rsq" | metric=="adjRsq"){
         subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = TRUE),]
       }else{
         subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = FALSE),]
@@ -216,7 +217,7 @@ stepwise <- function(formula,
     finalResult <- finalResult[-1,]
     rownames(finalResult) <- 1:nrow(finalResult)
     result$'Process of Selection' <- finalResult
-    if(select=="Rsq" | select=="adjRsq"){
+    if(metric=="Rsq" | metric=="adjRsq"){
       xModel <- unlist(strsplit(finalResult[which.max(as.numeric(finalResult[,3])),4]," "))
     }else{
       xModel <- unlist(strsplit(finalResult[which.min(as.numeric(finalResult[,3])),4]," "))
@@ -228,17 +229,17 @@ stepwise <- function(formula,
                                DF=numeric(),
                                NumberEffectIn=numeric(),
                                NumberParmsIn=numeric(),
-                               select=numeric())
-    colnames(subBestPoint)[7] <- select
+                               metric=numeric())
+    colnames(subBestPoint)[7] <- metric
     bestPoint <- subBestPoint
-    if(selection == "backward"){
+    if(strategy == "backward"){
       addIdx <- FALSE
       xModel <- c(intercept,includeName,setdiff(xName,includeName))
       xResidual <- NULL
-      if (select == 'SL') {
+      if (metric == 'SL') {
         PIC <- 1
       }else{
-        PIC <- modelFitStat(select,lmFull,"LeastSquare")
+        PIC <- modelFitStat(metric,lmFull,"LeastSquare")
       }
       bestPoint[1,] <- c(0,"","","",length(attr(lmFull$terms,"term.labels")),lmFull$rank,PIC)
     }else{
@@ -247,13 +248,13 @@ stepwise <- function(formula,
       xResidual <- setdiff(xName,includeName)
       fmInt <- reformulate(intercept, yName)
       fitInt <- lm(fmInt,data=weightData)
-      if(select == 'SL') {
+      if(metric == 'SL') {
         PIC <- 1
       }else{
         if(intercept=='1'){
-          PIC <- modelFitStat(select,fitInt,"LeastSquare")
+          PIC <- modelFitStat(metric,fitInt,"LeastSquare")
         }else{
-          if(select %in% c("Rsq","adjRsq")){
+          if(metric %in% c("Rsq","adjRsq")){
             PIC <- 0
           }else{
             PIC <- Inf
@@ -264,10 +265,10 @@ stepwise <- function(formula,
       if(!is.null(includeName)){
         fmInc <- reformulate(c(intercept,includeName),yName)
         fitInc <- lm(fmInc,data=weightData)
-        if(select == 'SL') {
+        if(metric == 'SL') {
           PIC <- anova(fitInc,fitInt,test=approxF)[2,'Pr(>F)']
         }else{
-          PIC <- modelFitStat(select,fitInc,"LeastSquare")
+          PIC <- modelFitStat(metric,fitInc,"LeastSquare")
         }
         subBestPoint[1,] <- c(0,mergeIncName,"",anova(fitInc,fitInt,test=approxF)[2,'Df'],length(attr(fitInt$terms,"term.labels")),fitInc$rank,PIC)
         bestPoint <- rbind(bestPoint,subBestPoint)
@@ -294,7 +295,7 @@ stepwise <- function(formula,
         fmX <- lapply(xCheckList,function(x){reformulate(setdiff(xModel,x),yName)})
       }
       fitX <- lapply(fmX,function(x){lm(x,data=weightData)})
-      if(select=="SL"){
+      if(metric=="SL"){
         PICset <- sapply(fitX,function(x){anova(x,lmAlt,test=approxF)[2,'Pr(>F)']})
         Fset <- sapply(fitX,function(x){anova(x,lmAlt,test=approxF)[2,'F']})
       }else{
@@ -302,10 +303,10 @@ stepwise <- function(formula,
           PICset <- Inf
           names(PICset) <- xCheck
         }else{
-          PICset <- sapply(fitX,function(x){modelFitStat(select,x,"LeastSquare")})
+          PICset <- sapply(fitX,function(x){modelFitStat(metric,x,"LeastSquare")})
         }
       }
-      if(select=="Rsq" | select=="adjRsq" | (select=="SL" & addIdx==FALSE)){
+      if(metric=="Rsq" | metric=="adjRsq" | (metric=="SL" & addIdx==FALSE)){
         PIC <- max(PICset)
         minmaxVar <- names(which.max(PICset))
         bestLm <- fitX[[minmaxVar]]
@@ -313,7 +314,7 @@ stepwise <- function(formula,
         PIC <- min(PICset)
         minmaxVar <- names(which.min(PICset))
         bestLm <- fitX[[minmaxVar]]
-        if(sum(PICset %in% PIC)>1 & select=="SL"){
+        if(sum(PICset %in% PIC)>1 & metric=="SL"){
           Fvalue <- max(Fset)
           minmaxVar <- names(which.max(Fset))
           bestLm <- fitX[[minmaxVar]]
@@ -323,13 +324,13 @@ stepwise <- function(formula,
       if(bestLm$rank==lmAlt$rank & addIdx==TRUE){
         break
       }else{
-        if(select=='SL'){
+        if(metric=='SL'){
           if(addIdx==FALSE){
             indicator <- PIC > sls
           }else{
             indicator <- PIC < sle
           }
-        }else if(select=='Rsq' | select=='adjRsq'){
+        }else if(metric=='Rsq' | metric=='adjRsq'){
           indicator <- PIC > as.numeric(bestPoint[nrow(bestPoint),7])
         }else{
           indicator <- PIC <= as.numeric(bestPoint[nrow(bestPoint),7])
@@ -354,7 +355,7 @@ stepwise <- function(formula,
               }
             }
           }
-          if(is.nan(pval)==TRUE & (select!='Rsq' | select!='adjRsq')){
+          if(is.nan(pval)==TRUE & (metric!='Rsq' | metric!='adjRsq')){
             break
           }
           if(addIdx==TRUE){
@@ -368,7 +369,7 @@ stepwise <- function(formula,
           }
           bestPoint <- rbind(bestPoint,subBestPoint)
           
-          if(selection == 'bidirection'){
+          if(strategy == 'bidirection'){
             if(addIdx==FALSE){
               next
             }else{
@@ -379,7 +380,7 @@ stepwise <- function(formula,
             next
           }
         }else{
-          if(selection == 'bidirection' & addIdx==FALSE) {
+          if(strategy == 'bidirection' & addIdx==FALSE) {
             addIdx <- TRUE
             next
           }else{

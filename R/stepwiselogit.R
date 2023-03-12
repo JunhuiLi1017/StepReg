@@ -1,26 +1,26 @@
 #' Stepwise Logistic Regression
 #' 
-#' Stepwise logistic regression analysis selects model based on information criteria and Wald or Score test with 'forward', 'backward', 'bidirection' and 'score' model selection method.
+#' Stepwise logistic regression analysis selects model based on information criteria and Wald or Score test with 'forward', 'backward', 'bidirection' and 'subset' model strategy method.
 #' 
-#' @param formula Model formulae. The models fitted by the glm functions are specified in a compact symbolic form. The basic structure of a formula is the tilde symbol (~) and at least one independent (righthand) variable. In most (but not all) situations, a single dependent (lefthand) variable is also needed. Thus we can construct a formula quite simple formula (y ~ x). Multiple independent variables by simply separating them with the plus (+) symbol (y ~ x1 + x2). Variables in the formula are removed with a minus(-) symbol (y ~ x1 - x2). One particularly useful feature is the . operator when modelling with lots of variables (y ~ .). The \%in\% operator indicates that the terms on its left are nested within those on the right. For example y ~ x1 + x2 \%in\% x1 expands to the formula y ~ x1 + x1:x2. A model with no intercept can be specified as y ~ x - 1 or y ~ x + 0 or y ~ 0 + x.
+#' @param formula (formula) The formula used for model fitting. The formula takes the form of a '~' (tilde) symbol, with the response variable(s) on the left-hand side, and the predictor variable(s) on the right-hand side. The 'lm()' function uses this formula to fit a regression model. A formula can be as simple as 'y ~ x'. For multiple predictors, they must be separated by the '+' (plus) symbol, e.g. 'y ~ x1 + x2'. To include an interaction term between variables, use the ':' (colon) symbol: 'y ~ x1 + x1:x2'. Use the '.' (dot) symbol to indicate that all other variables in the dataset should be included as predictors, e.g. 'y ~ .'. In the case of multiple response variables (multivariate), the formula can be specified as 'cbind(y1, y2) ~ x1 + x2'. By default, an intercept term is always included in the models, to exclude it, include '0' or '- 1' in your formula: 'y ~ 0 + x1', 'y ~ x1 + 0', and 'y ~ x1 - 1'.
 #' 
-#' @param data Data set including dependent and independent variables to be analyzed
+#' @param data (data.frame) A dataset consisting of predictor variable(s) and response variable(s).
 #' 
-#' @param include Force the effects vector listed in the data to be included in all models. The selection methods are performed on the other effects in the data set
+#' @param include (NULL|character) A character vector specifying predictor variables that will always stay in the model. A subset of the predictors in the dataset.
 #' 
-#' @param selection Model selection method including "forward", "backward", "bidirection" and 'score',forward selection starts with no effects in the model and adds effects, backward selection starts with all effects in the model and removes effects, while bidirection regression is similar to the forward method except that effects already in the model do not necessarily stay there, and score method requests best subset selection.
+#' @param strategy (character) The model selection strategy. Choose from 'forward', 'backward', 'bidirectional' and 'subset'. Default is 'forward'. More information, see [StepReg](https://github.com/JunhuiLi1017/StepReg#stepwise-regression)
 #' 
-#' @param select Specify the criterion that uses to determine the order in which effects enter and leave at each step of the specified selection method including AIC, AICc, SBC, IC(1), IC(3/2), HQ, HQc and Significant Levels(SL)
+#' @param metric (character) The model selection criterion (model fit score). Used for the evaluation of the predictive performance of an intermediate model. Choose from 'AIC', 'AICc', 'SL', 'SBC', 'IC(3/2)', 'IC(1)'. Default is 'AIC'.
 #' 
-#' @param sigMethod Specify the method of significant test for variable to be entered in the model. "Rao" and "LRT" cab be chosen for Rao's efficient score test and likelihood ratio test.
+#' @param sle (numeric) Significance Level to Enter. It is the statistical significance level that a predictor variable must meet to be included in the model. E.g. if 'sle = 0.05', a predictor with a P-value less than 0.05 will 'enter' the model. Default is 0.15.
 #' 
-#' @param sle Specify the significance level for entry, default is 0.15
+#' @param sls (numeric) Significance Level to Stay. Similar to 'sle', 'sls' is the statistical significance level that a predictor variable must meet to 'stay' in the model. E.g. if 'sls = 0.1', a predictor that was previously included in the model but whose P-value is now greater than 0.1 will be removed.
 #' 
-#' @param sls Specify the significance level for staying in the model, default is 0.15
+#' @param weights (numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weights reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weights should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is 1, which means that all weights are set to 1.
 #' 
-#' @param weights Numeric vector to provide a weights for each observation in the input data set. Note that weights should be ranged from 0 to 1, while negative numbers are forcibly converted to 0, and numbers greater than 1 are forcibly converted to 1. If you do not specify a weights vector, each observation has a default weights of 1.
-#'
-#' @param best Control the number of models displayed in the output, default is NULL which means all possible model will be displayed
+#' @param test_method_logit (character) Test method for univariate logit regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'.
+#' 
+#' @param best_n (numeric(integer)) The number of models to keep in the final output. Default is Inf, which means that all models will be displayed.
 #' 
 #' @references 
 #' 
@@ -54,36 +54,37 @@
 #' 
 #' Schwarz, G. (1978). Estimating the dimension of a model. Annals of Statistics, 6(2), pags. 15-18.
 #' 
-#' @author Junhui Li 
+#' @author Junhui Li, Kai Hu
 #' 
 #' @examples
+#' 
 #' data(mtcars)
 #' formula <- vs ~ .
 #' stepwiseLogit(formula,
 #'               data=mtcars,
-#'               selection="bidirection",
-#'               select="SL",
+#'               strategy="bidirection",
+#'               metric="SL",
 #'               sle=0.15,
 #'               sls=0.15,
-#'               sigMethod="Rao")
+#'               test_method_logit="Rao")
 #' 
-#' @keywords stepwise logistic regression
+#' @keywords stepwise logit regression
 #'
 #' @export
 
 stepwiseLogit <- function(formula,
                           data,
                           include=NULL,
-                          selection=c("forward","backward","bidirection","score"),
-                          select=c("SL","AIC","AICc","SBC","HQ","HQc","IC(3/2)","IC(1)"),
+                          strategy=c("forward","backward","bidirection","subset"),
+                          metric=c("SL","AIC","AICc","SBC","HQ","HQc","IC(3/2)","IC(1)"),
                           sle=0.15,
                           sls=0.15,
-                          sigMethod=c("Rao","LRT"),
+                          test_method_logit=c("Rao","LRT"),
                           weights=NULL,
-                          best=NULL){
-  selection <- match.arg(selection)
-  select <- match.arg(select)
-  sigMethod <- match.arg(sigMethod)
+                          best_n=NULL){
+  strategy <- match.arg(strategy)
+  metric <- match.arg(metric)
+  test_method_logit <- match.arg(test_method_logit)
   stopifnot(inherits(formula, "formula"))
   termForm <- terms(formula,data=data)
   vars <- as.character(attr(termForm, "variables"))[-1]
@@ -139,7 +140,7 @@ stepwiseLogit <- function(formula,
   n <- nrow(data)
   result <- list()
   ModInf <- matrix(NA,9,1)
-  ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,selection,select,sle,sle,sigMethod,mulcolMergeName,intercept),9,1))
+  ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,strategy,metric,sle,sle,test_method_logit,mulcolMergeName,intercept),9,1))
   ModInf <- data.frame(ModInf)
   colnames(ModInf) <- c("Paramters","Value")
   ModInf[,1] <- c("Response Variable",
@@ -151,12 +152,12 @@ stepwiseLogit <- function(formula,
                   "Variable significance test",
                   "Multicollinearity Terms",
                   "Intercept")
-  if(select=="SL"){
-    if(selection=="forward"){
+  if(metric=="SL"){
+    if(strategy=="forward"){
       ModInf <- ModInf[-6,]
-    }else if(selection=="backward"){
+    }else if(strategy=="backward"){
       ModInf <- ModInf[-5,]
-    }else if(selection=="score"){
+    }else if(strategy=="subset"){
       ModInf <- ModInf[-c(5:6),]
     }
   }else{
@@ -165,10 +166,10 @@ stepwiseLogit <- function(formula,
   rownames(ModInf) <- 1:nrow(ModInf)
   result$'Summary of Parameters' <- ModInf
   result$'Variables Type' <- classTable
-  if(selection=="score"){ #score
+  if(strategy=="subset"){ #subset
     bestSubSet <- NULL
     singSet <- matrix(NA,1,3)
-    colnames(singSet) <- c("NumberOfVariables",select,"VariablesInModel")
+    colnames(singSet) <- c("NumberOfVariables",metric,"VariablesInModel")
     finalResult <- singSet
     fmReduce <- reformulate(c(intercept), yName)
     fitReduce <- glm(fmReduce,data=data, weights=weights, family="binomial")
@@ -176,10 +177,10 @@ stepwiseLogit <- function(formula,
       fm <- reformulate(c(intercept,includeName), yName)
       #fit <- multinom(fm, data = YXdata, weights = weights)
       fit <- glm(fm,data=data, weights=weights, family="binomial")
-      if(select=="SL"){
+      if(metric=="SL"){
         PIC <- anova(fitReduce,fit,test="Rao")[2,"Rao"]
       }else{
-        PIC <- modelFitStat(select,fit,"Likelihood")
+        PIC <- modelFitStat(metric,fit,"Likelihood")
       }
       singSet[1,1:3] <- c(fit$rank,PIC,paste0(c(intercept,includeName),collapse=" "))
       includeSubSet <- singSet
@@ -195,28 +196,28 @@ stepwiseLogit <- function(formula,
         comVar <- c(intercept,includeName,comTable[,ncom])
         fm <- reformulate(comVar, yName)
         fit <- glm(fm,data = data,weights=weights,family="binomial")
-        if(select=="SL"){
+        if(metric=="SL"){
           PIC <- anova(fitReduce,fit, test="Rao")[2,"Rao"] 
         }else{
-          PIC <- modelFitStat(select,fit,"Likelihood")
+          PIC <- modelFitStat(metric,fit,"Likelihood")
         }
         singSet[1,1:3] <- c(fit$rank,PIC,paste0(comVar,collapse=" "))
         subSet <- rbind(subSet,singSet)
       }
 	    bestSubSet <- as.data.frame(subSet)
       bestSubSet[,2] <- as.numeric(bestSubSet[,2])
-      if(select=="SL"){
+      if(metric=="SL"){
         subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = TRUE),]
       }else{
         subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = FALSE),]
       }
-	    if(is.null(best)){
+	    if(is.null(best_n)){
 	      nbest <- nrow(subResultSort)
 	    }else{
-	      if(nrow(subResultSort)<best){
+	      if(nrow(subResultSort)<best_n){
 	        nbest <- nrow(subResultSort)
 	      }else{
-	        nbest <- best
+	        nbest <- best_n
 	      }
 	    }
       finalResult <- rbind(finalResult,subResultSort[1:nbest,])
@@ -226,7 +227,7 @@ stepwiseLogit <- function(formula,
     rownames(RegPIC) <- c(1:nrow(RegPIC))
     result$'Process of Selection' <- RegPIC
     RegPIC[,2] %in% min(RegPIC[,2])
-    if(select=="SL"){
+    if(metric=="SL"){
       xModel <- unlist(strsplit(RegPIC[which.max(as.numeric(RegPIC[,2])),3]," "))
     }else{
       xModel <- unlist(strsplit(RegPIC[which.min(as.numeric(RegPIC[,2])),3]," "))
@@ -237,19 +238,19 @@ stepwiseLogit <- function(formula,
                                RemovedEffect=character(),
                                DF=numeric(),
                                NumberIn=numeric(),
-                               select=numeric())
-    colnames(subBestPoint)[6] <- select
+                               metric=numeric())
+    colnames(subBestPoint)[6] <- metric
     bestPoint <- subBestPoint
-    if(selection=="backward"){
+    if(strategy=="backward"){
       addVar <- FALSE
       xModel <- c(intercept,includeName,setdiff(xName,includeName))
       xResidual <- NULL
       fmFull <- reformulate(xModel, yName)
       fitFull <- glm(fmFull,data=data,weights=weights,family="binomial")
-      if(select=="SL"){
+      if(metric=="SL"){
         PIC <- 1
       }else{
-        PIC <- modelFitStat(select,fitFull,"Likelihood")
+        PIC <- modelFitStat(metric,fitFull,"Likelihood")
       }
       bestPoint[1,-1] <- c("","",fitFull$rank,fitFull$rank,PIC)
     }else{
@@ -258,23 +259,23 @@ stepwiseLogit <- function(formula,
       xResidual <- setdiff(xName,includeName)
       fmInt <- reformulate(intercept, yName)
       fitInt <- glm(fmInt,data=data,weights=weights,family="binomial")
-      if(select=="SL"){
+      if(metric=="SL"){
         PIC <- 1
       }else{
         if(intercept=="0"){
           PIC <- Inf
         }else{
-          PIC <- modelFitStat(select,fitInt,"Likelihood")
+          PIC <- modelFitStat(metric,fitInt,"Likelihood")
         }
       }
       bestPoint[1,-1] <- c(intercept,"",fitInt$rank,fitInt$rank,PIC)
       if(!is.null(includeName)){
         fmInc <- reformulate(xModel, yName)
         fitInc <- glm(fmInc,data=data,weights=weights,family="binomial")
-        if(select=="SL"){
-          PIC <- anova(fitInt,fitInc,test=sigMethod)[2,'Pr(>Chi)']
+        if(metric=="SL"){
+          PIC <- anova(fitInt,fitInc,test=test_method_logit)[2,'Pr(>Chi)']
         }else{
-          PIC <- modelFitStat(select,fitInc,"Likelihood")
+          PIC <- modelFitStat(metric,fitInc,"Likelihood")
         }
         subBestPoint[1,-1] <- c(paste0(includeName,collapse=" "),"",anova(fitInt,fitInc)[2,'Df'],fitInc$rank,PIC)
         bestPoint <- rbind(bestPoint,subBestPoint)
@@ -296,12 +297,12 @@ stepwiseLogit <- function(formula,
         if(length(mulColVar)>0){
           fit1 <- fit1[!names(fit1) %in% mulColVar]
         }
-        if(select=="SL"){
+        if(metric=="SL"){
           threshold <- sle
-          PICset <- sapply(fit1,function(x){anova(fit0,x,test=sigMethod)[2,'Pr(>Chi)']})
+          PICset <- sapply(fit1,function(x){anova(fit0,x,test=test_method_logit)[2,'Pr(>Chi)']})
         }else{
           threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
-          PICset <- sapply(fit1,function(x){modelFitStat(select,x,"Likelihood")})
+          PICset <- sapply(fit1,function(x){modelFitStat(metric,x,"Likelihood")})
         }
         mPIC <- min(PICset)
         minmaxVar <- names(which.min(PICset))
@@ -326,9 +327,9 @@ stepwiseLogit <- function(formula,
         names(xChcekList) <- xChcek
         fm0 <- lapply(xChcekList,function(x){reformulate(setdiff(xModel,x),yName)})
         fit0 <- lapply(fm0,function(x){glm(x,data=data,weights=weights,family="binomial")})
-        if(select=="SL"){
+        if(metric=="SL"){
           threshold <- sls
-          PIC <- sapply(fit0,function(x){anova(x,fit1,test=sigMethod)[2,'Pr(>Chi)']})
+          PIC <- sapply(fit0,function(x){anova(x,fit1,test=test_method_logit)[2,'Pr(>Chi)']})
           mPIC <- max(PIC)
           minmaxVar <- names(which.max(PIC))
           if(mPIC > threshold){
@@ -338,7 +339,7 @@ stepwiseLogit <- function(formula,
           }
         }else{
           threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
-          PIC <- sapply(fit0,function(x){modelFitStat(select,x,"Likelihood")})
+          PIC <- sapply(fit0,function(x){modelFitStat(metric,x,"Likelihood")})
           mPIC <- min(PIC)
           minmaxVar <- names(which.min(PIC))
           if(mPIC < threshold){
@@ -357,7 +358,7 @@ stepwiseLogit <- function(formula,
       }
       ## change direction or stop for this while loop
       if(indicator==TRUE){
-        if(selection=="bidirection"){
+        if(strategy=="bidirection"){
           if(addVar==TRUE){
             addVar <- FALSE
           }else{
@@ -368,17 +369,17 @@ stepwiseLogit <- function(formula,
           next
         }
       }else{
-        if(selection=="bidirection" && addVar==TRUE){
+        if(strategy=="bidirection" && addVar==TRUE){
           break
-        }else if(selection=="bidirection" && addVar==FALSE){
+        }else if(strategy=="bidirection" && addVar==FALSE){
           addVar <- TRUE
           next
-        }else if(selection != "bidirecion"){
+        }else if(strategy != "bidirecion"){
           break
         }
       }
     }#while
-    if(selection!="backward"){
+    if(strategy!="backward"){
       if(is.null(includeName)){
         nInc <- 0
       }else{
