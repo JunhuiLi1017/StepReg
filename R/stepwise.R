@@ -18,7 +18,7 @@
 #' 
 #' @param sls (numeric) Significance Level to Stay. Similar to 'sle', 'sls' is the statistical significance level that a predictor variable must meet to 'stay' in the model. E.g. if 'sls = 0.1', a predictor that was previously included in the model but whose P-value is now greater than 0.1 will be removed.
 #' 
-#' @param weights (numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weights reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weights should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is 1, which means that all weights are set to 1.
+#' @param weights (numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weights reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weights should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is NULL, which means that all weights are set equal.
 #' 
 #' @param test_method_linear (character) Test method for multivariate linear regression analysis, choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'. Default is 'Pillai'. For univariate regression, 'F-test' will be used. 
 #' 
@@ -59,6 +59,7 @@
 #'          metric="AIC")
 #'          
 #' @keywords stepwise regression
+#' @import survival
 #' @importFrom utils combn
 #' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms
 #' 
@@ -75,16 +76,35 @@ stepwise <- function(type = c("linear", "logit", "cox"),
                      test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
                      test_method_logit = c("Rao", "LRT"),
                      test_method_cox = c("efron", "breslow", "exact"),
-                     weights = 1,
+                     weights = NULL,
                      best_n = Inf){
 	## validate input:
+	## check required parameters
+	type <- match.arg(type)
+	strategy <- match.arg(strategy)
+	metric <- match.arg(metric)
+	test_method_linear <- match.arg(test_method_linear)
+	test_method_logit <- match.arg(test_method_logit)
+	test_method_cox <- match.arg(test_method_cox)
+	## convert the following into a helper function:
+	# x_name <- NULL
+	# y_name <- NULL
+	# intercept <- NULL
+	# response_variable_n <- NULL
+	# predictor_variable_n <- NULL 
+	# include_name <- NULL
+	# merge_inc_name <- NULL
+	
 	validateInputStepwise(type = type, formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, weights = weights, best_n = best_n)
+	
+	## invoke corresponding function:
+	shared_params <- list(formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, weights = weights, best_n = best_n)
 	if(type == "linear"){
-	  result <- stepwiseLinear(formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, weights = weights, best_n = best_n)
+		result <- do.call(stepwiseLinear, append(shared_params, list(test_method_linear = test_method_linear)))
 	}else if(type == "logit"){
-	  result <- stepwiseLogit(formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_logit = test_method_logit, weights = weights, best_n = best_n)
+		result <- do.call(stepwiseLogit, append(shared_params, list(test_method_logit = test_method_logit)))
 	}else if(type == "cox"){
-	  result <- stepwiseCox(formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_cox = test_method_cox, weights = weights, best_n = best_n)
+	  result <- do.call(stepwiseCox, append(shared_params, list(test_method_cox = test_method_cox)))
 	}
 }
 

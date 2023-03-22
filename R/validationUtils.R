@@ -19,13 +19,6 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
                                   weights = NULL,
                                   best_n = Inf) {
 	## check required parameters
-	type <- match.arg(type)
-	strategy <- match.arg(strategy)
-	metric <- match.arg(metric)
-	test_method_linear <- match.arg(test_method_linear)
-    test_method_logit <- match.arg(test_method_logit)
-    test_method_cox <- match.arg(test_method_cox)
-    
 	if(missing(data)){ 
 		stop("'data' parameter is missing.") 
 	}else{
@@ -40,30 +33,35 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
 		if(!inherits(formula, "formula")){
 			stop("'formula' must be a formula class.")
 		}
-		term_form <- terms(formula,data=data)
-		vars <- as.character(attr(term_form, "variables"))[-1]
-		y_name <- vars[attr(term_form, "response")]
-		x_name <- attr(term_form,"term.labels")
-		if(attr(term_form, "intercept") == 0){
-			intercept <- "0"
-		}else{
-			intercept <- "1"
-		}
+		# term_form <- terms(formula,data=data)
+		# vars <- as.character(attr(term_form, "variables"))[-1]
+		# y_name <<- vars[attr(term_form, "response")]
+		# x_name <<- attr(term_form,"term.labels")
+		# if(attr(term_form, "intercept") == 0){
+		# 	intercept <<- "0"
+		# }else{
+		# 	intercept <<- "1"
+		# }
 	}
-	response_variable_n <- length(all.vars(formula[[2]]))
-	predictor_variable_n <- length(all.vars(formula[[3]]))
+	# response_variable_n <<- length(all.vars(formula[[2]]))
+	# predictor_variable_n <<- length(all.vars(formula[[3]]))
 	 # Ref: https://stackoverflow.com/questions/13217322/how-to-reliably-get-dependent-variable-name-from-formula-object
 	
-	if(is.null(include)){
-		include_name <- NULL
-		merge_inc_name <- "NULL"
-	}else{
+	# if(is.null(include)){
+	# 	# include_name <<- NULL
+	# 	# merge_inc_name <<- "NULL"
+	# }else{
+	if(!is.null(include)){
+		term_form <- terms(formula,data=data)
+		vars <- as.character(attr(term_form, "variables"))[-1]
+		x_name <<- attr(term_form,"term.labels")
 		if(!all(include %in% x_name)){
 			stop(paste0("'include' must be a subset of: c('",paste0(x_name,collapse = "','"),"')"))
-		}else{
-			include_name <- include
-			merge_inc_name <- paste0(include_name,collapse=" ")
 		}
+		# else{
+		# 	include_name <<- include
+		# 	merge_inc_name <<- paste0(include_name,collapse=" ")
+		# }
 	}
 	
 	if(is.numeric(sle) & is.numeric(sls)){
@@ -86,7 +84,9 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
 		if(!metric %in% linear_metric){
 			stop("for type 'linear': 'metric' must be from one of the c('", paste0(linear_metric, collapse = "','"),"').")
 		}
-
+		if(strategy=="subset" & metric=="SL"){
+			stop("metric = 'SL' is not allowed when strategy = 'subset'")
+		}
 	}else if(type == "logit"){
 		if(!metric %in% logit_metric){
 			stop("for type 'logit': 'metric' must be from one of the c('", paste0(logit_metric, collapse = "','"),"').")
@@ -105,8 +105,6 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
 		}else if(length(weights) != predictor_variable_n){
 			stop("the length of the 'weights' vector must equal the number of predictor variables specified in the 'formula'.")
 		}
-	}else{
-		weights <- rep(1,nrow(data))
 	}
 	
 	## check 'best_n'
