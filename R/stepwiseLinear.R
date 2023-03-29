@@ -84,7 +84,7 @@ stepwiseLinear <- function(
   }
   result <- list()
   ModInf <- matrix(NA,9,1)
-  ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,strategy,metric,sle,sle,approxF,mulcolMergeName,intercept),9,1))
+  ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,strategy,metric,sle,sls,approxF,mulcolMergeName,intercept),9,1))
   ModInf <- data.frame(ModInf)
   colnames(ModInf) <- c("Paramters","Value")
   ModInf[,1] <- c("Response Variable",

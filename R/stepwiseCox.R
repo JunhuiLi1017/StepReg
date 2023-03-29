@@ -63,7 +63,7 @@ stepwiseCox <- function(formula,
   n <- nrow(data)
   result <- list()
   ModInf <- matrix(NA,8,1)
-  ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,strategy,metric,sle,sle,test_method_cox,mulcolMergeName),8,1))
+  ModInf <- cbind(ModInf,matrix(c(yName,mergeIncName,strategy,metric,sle,sls,test_method_cox,mulcolMergeName),8,1))
   ModInf <- data.frame(ModInf)
   colnames(ModInf) <- c("Paramters","Value")
   ModInf[,1] <- c("Response Variable",

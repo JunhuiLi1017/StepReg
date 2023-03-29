@@ -18,6 +18,8 @@
 #' 
 #' @param sls (numeric) Significance Level to Stay. Similar to 'sle', 'sls' is the statistical significance level that a predictor variable must meet to 'stay' in the model. E.g. if 'sls = 0.1', a predictor that was previously included in the model but whose P-value is now greater than 0.1 will be removed.
 #' 
+#' @param tolerance (numeric)  A statistical measure used to assess multicollinearity in a multiple regression model. It is calculated as the proportion of the variance in a predictor variable that is not accounted for by the other predictor variables in the model. Default is 1e-07.
+#' 
 #' @param weights (numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weights reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weights should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is NULL, which means that all weights are set equal.
 #' 
 #' @param test_method_linear (character) Test method for multivariate linear regression analysis, choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'. Default is 'Pillai'. For univariate regression, 'F-test' will be used. 
@@ -76,6 +78,7 @@ stepwise <- function(type = c("linear", "logit", "cox"),
                      test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
                      test_method_logit = c("Rao", "LRT"),
                      test_method_cox = c("efron", "breslow", "exact"),
+                     tolerance=1e-7,
                      weights = NULL,
                      best_n = Inf){
 	## validate input:
