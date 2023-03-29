@@ -80,6 +80,7 @@ stepwise <- function(type = c("linear", "logit", "cox"),
                      best_n = Inf){
 	## validate input:
 	## check required parameters
+	## place match.arg() in the main function because validationUtils.R can't return type even with <<-, and type represents all values in c().
 	type <- match.arg(type)
 	strategy <- match.arg(strategy)
 	metric <- match.arg(metric)
@@ -94,17 +95,16 @@ stepwise <- function(type = c("linear", "logit", "cox"),
 	# predictor_variable_n <- NULL 
 	# include_name <- NULL
 	# merge_inc_name <- NULL
-	
 	validateInputStepwise(type = type, formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, weights = weights, best_n = best_n)
 	
 	## invoke corresponding function:
 	shared_params <- list(formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, weights = weights, best_n = best_n)
 	if(type == "linear"){
-		result <- do.call(stepwiseLinear, append(shared_params, list(test_method_linear = test_method_linear)))
+		do.call(stepwiseLinear, append(shared_params, list(test_method_linear = test_method_linear)))
 	}else if(type == "logit"){
-		result <- do.call(stepwiseLogit, append(shared_params, list(test_method_logit = test_method_logit)))
+		do.call(stepwiseLogit, append(shared_params, list(test_method_logit = test_method_logit)))
 	}else if(type == "cox"){
-	  result <- do.call(stepwiseCox, append(shared_params, list(test_method_cox = test_method_cox)))
+	  do.call(stepwiseCox, append(shared_params, list(test_method_cox = test_method_cox)))
 	}
 }
 

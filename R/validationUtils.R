@@ -44,7 +44,7 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
 		# }
 	}
 	# response_variable_n <<- length(all.vars(formula[[2]]))
-	# predictor_variable_n <<- length(all.vars(formula[[3]]))
+	
 	 # Ref: https://stackoverflow.com/questions/13217322/how-to-reliably-get-dependent-variable-name-from-formula-object
 	
 	# if(is.null(include)){
@@ -52,9 +52,8 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
 	# 	# merge_inc_name <<- "NULL"
 	# }else{
 	if(!is.null(include)){
-		term_form <- terms(formula,data=data)
-		vars <- as.character(attr(term_form, "variables"))[-1]
-		x_name <<- attr(term_form,"term.labels")
+		term_form <- terms(formula, data = data)
+		x_name <- attr(term_form, "term.labels")
 		if(!all(include %in% x_name)){
 			stop(paste0("'include' must be a subset of: c('",paste0(x_name,collapse = "','"),"')"))
 		}
@@ -99,6 +98,7 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
 	}
 	
 	## check 'weights'
+	predictor_variable_n <- length(all.vars(formula[[3]]))
 	if(!is.null(weights)){
 		if(!is.numeric(weights)){
 			stop("the 'weights' must be a numeric vector.")

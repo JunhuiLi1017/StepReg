@@ -13,38 +13,27 @@ stepwiseLinear <- function(
                      test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
                      weights = NULL,
                      best_n = Inf){
-  strategy <- match.arg(strategy)
-  metric <- match.arg(metric)
-  test_method_linear <- match.arg(test_method_linear)
   ## extract response, independent variable and intercept
-  stopifnot(inherits(formula, "formula"))
-  termForm <- terms(formula,data=data)
-  #yName <- rownames(attr(termForm,"factors"))[1]
-  #yName <- all.vars(formula)[1]
+  termForm <- terms(formula, data = data)
   vars <- as.character(attr(termForm, "variables"))[-1]
   yName <- vars[attr(termForm, "response")]
   xName <- attr(termForm,"term.labels")
-  if(attr(termForm, "intercept")==0){
+  
+  if(attr(termForm, "intercept") == 0){
     intercept <- "0"
   }else{
     intercept <- "1"
   }
   if(is.character(include)){
-    if(!all(include %in% xName)){
-      stop("variable in include is not included formula or dataset")
-    }else{
-      includeName <- include
-      mergeIncName <- paste0(includeName,collapse=" ")
-    }
+    includeName <- include
+    mergeIncName <- paste0(includeName,collapse=" ")
   }else if(is.null(include)){
     includeName <- NULL
     mergeIncName <- "NULL"
-  }else{
-    stop("include should be character vector indicating variable to be included in all models")
   }
   if(!is.null(weights)){
     if(length(weights)==nrow(data)){
-      weightData <- data*sqrt(weights)
+    	weightData <- data*sqrt(weights)
     }else{
       stop("Variable length is different ('(weights)')")
     }
@@ -120,6 +109,8 @@ stepwiseLinear <- function(
   }
   rownames(ModInf) <- 1:nrow(ModInf)
   result$'Summary of Parameters' <- ModInf
+  message("test here")
+  print(result$'Summary of Parameters')
   result$'Variables Type' <- classTable
   if(strategy=="subset"){
     ## best subset model selection
