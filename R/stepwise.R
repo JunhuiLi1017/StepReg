@@ -30,6 +30,8 @@
 #' 
 #' @param best_n (numeric(integer)) The number of models to keep in the final output. Default is Inf, which means that all models will be displayed.
 #' 
+#' @param excel_name (NULL|character) The output excel name. If NULL, do not output excel file. Default is NULL.
+#' 
 #' @references
 #' 
 #' Alsubaihi, A. A., Leeuw, J. D., and Zeileis, A. (2002). Variable strategy in multivariable regression using sas/iml. , 07(i12).
@@ -78,9 +80,10 @@ stepwise <- function(type = c("linear", "logit", "cox"),
                      test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
                      test_method_logit = c("Rao", "LRT"),
                      test_method_cox = c("efron", "breslow", "exact"),
-                     tolerance=1e-7,
+                     tolerance = 1e-7,
                      weights = NULL,
-                     best_n = Inf){
+                     best_n = Inf,
+										 output_excel = NULL){
 	## validate input:
 	## check required parameters
 	## place match.arg() in the main function because validationUtils.R can't return type even with <<-, and type represents all values in c().
@@ -98,16 +101,24 @@ stepwise <- function(type = c("linear", "logit", "cox"),
 	# predictor_variable_n <- NULL 
 	# include_name <- NULL
 	# merge_inc_name <- NULL
-	validateInputStepwise(type = type, formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, weights = weights, best_n = best_n)
+	validateInputStepwise(type = type, formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, weights = weights, tolerance = tolerance, best_n = best_n, excel_name = excel_name)
 	
 	## invoke corresponding function:
 	shared_params <- list(formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, weights = weights, best_n = best_n)
 	if(type == "linear"){
-		do.call(stepwiseLinear, append(shared_params, list(test_method_linear = test_method_linear)))
+		res <- do.call(stepwiseLinear, append(shared_params, list(test_method_linear = test_method_linear)))
 	}else if(type == "logit"){
-		do.call(stepwiseLogit, append(shared_params, list(test_method_logit = test_method_logit)))
+		res <- do.call(stepwiseLogit, append(shared_params, list(test_method_logit = test_method_logit)))
 	}else if(type == "cox"){
-	  do.call(stepwiseCox, append(shared_params, list(test_method_cox = test_method_cox)))
+	  res <- do.call(stepwiseCox, append(shared_params, list(test_method_cox = test_method_cox)))
+	}
+	
+	# output tables:
+	## table1:
+	res
+	if(!is.null(excel_name)){
+		# also extract and generate excel output
+		test <- 1
 	}
 }
 

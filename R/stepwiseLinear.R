@@ -41,10 +41,10 @@ stepwiseLinear <- function(
     weightData <- data
   }
 
-  lmFull <- lm(formula,data=weightData)
+  lmFull <- lm(formula, data = weightData)
   allVarClass <- attr(lmFull$terms,"dataClasses")
   classTable <- as.data.frame(table(allVarClass))
-  colnames(classTable) <- c("class","variable")
+  colnames(classTable) <- c("class", "variable")
   for(i in names(table(allVarClass))){
     classTable[names(table(allVarClass)) %in% i,2] <- paste0(names(allVarClass[allVarClass %in% i]),collapse=" ")
   }

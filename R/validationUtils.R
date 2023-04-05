@@ -16,8 +16,10 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
                                   test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
                                   test_method_logit = c("Rao", "LRT"),
                                   test_method_cox = c("efron", "breslow", "exact"),
-                                  weights = NULL,
-                                  best_n = Inf) {
+																	tolerance = 10e-7,
+																	weights = NULL,
+                                  best_n = Inf,
+																	excel_name = NULL) {
 	## check required parameters
 	if(missing(data)){ 
 		stop("'data' parameter is missing.") 
@@ -97,6 +99,13 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
 		}
 	}
 	
+	## check 'tolerance'
+	if(!is.numeric(tolerance)){
+		stop("the 'tolerance' must be a numeric value.")
+	}else if (tolerance > 1 | tolerance < 0){
+		stop("the 'tolenrance' must be in range 0~1.")
+	}
+	
 	## check 'weights'
 	predictor_variable_n <- length(all.vars(formula[[3]]))
 	if(!is.null(weights)){
@@ -111,6 +120,13 @@ validateInputStepwise <- function(type = c("linear", "logit", "cox"),
 	if(!is.infinite(best_n)){
 		if(!is.integer(best_n)){
 			stop("the 'best_n' must be an integer.")
+		}
+	}
+	
+	## check 'excel_name'
+	if(!is.null(excel_name)){
+		if(!is.character(excel_name)){
+			stop("the 'excel_name' must be a character string.")
 		}
 	}
 }
