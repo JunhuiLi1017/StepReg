@@ -113,51 +113,54 @@ stepwiseLinear <- function(
   print(result$'Summary of Parameters')
   result$'Variables Type' <- classTable
   if(strategy=="subset"){
-    ## best subset model selection
-    tempresult <- matrix(NA,1,4)
-    colnames(tempresult) <- c("NoVariable","RankModel",metric,"VariablesEnteredinModel")
-    finalResult <- tempresult
-    if(!is.null(includeName)){
-      lmIncForm <- reformulate(c(intercept,includeName), yName)
-      lmInc <- lm(lmIncForm,data=weightData)
-      tempresult[1,c(1:4)] <- c(length(attr(lmInc$terms,"term.labels")),lmInc$rank,modelFitStat(metric,lmInc,"LeastSquare"),paste(c(intercept,includeName),collapse=" "))
-      finalResult <- rbind(finalResult,tempresult)
-      checkX <- xName[!xName %in% includeName]
-    }else{
-      checkX <- xName
-    }
-    for(nv in 1:length(checkX)){
-      comTable <- combn(length(checkX),nv)
-      subSet <- NULL
-      for(ncom in 1:ncol(comTable)){
-        comVar <- c(intercept,includeName,checkX[comTable[,ncom]])
-        tempFormula <- reformulate(comVar, yName)
-        lmresult <- lm(tempFormula,data=weightData)
-        tempresult[1,1:4] <- c(length(attr(lmresult$terms,"term.labels")),lmresult$rank,modelFitStat(metric,lmresult,"LeastSquare"),paste(comVar,collapse=" "))
-        subSet <- rbind(subSet,tempresult)
-      }
-      
-      if(nrow(subSet) < best_n){
-      	best_n <- nrow(subSet)
-      }
-      
-      bestSubSet <- as.data.frame(subSet)
-      bestSubSet[,2] <- as.numeric(bestSubSet[,2])
-      if(metric=="Rsq" | metric=="adjRsq"){
-        subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = TRUE),]
-      }else{
-        subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = FALSE),]
-      }
-      finalResult <- rbind(finalResult,subResultSort[1:best_n,])
-    }
-    finalResult <- finalResult[-1,]
-    rownames(finalResult) <- 1:nrow(finalResult)
-    result$'Process of Selection' <- finalResult
-    if(metric=="Rsq" | metric=="adjRsq"){
-      xModel <- unlist(strsplit(finalResult[which.max(as.numeric(finalResult[,3])),4]," "))
-    }else{
-      xModel <- unlist(strsplit(finalResult[which.min(as.numeric(finalResult[,3])),4]," "))
-    }
+  	tem_res <- getXNameSelectedWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, result, test_method_cox = NULL, best_n = 1)
+  	result <- tem_res[[1]]
+  	x_name_selected <- tem_res[[2]]
+  	
+    # tempresult <- matrix(NA,1,4)
+    # colnames(tempresult) <- c("NoVariable","RankModel",metric,"VariablesEnteredinModel")
+    # finalResult <- tempresult
+    # if(!is.null(includeName)){
+    #   lmIncForm <- reformulate(c(intercept,includeName), yName)
+    #   lmInc <- lm(lmIncForm,data=weightData)
+    #   tempresult[1,c(1:4)] <- c(length(attr(lmInc$terms,"term.labels")),lmInc$rank,modelFitStat(metric,lmInc,"LeastSquare"),paste(c(intercept,includeName),collapse=" "))
+    #   finalResult <- rbind(finalResult,tempresult)
+    #   checkX <- xName[!xName %in% includeName]
+    # }else{
+    #   checkX <- xName
+    # }
+    # for(nv in 1:length(checkX)){
+    #   comTable <- combn(length(checkX),nv)
+    #   subSet <- NULL
+    #   for(ncom in 1:ncol(comTable)){
+    #     comVar <- c(intercept,includeName,checkX[comTable[,ncom]])
+    #     tempFormula <- reformulate(comVar, yName)
+    #     lmresult <- lm(tempFormula,data=weightData)
+    #     tempresult[1,1:4] <- c(length(attr(lmresult$terms,"term.labels")),lmresult$rank,modelFitStat(metric,lmresult,"LeastSquare"),paste(comVar,collapse=" "))
+    #     subSet <- rbind(subSet,tempresult)
+    #   }
+    #   
+    #   if(nrow(subSet) < best_n){
+    #   	best_n <- nrow(subSet)
+    #   }
+    #   
+    #   bestSubSet <- as.data.frame(subSet)
+    #   bestSubSet[,2] <- as.numeric(bestSubSet[,2])
+    #   if(metric=="Rsq" | metric=="adjRsq"){
+    #     subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = TRUE),]
+    #   }else{
+    #     subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = FALSE),]
+    #   }
+    #   finalResult <- rbind(finalResult,subResultSort[1:best_n,])
+    # }
+    # finalResult <- finalResult[-1,]
+    # rownames(finalResult) <- 1:nrow(finalResult)
+    # result$'Process of Selection' <- finalResult
+    # if(metric=="Rsq" | metric=="adjRsq"){
+    #   xModel <- unlist(strsplit(finalResult[which.max(as.numeric(finalResult[,3])),4]," "))
+    # }else{
+    #   xModel <- unlist(strsplit(finalResult[which.min(as.numeric(finalResult[,3])),4]," "))
+    # }
   }else{
     subBestPoint <- data.frame(Step=numeric(),
                                EnteredEffect=character(),

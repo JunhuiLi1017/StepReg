@@ -14,47 +14,96 @@ x_name <- getXname(formula, input_data)
 y_name <- getYname(formula, input_data)
 intercept <- getIntercept(formula, input_data, type) 
 
-getFitModel <- function(data, x_name_subset, y_name, weights, family = "binomial"){
+getFitModel <- function(data, type, x_name_subset, y_name, weights, test_method_cox = NULL){
+	# obtain a fit (usually reduced) model using custom input variables (x_names)
 	fm <- reformulate(x_name_subset, y_name)
-	fit <- glm(fm, data = data, weights = weights, family = family)
+	
+	if (type == "linear"){
+		weight_data <- data * sqrt(weights)
+		fit <- lm(fm, data = weight_data)
+	} else if (type == "logit"){
+		fit <- glm(fm, data = data, weights = weights, family = "binomial")
+	} else if (type == "cox"){
+		fit <- survival::coxph(fm, data = data, weights = weights, method = test_method_cox)
+	}
 	fit
 }
 
-getIncludeSubset <- function(data, single_set, metric, fit_reduced, x_name_subset, y_name, weights){
+getInitialSet <- function(data, type, metric, y_name, intercept, include, weights, test_method_cox = NULL){
+	# obtain the initial model information: if no include variable, return NULL, otherwise return a matrix containing columns of "NumberOfVariables", metric, and "VariablesInModel"
 	if (length(include) != 0){
-		fit <- getFitModel(data, x_name_subset, y_name, weights, include = include, family = "binomial")
-		if (metric == "SL"){
-			PIC <- anova(fit_reduced, fit, test = "Rao")[2,"Rao"]
-		} else{
-			PIC <- modelFitStat(metric, fit, "Likelihood")
+		single_set <- matrix(NA, 1, 3)
+		colnames(single_set) <- c("NumberOfVariables", metric, "VariablesInModel")
+		if (type == "linear"){
+			fit <- getFitModel(data, type, c(intercept, include), y_name, weights)
+			PIC <- modelFitStat(metric, fit, "LeastSquare")
+			single_set <- c(length(attr(fit$terms,"term.labels")), PIC, paste(c(intercept, include), collapse = " "))
+		} else if (type == "logit"){
+			fit <- getFitModel(data, type, c(intercept, include), y_name, weights)
+			if (metric == "SL"){
+				fit_reduced <- getFitModel(data, type, c(intercept), y_name, weights)
+				PIC <- anova(fit_reduced, fit, test = "Rao")[2, "Rao"]
+			} else{
+				PIC <- modelFitStat(metric, fit, "Likelihood")
+			}
+			single_set[1, 1:3] <- c(fit$rank, PIC, paste0(c(intercept, include), collapse = " "))
+		} else if (type == "cox"){
+			fit <- getFitModel(data, type, c(include), y_name, weights, method = test_method_cox)
+			if (metric == "SL"){
+				PIC <- fit$score
+			} else{
+				PIC <- modelFitStat(metric, fit, "Likelihood", TRUE)
+			}
+			single_set[1, 1:3] <- c(length(attr(fit$terms, "term.labels")), PIC, paste0(c(include), collapse = " "))
 		}
-		single_set[1, 1:3] <- c(fit$rank, PIC, paste0(c(intercept, include), collapse = " "))
 		return(single_set)
-		# xCheck <- setdiff(xName,includeName)
 	} else{
 		return(NULL)
 	}
 }
 
-getFinalSet <- function(data, x_check, single_set, y_name, include, weights, intercept, best_n = 1){
-	final_result <- single_set
+getFinalSet <- function(data, type, metric, x_check, initial_set, y_name, include, weights, intercept, best_n = 1, test_method_cox = NULL){
+	final_result <- initial_set
+	single_set <- matrix(NA, 1, 3)
+	colnames(single_set) <- c("NumberOfVariables", metric, "VariablesInModel")
+	subset <- NULL
+	comTable <- combn(x_check, nv)
+	
 	for (nv in 1:length(x_check)){
-		subset <- NULL
-		comTable <- combn(x_check, nv)
 		for (ncom in 1:ncol(comTable)){
-			comVar <- c(intercept, include, comTable[, ncom])
-			fit <- getFitModel(data, comVar, y_name, weights)
-			if (metric == "SL"){
-				PIC <- anova(fit_reduced, fit, test = "Rao")[2, "Rao"] 
-			} else{
-				PIC <- modelFitStat(metric, fit, "Likelihood")
+			if (type == "linear"){
+				comVar <- c(intercept, include, comTable[, ncom])
+				fit <- getFitModel(data, type, comVar, y_name, weights)
+				PIC <- modelFitStat(metric, fit, "LeastSquare")
+				single_set[1, 1:3] <- c(length(attr(fit$terms,"term.labels")), PIC, paste(comVar, collapse = " "))
+				subset <- rbind(subset, single_set)
+			} else if (type == "logit"){
+				comVar <- c(intercept, include, comTable[, ncom])
+				fit <- getFitModel(data, type, comVar, y_name, weights)
+				if (metric == "SL"){
+					PIC <- anova(fit_reduced, fit, test = "Rao")[2, "Rao"] 
+				} else{
+					PIC <- modelFitStat(metric, fit, "Likelihood")
+				}
+				single_set[1, 1:3] <- c(fit$rank, PIC, paste0(comVar, collapse = " "))
+				subset <- rbind(subset, single_set)
+			} else if (type == "cox"){
+				comVar <- c(include, comTable[, ncom])
+				fit <- getFitModel(data, type, comVar, y_name, weights, test_method_cox = test_method_cox)
+				if (metric == "SL"){
+					PIC <- fit$score
+				}else{
+					PIC <- modelFitStat(metric, fit, "Likelihood", TRUE)
+				}
+				single_set[1, 1:3] <- c(attr(logLik(fit), "df"), PIC, paste0(comVar, collapse = " "))
+				subset <- rbind(subset, single_set)
 			}
-			single_set[1,1:3] <- c(fit$rank, PIC, paste0(comVar, collapse=" "))
-			subset <- rbind(subset, single_set)
 		}
+		
 		best_subset <- as.data.frame(subset)
-		best_subset[,2] <- as.numeric(best_subset[, 2])
-		if (metric == "SL"){
+		best_subset[, 2] <- as.numeric(best_subset[, 2])
+		if (metric %in% c("SL", "Rsq", "adjRsq")){
+			# "Rsq" and "adjRsq" are for type "linear"; "SL" is for type "logit" and "cox"
 			decreasing = TRUE
 		} else{
 			decreasing = FALSE
@@ -66,104 +115,57 @@ getFinalSet <- function(data, x_check, single_set, y_name, include, weights, int
 		}
 		final_result <- rbind(final_result, sub_result_sort[1:best_n, ])
 	}
-	final_result <- final_result[-1,]
+	
+	final_result <- final_result[-1, ]
 	final_result
 }
 
-getXmodel <- function(include_subset, final_result){
-	reg_pic <- rbind(include_subset, final_result)
-	rownames(reg_pic) <- c(1:nrow(reg_pic))
-	result$'Process of Selection' <- reg_pic
-	reg_pic[, 2] %in% min(reg_pic[, 2])
-	if (metric == "SL"){
-		x_model <- unlist(strsplit(reg_pic[which.max(as.numeric(reg_pic[, 2])), 3]," "))
+getXNameSelected <- function(result, final_set){
+	# result is a list containing logging info passed in from upstream
+	rownames(final_set) <- c(1:nrow(final_set))
+	result$'Process of Selection' <- final_set
+	final_set[, 2] %in% min(final_set[, 2])
+	if (metric %in% c("SL", "Rsq", "adjRsq"){
+		# "Rsq" and "adjRsq" are for type "linear"; "SL" is for type "logit" and "cox"
+		x_name_selected <- unlist(strsplit(final_set[which.max(as.numeric(final_set[, 2])), 3]," "))
 	} else{
-		x_model <- unlist(strsplit(reg_pic[which.min(as.numeric(reg_pic[, 2])), 3]," "))
+		x_name_selected <- unlist(strsplit(final_set[which.min(as.numeric(final_set[, 2])), 3]," "))
 	}
-	x_model
+	x_name_selected
 }
 
+getXNameSelectedWrapper <- function(input_data, type, metric, y_name, intercept, include, weights, test_method_cox = NULL, result){
+	# a wrapper to obtain x_name_selected
+	## obtain initial model info
+	initial_set <- getInitialSet(input_data, type, metric, y_name, intercept, include, weights, test_method_cox = NULL)
+	
+	## obtain final model info
+	x_check <- setdiff(x_name, include)
+	final_set <- getFinalSet(input_data, type, metric, x_check, initial_set, y_name, include, weights, intercept, best_n = best_n, test_method_cox = NULL)
+	
+	## obtain x_name_selected (drop-in replacement for x_model/xModel)
+	x_name_selected <- getXNameSelected(result, final_set)
+	return(list(result, x_name_selected))
+}
 
 # 99 - 161: stepwiseLogit
-if(strategy=="subset"){ #subset
-	# bestSubSet <- NULL
-	# singSet <- matrix(NA,1,3)
-	# colnames(singSet) <- c("NumberOfVariables",metric,"VariablesInModel")
-	# finalResult <- singSet
-	# fmReduce <- reformulate(c(intercept), y_name)
-	# fitReduce <- glm(fmReduce,data=input_data, weights=weights, family="binomial")
-	single_set <- matrix(NA, 1, 3)
-	colnames(single_set) <- c("NumberOfVariables", metric, "VariablesInModel")
-	fit_reduced <- getFitModel(input_data, c(intercept), y_name, weights)
-	include_subset <- getIncludeSubset(input_data, single_set, metric, fit_reduced, c(intercept, include), y_name, weights)
-	x_check <- setdiff(x_name, include)
-	
-	# if(length(includeName)!=0){
-	# 	fm <- reformulate(c(intercept,includeName), yName)
-	# 	#fit <- multinom(fm, data = YXdata, weights = weights)
-	# 	fit <- glm(fm,data=data, weights=weights, family="binomial")
-	# 	if(metric=="SL"){
-	# 		PIC <- anova(fitReduce,fit,test="Rao")[2,"Rao"]
-	# 	}else{
-	# 		PIC <- modelFitStat(metric,fit,"Likelihood")
-	# 	}
-	# 	singSet[1,1:3] <- c(fit$rank,PIC,paste0(c(intercept,includeName),collapse=" "))
-	# 	includeSubSet <- singSet
-	# 	xCheck <- setdiff(xName,includeName)
-	# }else{
-	# 	includeSubSet <- NULL
-	# 	x_check <- x_name
-	# }
-	
-	# obtain final_set:
-	final_result <- getFinalSet(input_data, x_check, single_set, y_name, include, weights, intercept, best_n = best_n)
-	
-	# for(nv in 1:length(x_check)){
-	# 	# nv <- 1
-	# 	subSet <- NULL
-	# 	comTable <- combn(x_check,nv)
-	# 	for(ncom in 1:ncol(comTable)){
-	# 		comVar <- c(intercept,include,comTable[,ncom])
-	# 		fm <- reformulate(comVar, y_name)
-	# 		fit <- glm(fm,data = input_data,weights=weights,family="binomial")
-	# 		if(metric=="SL"){
-	# 			PIC <- anova(fitReduce,fit, test="Rao")[2,"Rao"] 
-	# 		}else{
-	# 			PIC <- modelFitStat(metric,fit,"Likelihood")
-	# 		}
-	# 		singSet[1,1:3] <- c(fit$rank,PIC,paste0(comVar,collapse=" "))
-	# 		subSet <- rbind(subSet,singSet)
-	# 	}
-	# 	bestSubSet <- as.data.frame(subSet)
-	# 	bestSubSet[,2] <- as.numeric(bestSubSet[,2])
-	# 	if(metric=="SL"){
-	# 		subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = TRUE),]
-	# 	}else{
-	# 		subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = FALSE),]
-	# 	}
-	# 	
-	# 	if(nrow(subSet) < best_n){
-	# 		best_n <- nrow(subSet)
-	# 	}
-	# 	
-	# 	finalResult <- rbind(finalResult,subResultSort[1:best_n,])
-	# }
-	# 
-	# finalResult <- finalResult[-1,]
-	
-	
-	# obtain x_model:
-	x_model <- getXmodel(include_subset, final_result)
-	# 
-	# RegPIC <- rbind(includeSubSet,finalResult)
-	# rownames(RegPIC) <- c(1:nrow(RegPIC))
-	# result$'Process of Selection' <- RegPIC
-	# RegPIC[,2] %in% min(RegPIC[,2])
-	# if(metric=="SL"){
-	# 	xModel <- unlist(strsplit(RegPIC[which.max(as.numeric(RegPIC[,2])),3]," "))
-	# }else{
-	# 	xModel <- unlist(strsplit(RegPIC[which.min(as.numeric(RegPIC[,2])),3]," "))
-	# }
-	
-	
+if(strategy=="subset"){
+	tem_res <- getXNameSelectedWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, result, test_method_cox = NULL, best_n = 1)
+	result <- tem_res[[1]]
+	x_name_selected <- tem_res[[2]]
 }
+
+# 91 - 150: stepwiseCox:
+if(strategy=="subset"){
+	tem_res <- getXNameSelectedWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, result, test_method_cox = NULL, best_n = 1)
+	result <- tem_res[[1]]
+	x_name_selected <- tem_res[[2]]
+}
+
+## 115-161: stepwiseLinear:
+if(strategy=="subset"){
+	tem_res <- getXNameSelectedWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, result, test_method_cox = NULL, best_n = 1)
+	result <- tem_res[[1]]
+	x_name_selected <- tem_res[[2]]
+}
+

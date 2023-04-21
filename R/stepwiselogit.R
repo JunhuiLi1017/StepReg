@@ -96,68 +96,75 @@ stepwiseLogit <- function(formula,
   rownames(ModInf) <- 1:nrow(ModInf)
   result$'Summary of Parameters' <- ModInf
   result$'Variables Type' <- classTable
-  if(strategy=="subset"){ #subset
-    bestSubSet <- NULL
-    singSet <- matrix(NA,1,3)
-    colnames(singSet) <- c("NumberOfVariables",metric,"VariablesInModel")
-    finalResult <- singSet
-    fmReduce <- reformulate(c(intercept), yName)
-    fitReduce <- glm(fmReduce,data=data, weights=weights, family="binomial")
-    if(length(includeName)!=0){
-      fm <- reformulate(c(intercept,includeName), yName)
-      #fit <- multinom(fm, data = YXdata, weights = weights)
-      fit <- glm(fm,data=data, weights=weights, family="binomial")
-      if(metric=="SL"){
-        PIC <- anova(fitReduce,fit,test="Rao")[2,"Rao"]
-      }else{
-        PIC <- modelFitStat(metric,fit,"Likelihood")
-      }
-      singSet[1,1:3] <- c(fit$rank,PIC,paste0(c(intercept,includeName),collapse=" "))
-      includeSubSet <- singSet
-      xCheck <- setdiff(xName,includeName)
-    }else{
-	    includeSubSet <- NULL
-	    xCheck <- xName
-    }
-    for(nv in 1:length(xCheck)){
-	    subSet <- NULL
-      comTable <- combn(xCheck,nv)
-      for(ncom in 1:ncol(comTable)){
-        comVar <- c(intercept,includeName,comTable[,ncom])
-        fm <- reformulate(comVar, yName)
-        fit <- glm(fm,data = data,weights=weights,family="binomial")
-        if(metric=="SL"){
-          PIC <- anova(fitReduce,fit, test="Rao")[2,"Rao"] 
-        }else{
-          PIC <- modelFitStat(metric,fit,"Likelihood")
-        }
-        singSet[1,1:3] <- c(fit$rank,PIC,paste0(comVar,collapse=" "))
-        subSet <- rbind(subSet,singSet)
-      }
-	    bestSubSet <- as.data.frame(subSet)
-      bestSubSet[,2] <- as.numeric(bestSubSet[,2])
-      if(metric=="SL"){
-        subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = TRUE),]
-      }else{
-        subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = FALSE),]
-      }
-
-      if(nrow(subSet) < best_n){
-      	best_n <- nrow(subSet)
-      }
-      
-      finalResult <- rbind(finalResult,subResultSort[1:best_n,])
-    }
-    finalResult <- finalResult[-1,]
-    RegPIC <- rbind(includeSubSet,finalResult)
-    rownames(RegPIC) <- c(1:nrow(RegPIC))
-    result$'Process of Selection' <- RegPIC
-    RegPIC[,2] %in% min(RegPIC[,2])
-    if(metric=="SL"){
-      xModel <- unlist(strsplit(RegPIC[which.max(as.numeric(RegPIC[,2])),3]," "))
-    }else{
-      xModel <- unlist(strsplit(RegPIC[which.min(as.numeric(RegPIC[,2])),3]," "))
-    }
+  
+  if (strategy=="subset"){ #subset
+  	tem_res <- getXNameSelectedWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, result, test_method_cox = NULL, best_n = 1)
+  	result <- tem_res[[1]]
+  	x_name_selected <- tem_res[[2]]
+  	
+#     bestSubSet <- NULL
+#     singSet <- matrix(NA,1,3)
+#     colnames(singSet) <- c("NumberOfVariables",metric,"VariablesInModel")
+#     finalResult <- singSet
+#     fmReduce <- reformulate(c(intercept), yName)
+#     fitReduce <- glm(fmReduce,data=data, weights=weights, family="binomial")
+#     if(length(includeName)!=0){
+#       fm <- reformulate(c(intercept,includeName), yName)
+#       #fit <- multinom(fm, data = YXdata, weights = weights)
+#       fit <- glm(fm,data=data, weights=weights, family="binomial")
+#       if(metric=="SL"){
+#         PIC <- anova(fitReduce,fit,test="Rao")[2,"Rao"]
+#       }else{
+#         PIC <- modelFitStat(metric,fit,"Likelihood")
+#       }
+#       singSet[1,1:3] <- c(fit$rank,PIC,paste0(c(intercept,includeName),collapse=" "))
+#       includeSubSet <- singSet
+#       xCheck <- setdiff(xName,includeName)
+#     }else{
+# 	    includeSubSet <- NULL
+# 	    xCheck <- xName
+#     }
+#     for(nv in 1:length(xCheck)){
+# 	    subSet <- NULL
+#       comTable <- combn(xCheck,nv)
+#       for(ncom in 1:ncol(comTable)){
+#         comVar <- c(intercept,includeName,comTable[,ncom])
+#         fm <- reformulate(comVar, yName)
+#         fit <- glm(fm,data = data,weights=weights,family="binomial")
+#         if(metric=="SL"){
+#           PIC <- anova(fitReduce,fit, test="Rao")[2,"Rao"] 
+#         }else{
+#           PIC <- modelFitStat(metric,fit,"Likelihood")
+#         }
+#         singSet[1,1:3] <- c(fit$rank,PIC,paste0(comVar,collapse=" "))
+#         subSet <- rbind(subSet,singSet)
+#       }
+# 	    bestSubSet <- as.data.frame(subSet)
+#       bestSubSet[,2] <- as.numeric(bestSubSet[,2])
+#       if(metric=="SL"){
+#         subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = TRUE),]
+#       }else{
+#         subResultSort <- bestSubSet[order(bestSubSet[,2],decreasing = FALSE),]
+#       }
+# 
+#       if(nrow(subSet) < best_n){
+#       	best_n <- nrow(subSet)
+#       }
+#       
+#       finalResult <- rbind(finalResult,subResultSort[1:best_n,])
+#     }
+#     finalResult <- finalResult[-1,]
+#     RegPIC <- rbind(includeSubSet,finalResult)
+#     rownames(RegPIC) <- c(1:nrow(RegPIC))
+#     result$'Process of Selection' <- RegPIC
+#     RegPIC[,2] %in% min(RegPIC[,2])
+#     if(metric=="SL"){
+#       xModel <- unlist(strsplit(RegPIC[which.max(as.numeric(RegPIC[,2])),3]," "))
+#     }else{
+#       xModel <- unlist(strsplit(RegPIC[which.min(as.numeric(RegPIC[,2])),3]," "))
+#     }
+    
+    
   }else{ #forward # bidirection # backward
     subBestPoint <- data.frame(Step=numeric(),
                                EnteredEffect=character(),
