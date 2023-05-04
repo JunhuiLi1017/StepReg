@@ -13,59 +13,83 @@ stepwiseLinear <- function(
                      test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
                      weights = NULL,
                      best_n = Inf){
-  ## extract response, independent variable and intercept
-  termForm <- terms(formula, data = data)
-  vars <- as.character(attr(termForm, "variables"))[-1]
-  yName <- vars[attr(termForm, "response")]
-  xName <- attr(termForm,"term.labels")
-  
-  if(attr(termForm, "intercept") == 0){
-    intercept <- "0"
-  }else{
-    intercept <- "1"
-  }
-  if(is.character(include)){
-    includeName <- include
-    mergeIncName <- paste0(includeName,collapse=" ")
-  }else if(is.null(include)){
-    includeName <- NULL
-    mergeIncName <- "NULL"
-  }
-  if(!is.null(weights)){
-    if(length(weights)==nrow(data)){
-    	weightData <- data*sqrt(weights)
-    }else{
-      stop("Variable length is different ('(weights)')")
-    }
-  }else{
-    weightData <- data
-  }
+	x_name <- getXname(formula, data)
+	y_name <- getYname(formula, data)
+	intercept <- getIntercept(formula, data, type = "linear") # char type
+	merged_include <- getMergedInclude(include)
+	model_raw <- getModel(input_data, type, method, x_name, y_name, weights, intercept)
+	multico_x <- getMulticolX(data, x_name, tolerance)
+	merged_multico_x <- paste0(multico_x, sep = " ")
+	
+	x_name_remove_multicol <- setdiff(x_name, multico_x)
+	
+	# test_method <- getTestMethod(data, model_raw, type, metric, y_name, test_method_linear, test_method_logit, test_method_cox)
 
-  lmFull <- lm(formula, data = weightData)
+	
+	
+	
+	
+  ## extract response, independent variable and intercept
+  # termForm <- terms(formula, data = data)
+  # vars <- as.character(attr(termForm, "variables"))[-1]
+  # yName <- vars[attr(termForm, "response")]
+  # xName <- attr(termForm,"term.labels")
+  # 
+  # if(attr(termForm, "intercept") == 0){
+  #   intercept <- "0"
+  # }else{
+  #   intercept <- "1"
+  # }
+  # if(is.character(include)){
+  #   includeName <- include
+  #   mergeIncName <- paste0(includeName,collapse=" ")
+  # }else if(is.null(include)){
+  #   includeName <- NULL
+  #   mergeIncName <- "NULL"
+  # }
+  # if(!is.null(weights)){
+  #   if(length(weights)==nrow(data)){
+  #   	weightData <- data*sqrt(weights)
+  #   }else{
+  #     stop("Variable length is different ('(weights)')")
+  #   }
+  # }else{
+  #   weightData <- data
+  # }
+
+  # lmFull <- lm(formula, data = weightData)
+  
+	# convert below into a function:
   allVarClass <- attr(lmFull$terms,"dataClasses")
   classTable <- as.data.frame(table(allVarClass))
   colnames(classTable) <- c("class", "variable")
   for(i in names(table(allVarClass))){
     classTable[names(table(allVarClass)) %in% i,2] <- paste0(names(allVarClass[allVarClass %in% i]),collapse=" ")
   }
-  ## detect multicollinearity
-  if(any(allVarClass=="factor")){
-    factVar <- names(which(allVarClass=="factor"))
-    for(i in factVar){
-      weightData[,i] <- as.factor(as.numeric(weightData[,i]))
-    }
-  }
-  xMatrix <- as.matrix(weightData[,xName])
-  qrXList <- qr(xMatrix,tol=1e-7)
-  rank0 <- qrXList$rank
-  pivot0 <- qrXList$pivot
-  if(rank0 < length(pivot0)){
-    mulcolX <- colnames(qrXList$qr)[pivot0[(rank0+1):length(pivot0)]]
-    mulcolMergeName <- paste0(mulcolX,collapse=" ")
-  }else{
-    mulcolX <- NULL
-    mulcolMergeName <- "NULL"
-  }
+  result$'Variables Type' <- classTable
+  
+  # ## detect multicollinearity
+  # if(any(allVarClass=="factor")){
+  #   factVar <- names(which(allVarClass=="factor"))
+  #   for(i in factVar){
+  #     weightData[,i] <- as.factor(as.numeric(weightData[,i]))
+  #   }
+  # }
+  
+  
+  # xMatrix <- as.matrix(weightData[,xName])
+  # qrXList <- qr(xMatrix,tol=1e-7)
+  # rank0 <- qrXList$rank
+  # pivot0 <- qrXList$pivot
+  # if(rank0 < length(pivot0)){
+  #   mulcolX <- colnames(qrXList$qr)[pivot0[(rank0+1):length(pivot0)]]
+  #   mulcolMergeName <- paste0(mulcolX,collapse=" ")
+  # }else{
+  #   mulcolX <- NULL
+  #   mulcolMergeName <- "NULL"
+  # }
+  
+  # x_name_remove_multicol <- setdiff(x_name, multico_x)
   xName <- setdiff(xName,mulcolX)
   Y <- as.matrix(lmFull$model[,yName])
   nY <- ncol(Y)
@@ -111,12 +135,14 @@ stepwiseLinear <- function(
   result$'Summary of Parameters' <- ModInf
   message("test here")
   print(result$'Summary of Parameters')
-  result$'Variables Type' <- classTable
+  
   if(strategy=="subset"){
-  	tem_res <- getXNameSelectedWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, result, test_method_cox = NULL, best_n = 1)
-  	result <- tem_res[[1]]
-  	x_name_selected <- tem_res[[2]]
+  	final_set <- getFinalSetWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, best_n = 1)
+  	result$'Process of Selection' <- final_set
   	
+  	## obtain x_name_selected (drop-in replacement for x_model/xModel)
+  	x_name_selected <- getXNameSelected(final_set)
+
     # tempresult <- matrix(NA,1,4)
     # colnames(tempresult) <- c("NoVariable","RankModel",metric,"VariablesEnteredinModel")
     # finalResult <- tempresult

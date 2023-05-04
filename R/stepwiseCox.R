@@ -89,9 +89,12 @@ stepwiseCox <- function(formula,
   result$'Summary of Parameters' <- ModInf
   result$'Variables Type' <- classTable
   if(strategy=="subset"){ #subset
-  	tem_res <- getXNameSelectedWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, result, test_method_cox = NULL, best_n = 1)
-  	result <- tem_res[[1]]
-  	x_name_selected <- tem_res[[2]]
+  	final_set <- getFinalSetWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, test_method_cox = test_method_cox, best_n = 1)
+  	result$'Process of Selection' <- final_set
+  	
+  	## obtain x_name_selected (drop-in replacement for x_model/xModel)
+  	x_name_selected <- getXNameSelected(final_set)
+  	
   	
     # bestSubSet <- NULL
     # singSet <- matrix(NA,1,3)

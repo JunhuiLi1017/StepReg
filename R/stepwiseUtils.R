@@ -225,9 +225,9 @@ getFinalSet <- function(data, type, metric, x_check, initial_set, y_name, includ
 	single_set <- matrix(NA, 1, 3)
 	colnames(single_set) <- c("NumberOfVariables", metric, "VariablesInModel")
 	subset <- NULL
-	comTable <- combn(x_check, nv)
 	
 	for (nv in 1:length(x_check)){
+		comTable <- combn(x_check, nv)
 		for (ncom in 1:ncol(comTable)){
 			if (type == "linear"){
 				comVar <- c(intercept, include, comTable[, ncom])
@@ -278,10 +278,7 @@ getFinalSet <- function(data, type, metric, x_check, initial_set, y_name, includ
 	final_result
 }
 
-getXNameSelected <- function(result, final_set){
-	# result is a list containing logging info passed in from upstream
-	rownames(final_set) <- c(1:nrow(final_set))
-	result$'Process of Selection' <- final_set
+getXNameSelected <- function(final_set){
 	final_set[, 2] %in% min(final_set[, 2])
 	if (metric %in% c("SL", "Rsq", "adjRsq"){
 		# "Rsq" and "adjRsq" are for type "linear"; "SL" is for type "logit" and "cox"
@@ -292,7 +289,7 @@ getXNameSelected <- function(result, final_set){
 	x_name_selected
 }
 
-getXNameSelectedWrapper <- function(input_data, type, metric, y_name, intercept, include, weights, test_method_cox = NULL, result){
+getFinalSetWrapper <- function(input_data, type, metric, y_name, intercept, include, weights, test_method_cox = NULL){
 	# a wrapper to obtain x_name_selected
 	## obtain initial model info
 	initial_set <- getInitialSet(input_data, type, metric, y_name, intercept, include, weights, test_method_cox = NULL)
@@ -301,9 +298,9 @@ getXNameSelectedWrapper <- function(input_data, type, metric, y_name, intercept,
 	x_check <- setdiff(x_name, include)
 	final_set <- getFinalSet(input_data, type, metric, x_check, initial_set, y_name, include, weights, intercept, best_n = best_n, test_method_cox = NULL)
 	
-	## obtain x_name_selected (drop-in replacement for x_model/xModel)
-	x_name_selected <- getXNameSelected(result, final_set)
-	return(list(result, x_name_selected))
+	## add rownames to sort the variables in final_set when output
+	rownames(final_set) <- c(1:nrow(final_set))
+	return(final_set)
 }
 
 formatTable <- function(tbl, tbl_name = "Test"){
@@ -479,7 +476,7 @@ stepwiseParams <- function(type,
 	#   #return(list(multico_x,multicol_merged_name))
 	# #}
 	
-	x_name_remove_multicol <- setdiff(x_name,multico_x) # not used
+	x_name_remove_multicol <- setdiff(x_name, multico_x) # not used?
 	# if(type == 'linear'){
 	#   y_df <- as.matrix(lm_raw$model[,y_name])
 	#   n_y <- ncol(y_df)
@@ -628,7 +625,7 @@ if(strategy=="subset"){ #subset
 		}
 		singSet[1,1:3] <- c(fit$rank,PIC,paste0(c(intercept,includeName),collapse=" "))
 		includeSubSet <- singSet
-		xCheck <- setdiff(xName,includeName)
+		xCheck <- setdiff(xName, includeName)
 	}else{
 		includeSubSet <- NULL
 		xCheck <- xName
