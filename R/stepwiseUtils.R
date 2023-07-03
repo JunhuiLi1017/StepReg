@@ -245,9 +245,9 @@ getModelFitStat <- function(metric, fit, type = c("linear","logit", "cox")){
 }
 
 ## functions for "subset" method:
-getFitModel <- function(data, type, x_name_subset, y_name, weights, test_method_cox = NULL){
+getFitModel <- function(data, type, x_name_subset, y_name, weights, test_method_cox){
 	# obtain a fit (usually reduced) model using custom input variables (x_names)
-	fm <- reformulate(x_name_subset, y_name)
+  fm <- reformulate(x_name_subset, y_name)
 	
 	if (type == "linear"){
 		weight_data <- data * sqrt(weights)
@@ -260,41 +260,41 @@ getFitModel <- function(data, type, x_name_subset, y_name, weights, test_method_
 	fit
 }
 
-getInitialSet <- function(data, type, metric, y_name, intercept, include, weights, test_method_cox = NULL){
+getInitialSet <- function(data, type, metric, y_name, intercept, include, weights, test_method_cox){
 	# obtain the initial model information: if no include variable, return NULL, otherwise return a matrix containing columns of "NumberOfVariables", metric, and "VariablesInModel"
 	# metric refers to PIC method, e.g. AIC, BIC, etc. for "logit" and "cox" type, if metric is "SL", the PIC is calculated differently
 	if (length(include) != 0){
-		single_set <- matrix(NA, 1, 3)
-		colnames(single_set) <- c("NumberOfVariables", metric, "VariablesInModel")
+		initial_set <- matrix(NA, 1, 3)
+		colnames(initial_set) <- c("NumberOfVariables", metric, "VariablesInModel")
 		if (type == "linear"){
 			fit <- getFitModel(data, type, c(intercept, include), y_name, weights)
 			PIC <- getModelFitStat(metric = metric, fit, type == type)
-			single_set <- c(length(attr(fit$terms,"term.labels")), PIC, paste(c(intercept, include), collapse = " "))
+			initial_set <- c(length(attr(fit$terms,"term.labels")), PIC, paste(c(intercept, include), collapse = " "))
 		} else if (type == "logit"){
 			fit <- getFitModel(data, type, c(intercept, include), y_name, weights)
 			if (metric == "SL"){
 				fit_reduced <- getFitModel(data, type, c(intercept), y_name, weights)
 				PIC <- anova(fit_reduced, fit, test = "Rao")[2, "Rao"]
-			} else{
+			} else {
 				PIC <- getModelFitStat(metric = metric, fit, type = type)
 			}
-			single_set[1, 1:3] <- c(fit$rank, PIC, paste0(c(intercept, include), collapse = " "))
+			initial_set[1, 1:3] <- c(fit$rank, PIC, paste0(c(intercept, include), collapse = " "))
 		} else if (type == "cox"){
 			fit <- getFitModel(data, type, c(include), y_name, weights, method = test_method_cox)
 			if (metric == "SL"){
 				PIC <- fit$score
-			} else{
+			} else {
 				PIC <- getModelFitStat(metric = metric, fit, type = type)
 			}
-			single_set[1, 1:3] <- c(length(attr(fit$terms, "term.labels")), PIC, paste0(c(include), collapse = " "))
+			initial_set[1, 1:3] <- c(length(attr(fit$terms, "term.labels")), PIC, paste0(c(include), collapse = " "))
 		}
-		return(single_set)
+		return(initial_set)
 	} else{
 		return(NULL)
 	}
 }
 
-getFinalSet <- function(data, type, metric, x_check, initial_set, y_name, include, weights, intercept, best_n = 1, test_method_cox = NULL){
+getFinalSet <- function(data, type, metric, x_check, initial_set, y_name, include, weights, intercept, best_n = Inf, test_method_cox){
 	final_result <- initial_set
 	single_set <- matrix(NA, 1, 3)
 	colnames(single_set) <- c("NumberOfVariables", metric, "VariablesInModel")
@@ -308,7 +308,6 @@ getFinalSet <- function(data, type, metric, x_check, initial_set, y_name, includ
 				fit <- getFitModel(data, type, comVar, y_name, weights)
 				PIC <- getModelFitStat(metric = metric, fit, type = type)
 				single_set[1, 1:3] <- c(length(attr(fit$terms,"term.labels")), PIC, paste(comVar, collapse = " "))
-				subset <- rbind(subset, single_set)
 			} else if (type == "logit"){
 				comVar <- c(intercept, include, comTable[, ncom])
 				fit <- getFitModel(data, type, comVar, y_name, weights)
@@ -318,7 +317,6 @@ getFinalSet <- function(data, type, metric, x_check, initial_set, y_name, includ
 					PIC <- getModelFitStat(metric = metric, fit, type = type)
 				}
 				single_set[1, 1:3] <- c(fit$rank, PIC, paste0(comVar, collapse = " "))
-				subset <- rbind(subset, single_set)
 			} else if (type == "cox"){
 				comVar <- c(include, comTable[, ncom])
 				fit <- getFitModel(data, type, comVar, y_name, weights, test_method_cox = test_method_cox)
@@ -328,8 +326,8 @@ getFinalSet <- function(data, type, metric, x_check, initial_set, y_name, includ
 					PIC <- getModelFitStat(metric = metric, fit, type = type)
 				}
 				single_set[1, 1:3] <- c(attr(logLik(fit), "df"), PIC, paste0(comVar, collapse = " "))
-				subset <- rbind(subset, single_set)
 			}
+		  subset <- rbind(subset, single_set)
 		}
 		
 		best_subset <- as.data.frame(subset)
@@ -363,14 +361,14 @@ getXNameSelected <- function(final_set){
 	x_name_selected
 }
 
-getFinalSetWrapper <- function(input_data, type, metric, y_name, intercept, include, weights, test_method_cox = NULL){
+getFinalSetWrapper <- function(input_data, type, metric, y_name, intercept, include, weights, best_n, test_method_cox){
 	# a wrapper to obtain x_name_selected
 	## obtain initial model info
-	initial_set <- getInitialSet(input_data, type, metric, y_name, intercept, include, weights, test_method_cox = NULL)
+	initial_set <- getInitialSet(input_data, type, metric, y_name, intercept, include, weights, test_method_cox)
 	
 	## obtain final model info
 	x_check <- setdiff(x_name, include)
-	final_set <- getFinalSet(input_data, type, metric, x_check, initial_set, y_name, include, weights, intercept, best_n = best_n, test_method_cox = NULL)
+	final_set <- getFinalSet(input_data, type, metric, x_check, initial_set, y_name, include, weights, intercept, best_n, test_method_cox)
 	
 	## add rownames to sort the variables in final_set when output
 	rownames(final_set) <- c(1:nrow(final_set))

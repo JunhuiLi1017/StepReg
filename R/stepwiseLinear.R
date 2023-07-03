@@ -131,7 +131,7 @@ stepwiseLinear <- function(
   print(result$'Summary of Parameters')
   
   if(strategy=="subset"){
-  	final_set <- getFinalSetWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, best_n = 1)
+  	final_set <- getFinalSetWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, best_n)
   	result$'Process of Selection' <- final_set
   	
   	## obtain x_name_selected (drop-in replacement for x_model/xModel)

@@ -11,7 +11,7 @@ stepwiseLogit <- function(formula,
                           sls=0.15,
                           test_method_logit=c("Rao","LRT"),
                           weights=NULL,
-                          best_n=NULL){
+                          best_n=Inf){
   strategy <- match.arg(strategy)
   metric <- match.arg(metric)
   test_method_logit <- match.arg(test_method_logit)
@@ -98,7 +98,7 @@ stepwiseLogit <- function(formula,
   result$'Variables Type' <- classTable
   
   if (strategy=="subset"){ #subset
-  	final_set <- getFinalSetWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, best_n = 1)
+  	final_set <- getFinalSetWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, best_n)
   	result$'Process of Selection' <- final_set
   	
   	## obtain x_name_selected (drop-in replacement for x_model/xModel)
