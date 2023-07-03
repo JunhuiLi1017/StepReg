@@ -50,9 +50,12 @@
 #' @author Junhui Li 
 #' @export modelFitStat
 
-modelFitStat <- function(ic,fit,method=c("LeastSquare","Likelihood"),cox=FALSE){
-  method <- match.arg(method)
-  if(method=="LeastSquare"){
+# modelFitStat <- function(ic,fit,method=c("LeastSquare","Likelihood"),cox=FALSE){
+	
+modelFitStat <- function(ic, fit, type = c("linear","logit", "cox")){
+  # returns PIC
+  # "LeastSquare" is for linear; "Likelihood" is for cox and logit; cox and logit are essentially the same except for sample size calculation.
+  if (type == "linear"){
     resMatrix <- as.matrix(fit$residuals)
     SSEmatrix <- t(resMatrix) %*% resMatrix
     SSE <- abs(det(SSEmatrix))
@@ -85,12 +88,12 @@ modelFitStat <- function(ic,fit,method=c("LeastSquare","Likelihood"),cox=FALSE){
     }else if(ic=="SBC"){
       PIC <- n*log(SSE/n)+log(n)*p*nY
     }
-  }else if(method=="Likelihood"){
+  } else if (type %in% c("logit", "cox"){
     ll <- logLik(fit)[1]
     k <- attr(logLik(fit),"df")
-    if(cox==TRUE){
+    if (type == "cox"){
       n <- fit$nevent
-    }else{
+    } else if (type == "logit"){
       n <- nrow(fit$data)
     }
     if(ic=="IC(1)"){

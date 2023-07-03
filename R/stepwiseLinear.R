@@ -22,13 +22,7 @@ stepwiseLinear <- function(
 	merged_multico_x <- paste0(multico_x, sep = " ")
 	
 	x_name_remove_multicol <- setdiff(x_name, multico_x)
-	
-	# test_method <- getTestMethod(data, model_raw, type, metric, y_name, test_method_linear, test_method_logit, test_method_cox)
 
-	
-	
-	
-	
   ## extract response, independent variable and intercept
   # termForm <- terms(formula, data = data)
   # vars <- as.character(attr(termForm, "variables"))[-1]
@@ -59,7 +53,7 @@ stepwiseLinear <- function(
 
   # lmFull <- lm(formula, data = weightData)
   
-	# convert below into a function:
+	# table2:
   allVarClass <- attr(lmFull$terms,"dataClasses")
   classTable <- as.data.frame(table(allVarClass))
   colnames(classTable) <- c("class", "variable")

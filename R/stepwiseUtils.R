@@ -171,7 +171,80 @@ getTestMethod <- function(data, model_raw, type, metric, y_name, test_method_lin
 	return(test_method)
 }
 
-## function for "subset" method:
+# For "subset", "forward", "backward", "bi-directional": each model needs to calculate PIC. 
+#' Fit Model Statistics
+#'
+#' Fit Model Statistics with least square or likelihood method to return an information criteria value 
+#'
+#' @param metric Information criteria, including AIC, AICc, BIC, CP, HQ, HQc, Rsq, adjRsq and SBC
+#' 
+#' @param fit Object of linear model or general linear model
+#' 
+#' @param type "linear", "cox", or "logit": to calculate information criteria value; for "linear", the "Least Square" method will be used; for "cox" and "logit", "Maximum Likelyhood" method will be used.
+#' 
+getModelFitStat <- function(metric, fit, type = c("linear","logit", "cox")){
+	# "LeastSquare" is for linear; "Likelihood" is for cox and logit; cox and logit are essentially the same except for sample size calculation.
+	if (type == "linear"){
+		resMatrix <- as.matrix(fit$residuals)
+		SSEmatrix <- t(resMatrix) %*% resMatrix
+		SSE <- abs(det(SSEmatrix))
+		p <- fit$rank
+		n <- nrow(resMatrix)
+		#yName <- rownames(attr(fit$terms,"factors"))[1]
+		vars <- as.character(attr(fit$terms, "variables"))[-1]
+		yName <- vars[attr(fit$terms, "response")]
+		Y <- as.matrix(fit$model[,yName])
+		nY <- ncol(Y)
+		if(metric == "AIC"){
+			PIC <- n*log(SSE/n)+2*p*nY+nY*(nY+1)+n
+		}else if(metric == "AICc"){
+			PIC <- n*log(SSE/n)+n*(n+p)*nY/(n-p-nY-1)
+		}else if(metric == "CP"){
+			PIC <- SSE/sigma(fit)+2*p-n
+		}else if(metric == "HQ"){
+			PIC <- n*log(SSE/n)+2*log(log(n))*p*nY/n
+		}else if(metric == "HQc"){
+			#PIC <- n*log(SSE*SSE/n)+2*log(log(n))*p*nY/(n-p-nY-1)
+			PIC <- n*log(SSE/n)+2*log(log(n))*p*nY/(n-p-nY-1)
+		}else if(metric == "BIC"){
+			PIC <- n*log(SSE/n)+2*(2+p)*(n*sigma(fit)/SSE)-2*(n*sigma(fit)/SSE)*(n*sigma(fit)/SSE)
+		}else if(metric == "Rsq"){
+			#PIC <- 1-(SSE/SST)
+			PIC <- summary(fit)$r.squared
+		}else if(metric == "adjRsq"){
+			#PIC <- 1-(SSE/SST)*(n-1)/(n-p)
+			PIC <- summary(fit)$adj.r.squared
+		}else if(metric == "SBC"){
+			PIC <- n*log(SSE/n)+log(n)*p*nY
+		}
+	} else if (type %in% c("logit", "cox"){
+		ll <- logLik(fit)[1]
+		k <- attr(logLik(fit),"df")
+		if (type == "cox"){
+			n <- fit$nevent
+		} else if (type == "logit"){
+			n <- nrow(fit$data)
+		}
+		if(metric == "IC(1)"){
+			PIC <- -2*ll+k
+		}else if(metric == "IC(3/2)"){
+			PIC <- -2*ll+1.5*k
+		}else if(metric == "SBC"){
+			PIC <- -2*ll+k*log(n)
+		}else if(metric == "AICc"){
+			PIC <- -2*ll+2*k*(k+1)/(n-k-1)
+		}else if(metric == "AIC"){
+			PIC <- -2*ll+2*k
+		}else if(metric == "HQ"){
+			PIC <- -2*ll+2*k*log(log(n))/n
+		}else if(metric == "HQc"){
+			PIC <- -2*ll+2*k*log(log(n))/(n-k-2)
+		}
+	}
+	return(PIC)
+}
+
+## functions for "subset" method:
 getFitModel <- function(data, type, x_name_subset, y_name, weights, test_method_cox = NULL){
 	# obtain a fit (usually reduced) model using custom input variables (x_names)
 	fm <- reformulate(x_name_subset, y_name)
@@ -189,12 +262,13 @@ getFitModel <- function(data, type, x_name_subset, y_name, weights, test_method_
 
 getInitialSet <- function(data, type, metric, y_name, intercept, include, weights, test_method_cox = NULL){
 	# obtain the initial model information: if no include variable, return NULL, otherwise return a matrix containing columns of "NumberOfVariables", metric, and "VariablesInModel"
+	# metric refers to PIC method, e.g. AIC, BIC, etc. for "logit" and "cox" type, if metric is "SL", the PIC is calculated differently
 	if (length(include) != 0){
 		single_set <- matrix(NA, 1, 3)
 		colnames(single_set) <- c("NumberOfVariables", metric, "VariablesInModel")
 		if (type == "linear"){
 			fit <- getFitModel(data, type, c(intercept, include), y_name, weights)
-			PIC <- modelFitStat(metric, fit, "LeastSquare")
+			PIC <- getModelFitStat(metric = metric, fit, type == type)
 			single_set <- c(length(attr(fit$terms,"term.labels")), PIC, paste(c(intercept, include), collapse = " "))
 		} else if (type == "logit"){
 			fit <- getFitModel(data, type, c(intercept, include), y_name, weights)
@@ -202,7 +276,7 @@ getInitialSet <- function(data, type, metric, y_name, intercept, include, weight
 				fit_reduced <- getFitModel(data, type, c(intercept), y_name, weights)
 				PIC <- anova(fit_reduced, fit, test = "Rao")[2, "Rao"]
 			} else{
-				PIC <- modelFitStat(metric, fit, "Likelihood")
+				PIC <- getModelFitStat(metric = metric, fit, type = type)
 			}
 			single_set[1, 1:3] <- c(fit$rank, PIC, paste0(c(intercept, include), collapse = " "))
 		} else if (type == "cox"){
@@ -210,7 +284,7 @@ getInitialSet <- function(data, type, metric, y_name, intercept, include, weight
 			if (metric == "SL"){
 				PIC <- fit$score
 			} else{
-				PIC <- modelFitStat(metric, fit, "Likelihood", TRUE)
+				PIC <- getModelFitStat(metric = metric, fit, type = type)
 			}
 			single_set[1, 1:3] <- c(length(attr(fit$terms, "term.labels")), PIC, paste0(c(include), collapse = " "))
 		}
@@ -232,7 +306,7 @@ getFinalSet <- function(data, type, metric, x_check, initial_set, y_name, includ
 			if (type == "linear"){
 				comVar <- c(intercept, include, comTable[, ncom])
 				fit <- getFitModel(data, type, comVar, y_name, weights)
-				PIC <- modelFitStat(metric, fit, "LeastSquare")
+				PIC <- getModelFitStat(metric = metric, fit, type = type)
 				single_set[1, 1:3] <- c(length(attr(fit$terms,"term.labels")), PIC, paste(comVar, collapse = " "))
 				subset <- rbind(subset, single_set)
 			} else if (type == "logit"){
@@ -241,7 +315,7 @@ getFinalSet <- function(data, type, metric, x_check, initial_set, y_name, includ
 				if (metric == "SL"){
 					PIC <- anova(fit_reduced, fit, test = "Rao")[2, "Rao"] 
 				} else{
-					PIC <- modelFitStat(metric, fit, "Likelihood")
+					PIC <- getModelFitStat(metric = metric, fit, type = type)
 				}
 				single_set[1, 1:3] <- c(fit$rank, PIC, paste0(comVar, collapse = " "))
 				subset <- rbind(subset, single_set)
@@ -251,7 +325,7 @@ getFinalSet <- function(data, type, metric, x_check, initial_set, y_name, includ
 				if (metric == "SL"){
 					PIC <- fit$score
 				}else{
-					PIC <- modelFitStat(metric, fit, "Likelihood", TRUE)
+					PIC <- getModelFitStat(metric = metric, fit, type = type)
 				}
 				single_set[1, 1:3] <- c(attr(logLik(fit), "df"), PIC, paste0(comVar, collapse = " "))
 				subset <- rbind(subset, single_set)
@@ -302,6 +376,16 @@ getFinalSetWrapper <- function(input_data, type, metric, y_name, intercept, incl
 	rownames(final_set) <- c(1:nrow(final_set))
 	return(final_set)
 }
+
+
+
+## functions for "forward" method:
+
+## functions for "backward" method:
+
+## functions for "bi-directional" method:
+
+
 
 formatTable <- function(tbl, tbl_name = "Test"){
 	tbl_list <- list(tbl)
