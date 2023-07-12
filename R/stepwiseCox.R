@@ -211,9 +211,9 @@ stepwiseCox <- function(formula,
         }
         fm0 <- reformulate(xMod, yName)
         fit0 <- survival::coxph(fm0,data = data,weights=weights,method=test_method_cox)
-	if(length(xResidual)==0){
-		break
-	}
+        if(length(xResidual)==0){
+          break
+        }
         xResidualList <- as.list(xResidual)
         names(xResidualList) <- xResidual
         fm1 <- lapply(xResidualList,function(x){reformulate(c(xModel,x),yName)})

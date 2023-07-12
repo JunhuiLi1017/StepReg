@@ -117,7 +117,9 @@ getMergedInclude <- function(include){
 	return(merge_include_name)
 }
 
-getModel <- function(data, type, method, x_name, y_name, weights, intercept){
+getModel <- function(data, type, x_name, y_name, weights, intercept, method=c("efron","breslow","exact")){
+  ## "method" is only used for cox regression
+  method <- arg.match(method)
 	# create a new formula given explicit x, y, and intercept, bypassed the x being .
 	formula_raw <- reformulate(c(intercept, x_name), y_name)
 	
@@ -128,7 +130,7 @@ getModel <- function(data, type, method, x_name, y_name, weights, intercept){
 	}else if(type == "logit"){
 		model_raw <- glm(formula_raw, data = data, weights = weights, family = "binomial")
 	}else if(type == 'cox'){
-		model_raw <- survival::coxph(formula_raw, data = data, weights = weights, method= test_method_cox)
+		model_raw <- survival::coxph(formula_raw, data = data, weights = weights, method= method)
 	}
 	return(model_raw)
 }
@@ -268,7 +270,7 @@ getInitialSet <- function(data, type, metric, y_name, intercept, include, weight
 		colnames(initial_set) <- c("NumberOfVariables", metric, "VariablesInModel")
 		if (type == "linear"){
 			fit <- getFitModel(data, type, c(intercept, include), y_name, weights)
-			PIC <- getModelFitStat(metric = metric, fit, type == type)
+			PIC <- getModelFitStat(metric = metric, fit, type = type)
 			initial_set <- c(length(attr(fit$terms,"term.labels")), PIC, paste(c(intercept, include), collapse = " "))
 		} else if (type == "logit"){
 			fit <- getFitModel(data, type, c(intercept, include), y_name, weights)
