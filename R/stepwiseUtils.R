@@ -119,7 +119,7 @@ getMergedInclude <- function(include){
 
 getModel <- function(data, type, x_name, y_name, weights, intercept, method=c("efron","breslow","exact")){
   ## "method" is only used for cox regression
-  method <- arg.match(method)
+  method <- match.arg(method)
 	# create a new formula given explicit x, y, and intercept, bypassed the x being .
 	formula_raw <- reformulate(c(intercept, x_name), y_name)
 	
@@ -219,7 +219,7 @@ getModelFitStat <- function(metric, fit, type = c("linear","logit", "cox")){
 		}else if(metric == "SBC"){
 			PIC <- n*log(SSE/n)+log(n)*p*nY
 		}
-	} else if (type %in% c("logit", "cox"){
+	} else if (type %in% c("logit", "cox")){
 		ll <- logLik(fit)[1]
 		k <- attr(logLik(fit),"df")
 		if (type == "cox"){

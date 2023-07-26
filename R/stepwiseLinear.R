@@ -1,5 +1,5 @@
 #' Stepwise Linear Model Regression
-#' 
+#'
 #' Stepwise linear regression analysis selects model based on information criteria and F or approximate F test with 'forward', 'backward', 'bidirection' and 'subset' model strategy method.
 
 stepwiseLinear <- function(
@@ -20,7 +20,7 @@ stepwiseLinear <- function(
 	model_raw <- getModel(input_data, type, method, x_name, y_name, weights, intercept)
 	multico_x <- getMulticolX(data, x_name, tolerance)
 	merged_multico_x <- paste0(multico_x, sep = " ")
-	
+
 	x_name_remove_multicol <- setdiff(x_name, multico_x)
 
   ## extract response, independent variable and intercept
@@ -28,7 +28,7 @@ stepwiseLinear <- function(
   # vars <- as.character(attr(termForm, "variables"))[-1]
   # yName <- vars[attr(termForm, "response")]
   # xName <- attr(termForm,"term.labels")
-  # 
+  #
   # if(attr(termForm, "intercept") == 0){
   #   intercept <- "0"
   # }else{
@@ -52,7 +52,7 @@ stepwiseLinear <- function(
   # }
 
   # lmFull <- lm(formula, data = weightData)
-  
+
 	# table2:
   allVarClass <- attr(lmFull$terms,"dataClasses")
   classTable <- as.data.frame(table(allVarClass))
@@ -61,7 +61,7 @@ stepwiseLinear <- function(
     classTable[names(table(allVarClass)) %in% i,2] <- paste0(names(allVarClass[allVarClass %in% i]),collapse=" ")
   }
   result$'Variables Type' <- classTable
-  
+
   # ## detect multicollinearity
   # if(any(allVarClass=="factor")){
   #   factVar <- names(which(allVarClass=="factor"))
@@ -69,8 +69,8 @@ stepwiseLinear <- function(
   #     weightData[,i] <- as.factor(as.numeric(weightData[,i]))
   #   }
   # }
-  
-  
+
+
   # xMatrix <- as.matrix(weightData[,xName])
   # qrXList <- qr(xMatrix,tol=1e-7)
   # rank0 <- qrXList$rank
@@ -82,7 +82,7 @@ stepwiseLinear <- function(
   #   mulcolX <- NULL
   #   mulcolMergeName <- "NULL"
   # }
-  
+
   # x_name_remove_multicol <- setdiff(x_name, multico_x)
   xName <- setdiff(xName,mulcolX)
   Y <- as.matrix(lmFull$model[,yName])
@@ -129,11 +129,11 @@ stepwiseLinear <- function(
   result$'Summary of Parameters' <- ModInf
   message("test here")
   print(result$'Summary of Parameters')
-  
+
   if(strategy=="subset"){
   	final_set <- getFinalSetWrapper(input_data, type, metric, x_name, y_name, intercept, include, weights, best_n)
   	result$'Process of Selection' <- final_set
-  	
+
   	## obtain x_name_selected (drop-in replacement for x_model/xModel)
   	x_name_selected <- getXNameSelected(final_set)
 
@@ -159,11 +159,11 @@ stepwiseLinear <- function(
     #     tempresult[1,1:4] <- c(length(attr(lmresult$terms,"term.labels")),lmresult$rank,modelFitStat(metric,lmresult,"LeastSquare"),paste(comVar,collapse=" "))
     #     subSet <- rbind(subSet,tempresult)
     #   }
-    #   
+    #
     #   if(nrow(subSet) < best_n){
     #   	best_n <- nrow(subSet)
     #   }
-    #   
+    #
     #   bestSubSet <- as.data.frame(subSet)
     #   bestSubSet[,2] <- as.numeric(bestSubSet[,2])
     #   if(metric=="Rsq" | metric=="adjRsq"){
@@ -200,7 +200,7 @@ stepwiseLinear <- function(
       }else{
         PIC <- modelFitStat(metric,lmFull,"LeastSquare")
       }
-      bestPoint[1,] <- c(0,"","","",length(attr(lmFull$terms,"term.labels")),lmFull$rank,PIC)
+      bestPoint[1,-1] <- c("","","",length(attr(lmFull$terms,"term.labels")),lmFull$rank,PIC)
     }else{
       addIdx <- TRUE
       xModel <- c(intercept,includeName)
@@ -327,7 +327,7 @@ stepwiseLinear <- function(
             subBestPoint[1,] <- c(as.numeric(bestPoint[nrow(bestPoint),1])+1,"",minmaxVar,anova(bestLm,lmAlt,test=approxF)[2,'Df'],length(attr(bestLm$terms,"term.labels")),bestLm$rank,PIC)
           }
           bestPoint <- rbind(bestPoint,subBestPoint)
-          
+
           if(strategy == 'bidirection'){
             if(addIdx==FALSE){
               next
