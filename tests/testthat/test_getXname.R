@@ -23,6 +23,8 @@ test_that("test_utils.R failed", {
 	expect_identical(getIntercept(formula2, data = mtcars, type = "logit"), "0")
 	expect_identical(getIntercept(formula3, data = lung, type = "cox"), NULL)
 
+	# test3: getInitialModel()
+	
 	
 	getIntercept <- function(formula, data, type){
 		# for 'cox', we need to set intercept to NULL
