@@ -102,7 +102,7 @@ getIntercept <- function(formula, data, type){
 	    intercept <- "1"
 	  }
 	}else{
-	  intercept <- NULL
+	  intercept <- '0'
 	}
 	return(intercept)
 }
@@ -831,4 +831,393 @@ if(metric=="SL"){
 	PIC <- anova(fitReduce,fit,test="Rao")[2,"Rao"]
 }else{
 	PIC <- modelFitStat(metric,fit,"Likelihood")
+}
+
+
+
+
+
+
+
+
+
+#note1: test_method_linear should be 'F' for univariate and c(“Pillai”, “Wilks”, “Hotelling-Lawley”, “Roy”) for multivariates
+#
+getAnovaStat <- function(fit_reduced, fit_full, type, test_method_linear, test_method_logit){
+  #fvalue <- NA
+  
+  if (type == "linear") {
+    test_method <- test_method_linear
+    ptype <- 'Pr(>F)'
+    if(test_method_linear %in% c("Pillai", "Wilks", "Hotelling-Lawley", "Roy")){
+      stattype <- 'approx F'
+    }else{
+      stattype <- 'F'
+    }
+    #pic <- anova(fit_reduced, fit_full, test = test_method_linear)[2, 'Pr(>F)']
+    # statistics is F value for linear
+    #statistics <- anova(fit_reduced, fit_full, test = test_method_linear)[2, 'F']
+  } else if (type == "logit") {
+    test_method <- test_method_logit
+    ptype <- 'Pr(>Chi)'
+    if(test_method_logit == "Rao"){
+      stattype <- "Rao"
+    }else{
+      stattype <- "Deviance"
+    }
+    
+    #pic <- anova(fit_reduced, fit_full, test = test_method_logit)[2, 'Pr(>Chi)']
+    # statistics is Chi value for logit
+    #statistics <- anova(fit_reduced, fit_full, test = test_method_logit)[2, 'Chi']
+  } else if (type == "cox") {
+    # test is not used in cox regression
+    test_method <- ""
+    ptype <- 'Pr(>|Chi|)'
+    stattype <- "Chisq"
+    #pic <- anova(fit_reduced, fit_full)[2, 'Pr(>|Chi|)']
+    # statistics is |Chi| value for cox
+    #statistics <- anova(fit_reduced, fit_full)[2, '|Chi|']
+  }
+  anova_table <- anova(fit_reduced, fit_full, test = test_method)
+  statistics <- anova_table[2,stattype]
+  pic <- anova_table[2, ptype]
+  return(c("statistics" = statistics, "pic" = pic))
+}
+
+## get pic based on model fit, it needs fit_reduced and fit_full for SL and only fit_formula for other metrics
+## used in stepwise in step0: SL:0,1,inf  non-SL:
+## fit_fm<-fit_intercept
+getInitStepModelStat <- function(fit_intercept,fit_fm,type,strategy,metric,intercept,include,test_method_cox,test_method_linear,test_method_logit){
+  if(metric == "SL"){
+    if(!is.null(include)){
+      if(all(include %in% attr(fit_fm$terms,"term.labels")) & strategy != "backward"){
+        f_pic_vec <- getAnovaStat(fit_intercept,fit_fm,type,test_method_cox,test_method_linear,test_method_logit)
+        pic <- f_pic_list["pic"]
+      }else{
+        pic <- 1
+      }
+    }else{
+      pic <- 1
+    }
+  }else{
+    if(strategy == "backward"){
+      pic <- getModelFitStat(metric,fit_fm,type)
+    }else{
+      if(!is.null(include)){
+        if(all(include %in% attr(fit_fm$terms,"term.labels"))){
+          pic <- getModelFitStat(metric,fit_fm,type)
+        }else{
+          if(intercept == '1'){
+            pic <- getModelFitStat(metric,fit_fm,type)
+          }else{
+            if(metric %in% c("Rsq","adjRsq") & type == "linear"){
+              pic <- 0
+            }else{
+              pic <- Inf
+            }
+          }
+        }
+      }else{
+        if(intercept == '1'){
+          pic <- getModelFitStat(metric,fit_fm,type)
+        }else{
+          if(metric %in% c("Rsq","adjRsq") & type == "linear"){
+            pic <- 0
+          }else{
+            pic <- Inf
+          }
+        }
+      }
+    }
+  }
+  return(pic)
+}
+
+#return 3 num for IC and remove 1st of 3 num for SL
+getNumberEffect <- function(fit,type){
+  if(type == "linear"){
+    vec <- c(fit$rank,length(attr(fit$terms,"term.labels")),fit$rank)
+  }else if(type == "logit"){
+    vec <- c(fit$rank,fit$rank,fit$rank)
+  }else if(type == "cox"){
+    vec <- c(attr(logLik(fit),"df"),attr(logLik(fit),"df"),attr(logLik(fit),"df"))
+  }
+  return(vec)
+}
+
+initialSubBestPoint <- function(metric){
+  sub_best_point <- data.frame(Step=numeric(),
+                               EnteredEffect=character(),
+                               RemovedEffect=character(),
+                               DF=numeric(),
+                               NumberEffectIn=numeric(),
+                               NumberParmsIn=numeric(),
+                               metric=numeric())
+  colnames(sub_best_point)[ncol(sub_best_point)] <- metric
+  return(sub_best_point)
+}
+
+##getInitialStepwise -> getInitialModel
+##getInitialSubset -> 
+getInitialStepwise <- function(data,type,strategy,metric,weights,x_name,y_name,intercept,include,method=c("efron","breslow","exact")){
+  sub_best_point <- initialSubBestPoint(metric)
+  best_point <- sub_best_point
+  if(strategy == "backward"){
+    add_or_remove <- "remove"
+    #the order of variable in x_in_model will affect pic calculation.
+    x_in_model <- c(setdiff(x_name,include))
+    x_notin_model <- NULL
+    #fit_full <- getModel(data=data, type=type, x_name=x_in_model, y_name=y_name, weights=weights, intercept=intercept, test_method_cox=test_method_cox,test_method_linear=test_method_linear,test_method_logit=test_method_logit)
+    fit_full <- getModel(data=data, type=type, x_name=c(include,x_in_model), y_name=y_name, weights=weights, intercept=intercept)
+    pic <- getInitStepModelStat(fit_intercept=NULL,fit_fm=fit_full,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method_cox=test_method_cox,test_method_linear=test_method_linear,test_method_logit=test_method_logit)
+    num_eff_para_in <- getNumberEffect(fit=fit_full,type=type)
+    best_point[1,] <- c(rep("",3),num_eff_para_in,pic)
+  }else{
+    add_or_remove <- "add"
+    x_in_model <- NULL
+    x_notin_model <- setdiff(x_name,include)
+    ## for intercept
+    #fit_intercept <- getModel(data=data, type=type, x_name=x_in_model, y_name=y_name, weights=weights, intercept=intercept, method=test_method_logit)
+    fit_intercept <- getModel(data=data, type=type, x_name=NULL, y_name=y_name, weights=weights, intercept=intercept)
+    pic <- getInitStepModelStat(fit_intercept=fit_intercept,fit_fm=fit_intercept,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method_cox=test_method_cox,test_method_linear=test_method_linear,test_method_logit=test_method_logit)
+    num_eff_para_in <- getNumberEffect(fit=fit_intercept,type=type)
+    best_point[1,] <- c("",intercept,"",num_eff_para_in,pic)
+    ## for include
+    if(!is.null(include)){
+      #fit_include <- getModel(data=data, type=type, x_name=x_in_model, y_name=y_name, weights=weights, intercept=intercept, method=test_method_logit)
+      fit_include <- getModel(data=data, type=type, x_name=include, y_name=y_name, weights=weights, intercept=intercept)
+      pic <- getInitStepModelStat(fit_intercept=fit_intercept,fit_fm=fit_include,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method_cox=test_method_cox,test_method_linear=test_method_linear,test_method_logit=test_method_logit)
+      num_eff_para_in <- getNumberEffect(fit=fit_include,type=type)
+      sub_best_point[1,] <- c("",paste0(include,collapse=" "),"",anova(fit_include,fit_intercept)[2,'Df'],num_eff_para_in[-1],pic)
+      best_point <- rbind(best_point,sub_best_point)
+    }
+  }
+  best_point$Step <- 0
+  return(list("add_or_remove"=add_or_remove,"x_in_model"=x_in_model,"x_notin_model"=x_notin_model,"best_point"=best_point))
+}
+
+#addOrRemX2StepModel <- function(add_or_remove,data,type,strategy,metric,sle,sls,weights,y_name,x_in_model,x_notin_model,intercept, include,index,test_method_cox,test_method_linear,test_method_logit,best_point){
+getCandStepModel <- function(add_or_remove,data,type,metric,weights,y_name,x_in_model,x_notin_model,intercept, include,test_method_cox,test_method_linear,test_method_logit){
+  #fit_x_in_model <- getModel(data=data, type=type, x_name=x_in_model, y_name=y_name, weights=weights, intercept=intercept, method=test_method_cox)
+  fit_x_in_model <- getModel(data=data, type=type, x_name=c(include,x_in_model), y_name=y_name, weights=weights, intercept=intercept)
+  BREAK <- FALSE
+  if(add_or_remove == "add"){
+    x_test <- x_notin_model
+  }else{
+    x_test <- x_in_model
+  }
+  x_test_list <- as.list(x_test)
+  names(x_test_list) <- x_test
+  if(length(x_test) == 0){
+    BREAK <- TRUE
+  }
+  if(add_or_remove == "add"){
+    x_name_list <- lapply(x_test_list,function(x){c(x_in_model,x)})
+  }else{
+    x_name_list <- lapply(x_test_list,function(x){setdiff(x_in_model,x)})
+  }
+  #fit_x_list <- lapply(x_test_list,function(x){getModel(data=data, type=type, x_name=x, y_name=y_name, weights=weights, intercept=intercept, method=test_method_cox)})
+  fit_x_list <- lapply(x_name_list,function(x){getModel(data=data, type=type, x_name=c(include,x), y_name=y_name, weights=weights, intercept=intercept)})
+  
+  if(metric == "SL"){
+    #f_pic_list <- sapply(fit_x_list,function(x){getAnovaStat(fit_reduced=x,fit_full=fit_x_in_model,type=type,test_method_linear,test_method_logit)})
+    f_pic_vec <- sapply(fit_x_list,function(x){getAnovaStat(fit_reduced=x,fit_full=fit_x_in_model,type=type,test_method_linear="F",test_method_logit="Rao")})
+    pic_set <- f_pic_vec[2,]
+    f_set <- f_pic_vec[1,]
+  }else{
+    if(add_or_remove == "remove" & length(x_test) == 1 & intercept == "0"){
+      pic_set <- Inf
+      names(pic_set) <- x_test
+    }else{
+      pic_set <- sapply(fit_x_list,function(x){getModelFitStat(metric,x,type)})
+    }
+  }
+  if(metric == "Rsq" | metric == "adjRsq" | (metric == "SL" & add_or_remove == "remove")){
+    pic <- max(pic_set)
+    minmax_var <- names(which.max(pic_set))
+    best_candidate_model <- fit_x_list[[minmax_var]]
+  }else{
+    pic <- min(pic_set)
+    minmax_var <- names(which.min(pic_set))
+    best_candidate_model <- fit_x_list[[minmax_var]]
+    if(sum(pic_set %in% pic) > 1 & metric == "SL"){
+      Fvalue <- max(f_set)
+      minmax_var <- names(which.max(f_set))
+      best_candidate_model <- fit_x_list[[minmax_var]]
+      pic <- pic_set[minmax_var]
+    }
+  }
+  if(type != "cox"){
+    if(best_candidate_model$rank == fit_x_in_model$rank & add_or_remove == "add"){
+      BREAK <- TRUE
+    }
+  }
+  return(list("pic"=pic,"minmax_var"=minmax_var,"best_candidate_model"=best_candidate_model,"BREAK"=BREAK))
+}
+
+getGoodnessFit <- function(best_candidate_model,y_name,metric){
+  smr <- summary(best_candidate_model)
+  n_y <- ncol(as.matrix(best_candidate_model$model[,y_name]))
+  if(n_y == 1){
+    f <- smr$fstatistic
+    if(is.nan(f[1])){
+      pval <- NaN
+    }else{
+      pval <- pf(f[1],f[2],f[3],lower.tail=F)
+    }
+  }else{
+    for(ny in 1:n_y){
+      f <- smr[[ny]]$fstatistic
+      if(is.nan(f[1])){
+        pval <- NaN
+      }else{
+        pval <- pf(f[1],f[2],f[3],lower.tail=F)
+      }
+    }
+  }
+  if(is.nan(pval) == TRUE & (metric != 'Rsq' | metric != 'adjRsq')){
+    BREAK <- TRUE
+  }else{
+    BREAK <- FALSE
+  }
+  return(BREAK)
+}
+
+checkEnterOrRemove <- function(add_or_remove,best_candidate_model,type,metric,y_name,pic,sls,sle,best_point){
+  if(metric == 'SL'){
+    if(add_or_remove == "remove"){
+      indicator <- pic > sls
+    }else{
+      indicator <- pic < sle
+    }
+  }else if(metric == 'Rsq' | metric == 'adjRsq'){
+    indicator <- pic > as.numeric(best_point[nrow(best_point),7])
+  }else{
+    indicator <- pic <= as.numeric(best_point[nrow(best_point),7])
+  }
+  if(indicator == TRUE & type == "linear" & (metric != "Rsq"|metric != "adjRsq")){
+    BREAK <- getGoodnessFit(best_candidate_model,y_name,metric)
+  }else{
+    BREAK <- FALSE
+  }
+  return(c("indicator"=indicator,"BREAK"=BREAK))
+}
+
+updateXinModel <- function(add_or_remove,indicator,best_candidate_model,BREAK,pic,x_in_model,x_notin_model,best_point,minmax_var){
+  sub_best_point <- initialSubBestPoint(metric)
+  if(indicator == TRUE & BREAK == FALSE){
+    if(add_or_remove == "add"){
+      x_in_model <- append(x_in_model,minmax_var)
+      x_notin_model <- setdiff(x_notin_model,minmax_var)
+      sub_best_point[1,] <- c(as.numeric(best_point[nrow(best_point),1])+1,minmax_var,"",getNumberEffect(fit=best_candidate_model,type),pic)
+    }else{
+      x_notin_model <- append(x_notin_model,minmax_var)
+      x_in_model <- setdiff(x_in_model,minmax_var)
+      sub_best_point[1,] <- c(as.numeric(best_point[nrow(best_point),1])+1,"",minmax_var,getNumberEffect(fit=best_candidate_model,type),pic)
+    }
+    best_point <- rbind(best_point,sub_best_point)
+    #best_point[nrow(best_point),1] <- as.numeric(best_point[1,nrow(best_point)-1]) + 1
+  }else{
+    BREAK <- TRUE
+  }
+  return(list("BREAK"=BREAK,"best_point"=best_point,"x_in_model"=x_in_model,"x_notin_model"=x_notin_model))
+}
+
+getFinalStepModel <- function(add_or_remove,data,type,metric,weights,y_name,x_in_model,x_notin_model,intercept, include,test_method_cox,test_method_linear,test_method_logit){
+  while(TRUE){
+    out_cand_stepwise <- getCandStepModel(add_or_remove,data,type,metric,weights,y_name,x_in_model,x_notin_model,intercept, include,test_method_cox,test_method_linear,test_method_logit)
+    BREAK <- out_cand_stepwise$BREAK
+    minmax_var <- out_cand_stepwise$minmax_var
+    if(BREAK == TRUE){
+      break
+    }
+    best_candidate_model <- out_cand_stepwise$best_candidate_model
+    pic <- out_cand_stepwise$pic
+    
+    
+    if(type == "linear"){
+      if(best_candidate_model$rank != 0){
+        BREAK <- getGoodnessFit(best_candidate_model,y_name,metric)
+        if(BREAK == TRUE){
+          break
+        }
+      }
+    }
+    
+    out_check <- checkEnterOrRemove(add_or_remove,best_candidate_model,type,metric,y_name,pic,sls,sle,best_point)
+    indicator <- out_check["indicator"]
+    BREAK <- out_check["BREAK"]
+    if(BREAK == TRUE){
+      break
+    }
+    
+    out_updateX <- updateXinModel(add_or_remove,indicator,best_candidate_model,BREAK,pic,x_in_model,x_notin_model,best_point,minmax_var)
+    x_in_model <- out_updateX$x_in_model
+    x_notin_model <- out_updateX$x_notin_model
+    best_point <- out_updateX$best_point
+    
+    if(indicator == TRUE){
+      if(strategy == 'bidirection'){
+        if(add_or_remove == "remove"){
+          next
+        }else{
+          add_or_remove <- "remove"
+          next
+        }
+      }else{
+        next
+      }
+    }else{
+      if(strategy == 'bidirection' & add_or_remove == "remove") {
+        add_or_remove <- "add"
+        next
+      }else{
+        break
+      }
+    }
+  }
+  
+  best_point$DF <- abs(as.numeric(best_point$DF))
+  best_point$DF[is.na(best_point$DF)] <- ""
+  if(type == "cox" && strategy != "backward"){
+    best_point <- best_point[-1,]
+  }
+  return(list("best_point"=best_point,"x_in_model"=x_in_model))
+}
+
+getTBLFianlVariable <- function(include,x_in_model){
+  all_x_in_model <- c(include,x_in_model)
+  variables <- as.data.frame(t(data.frame(all_x_in_model)))
+  colnames(variables) <- paste0("variable",1:ncol(variables))
+  rownames(variables) <- c("x in model")
+  table4 <- formatTable(variables,tbl_name = "Table 4. Selected Varaibles")
+  return(table4)
+}
+
+getTBLCoefModel <- function(type,intercept,include,x_in_model,y_name,n_y,data,test_method_cox){
+  if(is.null(c(include,x_in_model))){
+    summary_model <- NULL
+  }else{
+    summary_model <- summary(getModel(data, type, x_name=c(include,x_in_model), y_name, weights, intercept, method=test_method_cox))
+    summary_model_list <- list()
+    if(n_y>1){
+      #i=names(summary_model)[1]
+      for(i in names(summary_model)){
+        subsummary_model <- summary_model[[i]]$coefficients
+        col_name <- colnames(subsummary_model)
+        subsummary_model <- data.frame(rownames(subsummary_model),subsummary_model)
+        colnames(subsummary_model) <- c("Variable",col_name)
+        summary_model_list[i] <- list(subsummary_model)
+      }
+    }else{
+      subsummary_model <- summary_model$coefficients
+      col_name <- colnames(subsummary_model)
+      subsummary_model <- data.frame(rownames(subsummary_model),subsummary_model)
+      colnames(subsummary_model) <- c("Variable",col_name)
+      summary_model_list <- list(subsummary_model)
+      names(summary_model_list) <- y_name
+    }
+  }
+  table5 <- formatTable(summary_model_list, tbl_name = "Table 5. Summary of Model for")
+  return(table5)
 }

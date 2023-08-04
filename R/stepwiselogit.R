@@ -168,175 +168,191 @@ stepwiseLogit <- function(formula,
     
     
   }else{ #forward # bidirection # backward
-    subBestPoint <- data.frame(Step=numeric(),
-                               EnteredEffect=character(),
-                               RemovedEffect=character(),
-                               DF=numeric(),
-                               NumberIn=numeric(),
-                               metric=numeric())
-    colnames(subBestPoint)[6] <- metric
-    bestPoint <- subBestPoint
-    if(strategy=="backward"){
-      addVar <- FALSE
-      xModel <- c(intercept,includeName,setdiff(xName,includeName))
-      xResidual <- NULL
-      fmFull <- reformulate(xModel, yName)
-      fitFull <- glm(fmFull,data=data,weights=weights,family="binomial")
-      if(metric=="SL"){
-        PIC <- 1
-      }else{
-        PIC <- modelFitStat(metric,fitFull,"Likelihood")
-      }
-      bestPoint[1,-1] <- c("","",fitFull$rank,fitFull$rank,PIC)
-    }else{
-      addVar <- TRUE
-      xModel <- c(intercept,includeName)
-      xResidual <- setdiff(xName,includeName)
-      fmInt <- reformulate(intercept, yName)
-      fitInt <- glm(fmInt,data=data,weights=weights,family="binomial")
-      if(metric=="SL"){
-        PIC <- 1
-      }else{
-        if(intercept=="0"){
-          PIC <- Inf
-        }else{
-          PIC <- modelFitStat(metric,fitInt,"Likelihood")
-        }
-      }
-      bestPoint[1,-1] <- c(intercept,"",fitInt$rank,fitInt$rank,PIC)
-      if(!is.null(includeName)){
-        fmInc <- reformulate(xModel, yName)
-        fitInc <- glm(fmInc,data=data,weights=weights,family="binomial")
-        if(metric=="SL"){
-          PIC <- anova(fitInt,fitInc,test=test_method_logit)[2,'Pr(>Chi)']
-        }else{
-          PIC <- modelFitStat(metric,fitInc,"Likelihood")
-        }
-        subBestPoint[1,-1] <- c(paste0(includeName,collapse=" "),"",anova(fitInt,fitInc)[2,'Df'],fitInc$rank,PIC)
-        bestPoint <- rbind(bestPoint,subBestPoint)
-      }
-    }
-    while(TRUE){
-      if(addVar==TRUE){
-        fm0 <- reformulate(xModel, yName)
-        fit0 <- glm(fm0,data = data,weights=weights,family="binomial")
-        if(length(xResidual)==0){
-          break
-        }
-        xResidualList <- as.list(xResidual)
-        names(xResidualList) <- xResidual
-        fm1 <- lapply(xResidualList,function(x){reformulate(c(xModel,x),yName)})
-        fit1 <- lapply(fm1,function(x){glm(x,data=data,weights=weights,family="binomial")})
-        rank1 <- lapply(fit1,function(x){x$rank})
-        mulColVar <- names(which(fit0$rank == rank1))
-        if(length(mulColVar)>0){
-          fit1 <- fit1[!names(fit1) %in% mulColVar]
-        }
-        if(metric=="SL"){
-          threshold <- sle
-          PICset <- sapply(fit1,function(x){anova(fit0,x,test=test_method_logit)[2,'Pr(>Chi)']})
-        }else{
-          threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
-          PICset <- sapply(fit1,function(x){modelFitStat(metric,x,"Likelihood")})
-        }
-        mPIC <- min(PICset)
-        minmaxVar <- names(which.min(PICset))
-        minmaxFit1 <- fit1[[minmaxVar]]
-        if(mPIC < threshold){
-          indicator <- TRUE
-          xModel <- append(xModel,minmaxVar)
-          xResidual <- setdiff(xResidual,minmaxVar)
-          subBestPoint[1,-1] <- c(minmaxVar,"",anova(fit0,minmaxFit1)[2,'Df'],minmaxFit1$rank,mPIC)
-          bestPoint <- rbind(bestPoint,subBestPoint)
-        }else{
-          indicator <- FALSE
-        }
-      }else{
-        fm1 <- reformulate(xModel,yName)
-        fit1 <- glm(fm1,data=data,weights=weights,family="binomial")
-        xChcek <- setdiff(xModel,c(intercept,includeName))
-        if(is.null(xChcek)){
-          break
-        }
-        xChcekList <- as.list(xChcek)
-        names(xChcekList) <- xChcek
-        fm0 <- lapply(xChcekList,function(x){reformulate(setdiff(xModel,x),yName)})
-        fit0 <- lapply(fm0,function(x){glm(x,data=data,weights=weights,family="binomial")})
-        if(metric=="SL"){
-          threshold <- sls
-          PIC <- sapply(fit0,function(x){anova(x,fit1,test=test_method_logit)[2,'Pr(>Chi)']})
-          mPIC <- max(PIC)
-          minmaxVar <- names(which.max(PIC))
-          if(mPIC > threshold){
-            indicator <- TRUE
-          }else{
-            indicator <- FALSE
-          }
-        }else{
-          threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
-          PIC <- sapply(fit0,function(x){modelFitStat(metric,x,"Likelihood")})
-          mPIC <- min(PIC)
-          minmaxVar <- names(which.min(PIC))
-          if(mPIC < threshold){
-            indicator <- TRUE
-          }else{
-            indicator <- FALSE
-          }
-        }
-        if(indicator==TRUE){
-          minmaxFit0 <- fit0[[minmaxVar]]
-          xResidual <- append(xResidual,minmaxVar)
-          xModel <- setdiff(xModel,minmaxVar)
-          subBestPoint[1,-1] <- c("",minmaxVar,anova(minmaxFit0)[2,'Df'],minmaxFit0$rank,mPIC)
-          bestPoint <- rbind(bestPoint,subBestPoint)
-        }
-      }
-      ## change direction or stop for this while loop
-      if(indicator==TRUE){
-        if(strategy=="bidirection"){
-          if(addVar==TRUE){
-            addVar <- FALSE
-          }else{
-            addVar <- TRUE
-          }
-          next
-        }else{
-          next
-        }
-      }else{
-        if(strategy=="bidirection" && addVar==TRUE){
-          break
-        }else if(strategy=="bidirection" && addVar==FALSE){
-          addVar <- TRUE
-          next
-        }else if(strategy != "bidirecion"){
-          break
-        }
-      }
-    }#while
-    if(strategy!="backward"){
-      if(is.null(includeName)){
-        nInc <- 0
-      }else{
-        nInc <- 1
-      }
-      if(1+nInc<nrow(bestPoint)){
-        bestPoint[,1] <- c(rep(0,1+nInc),1:(nrow(bestPoint)-1-nInc))
-      }
-    }else{
-      bestPoint[,1] <- c(1:nrow(bestPoint))
-    }
-    result$'Process of Selection' <- bestPoint
-  }
-  lastModel <- reformulate(xModel,yName)
-  lastFit <- glm(lastModel,data=data,weights=weights,family="binomial")
-  MLE <- coef(summary(lastFit))
-  MLE <- data.frame(rownames(MLE),MLE)
-  colnames(MLE) <- c("Variable","Estimate","StdError","t.value","P.value")
-  variables <- as.data.frame(t(data.frame(xModel)))
-  colnames(variables) <- paste0("variables",1:length(xModel))
-  result$'Selected Varaibles' <- variables
-  result$'Coefficients of the Selected Variables' <- MLE
-  class(result) <- c("StepReg","list")
+    ## get intial stepwise model
+    out_init_stepwise <- getInitialStepwise(data,type,strategy,metric,weights,x_name,y_name,intercept,include,method=test_method_cox)
+    add_or_not <- out_init_stepwise$add_or_not
+    x_in_model <- out_init_stepwise$x_in_model
+    x_notin_model <- out_init_stepwise$x_notin_model
+    best_point <- out_init_stepwise$best_point
+    
+    ## get final stepwise model
+    out_final_stepwise <- getFinalStepModel(add_or_not,data,type,metric,weights,y_name,x_in_model,x_notin_model,intercept, include,test_method_cox,test_method_linear,test_method_logit)
+    x_in_model <- out_final_stepwise$x_in_model
+    best_point <- out_final_stepwise$best_point
+    
+    ## get table3-table5
+    table3 <- formatTable(best_point, tbl_name = "Table 3. Process of Selection")
+    table4 <- getTable4(include,x_in_model)
+    table5 <- getTable5(type,intercept,include,x_in_model,y_name,nY,data,test_method_cox)
+  #   subBestPoint <- data.frame(Step=numeric(),
+  #                              EnteredEffect=character(),
+  #                              RemovedEffect=character(),
+  #                              DF=numeric(),
+  #                              NumberIn=numeric(),
+  #                              metric=numeric())
+  #   colnames(subBestPoint)[6] <- metric
+  #   bestPoint <- subBestPoint
+  #   if(strategy=="backward"){
+  #     addVar <- FALSE
+  #     xModel <- c(intercept,includeName,setdiff(xName,includeName))
+  #     xResidual <- NULL
+  #     fmFull <- reformulate(xModel, yName)
+  #     fitFull <- glm(fmFull,data=data,weights=weights,family="binomial")
+  #     if(metric=="SL"){
+  #       PIC <- 1
+  #     }else{
+  #       PIC <- modelFitStat(metric,fitFull,"Likelihood")
+  #     }
+  #     bestPoint[1,-1] <- c("","",fitFull$rank,fitFull$rank,PIC)
+  #   }else{
+  #     addVar <- TRUE
+  #     xModel <- c(intercept,includeName)
+  #     xResidual <- setdiff(xName,includeName)
+  #     fmInt <- reformulate(intercept, yName)
+  #     fitInt <- glm(fmInt,data=data,weights=weights,family="binomial")
+  #     if(metric=="SL"){
+  #       PIC <- 1
+  #     }else{
+  #       if(intercept=="0"){
+  #         PIC <- Inf
+  #       }else{
+  #         PIC <- modelFitStat(metric,fitInt,"Likelihood")
+  #       }
+  #     }
+  #     bestPoint[1,-1] <- c(intercept,"",fitInt$rank,fitInt$rank,PIC)
+  #     if(!is.null(includeName)){
+  #       fmInc <- reformulate(xModel, yName)
+  #       fitInc <- glm(fmInc,data=data,weights=weights,family="binomial")
+  #       if(metric=="SL"){
+  #         PIC <- anova(fitInt,fitInc,test=test_method_logit)[2,'Pr(>Chi)']
+  #       }else{
+  #         PIC <- modelFitStat(metric,fitInc,"Likelihood")
+  #       }
+  #       subBestPoint[1,-1] <- c(paste0(includeName,collapse=" "),"",anova(fitInt,fitInc)[2,'Df'],fitInc$rank,PIC)
+  #       bestPoint <- rbind(bestPoint,subBestPoint)
+  #     }
+  #   }
+  #   while(TRUE){
+  #     if(addVar==TRUE){
+  #       fm0 <- reformulate(xModel, yName)
+  #       fit0 <- glm(fm0,data = data,weights=weights,family="binomial")
+  #       if(length(xResidual)==0){
+  #         break
+  #       }
+  #       xResidualList <- as.list(xResidual)
+  #       names(xResidualList) <- xResidual
+  #       fm1 <- lapply(xResidualList,function(x){reformulate(c(xModel,x),yName)})
+  #       fit1 <- lapply(fm1,function(x){glm(x,data=data,weights=weights,family="binomial")})
+  #       rank1 <- lapply(fit1,function(x){x$rank})
+  #       mulColVar <- names(which(fit0$rank == rank1))
+  #       if(length(mulColVar)>0){
+  #         fit1 <- fit1[!names(fit1) %in% mulColVar]
+  #       }
+  #       if(metric=="SL"){
+  #         threshold <- sle
+  #         PICset <- sapply(fit1,function(x){anova(fit0,x,test=test_method_logit)[2,'Pr(>Chi)']})
+  #       }else{
+  #         threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
+  #         PICset <- sapply(fit1,function(x){modelFitStat(metric,x,"Likelihood")})
+  #       }
+  #       mPIC <- min(PICset)
+  #       minmaxVar <- names(which.min(PICset))
+  #       minmaxFit1 <- fit1[[minmaxVar]]
+  #       if(mPIC < threshold){
+  #         indicator <- TRUE
+  #         xModel <- append(xModel,minmaxVar)
+  #         xResidual <- setdiff(xResidual,minmaxVar)
+  #         subBestPoint[1,-1] <- c(minmaxVar,"",anova(fit0,minmaxFit1)[2,'Df'],minmaxFit1$rank,mPIC)
+  #         bestPoint <- rbind(bestPoint,subBestPoint)
+  #       }else{
+  #         indicator <- FALSE
+  #       }
+  #     }else{
+  #       fm1 <- reformulate(xModel,yName)
+  #       fit1 <- glm(fm1,data=data,weights=weights,family="binomial")
+  #       xChcek <- setdiff(xModel,c(intercept,includeName))
+  #       if(is.null(xChcek)){
+  #         break
+  #       }
+  #       xChcekList <- as.list(xChcek)
+  #       names(xChcekList) <- xChcek
+  #       fm0 <- lapply(xChcekList,function(x){reformulate(setdiff(xModel,x),yName)})
+  #       fit0 <- lapply(fm0,function(x){glm(x,data=data,weights=weights,family="binomial")})
+  #       if(metric=="SL"){
+  #         threshold <- sls
+  #         PIC <- sapply(fit0,function(x){anova(x,fit1,test=test_method_logit)[2,'Pr(>Chi)']})
+  #         mPIC <- max(PIC)
+  #         minmaxVar <- names(which.max(PIC))
+  #         if(mPIC > threshold){
+  #           indicator <- TRUE
+  #         }else{
+  #           indicator <- FALSE
+  #         }
+  #       }else{
+  #         threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
+  #         PIC <- sapply(fit0,function(x){modelFitStat(metric,x,"Likelihood")})
+  #         mPIC <- min(PIC)
+  #         minmaxVar <- names(which.min(PIC))
+  #         if(mPIC < threshold){
+  #           indicator <- TRUE
+  #         }else{
+  #           indicator <- FALSE
+  #         }
+  #       }
+  #       if(indicator==TRUE){
+  #         minmaxFit0 <- fit0[[minmaxVar]]
+  #         xResidual <- append(xResidual,minmaxVar)
+  #         xModel <- setdiff(xModel,minmaxVar)
+  #         subBestPoint[1,-1] <- c("",minmaxVar,anova(minmaxFit0)[2,'Df'],minmaxFit0$rank,mPIC)
+  #         bestPoint <- rbind(bestPoint,subBestPoint)
+  #       }
+  #     }
+  #     ## change direction or stop for this while loop
+  #     if(indicator==TRUE){
+  #       if(strategy=="bidirection"){
+  #         if(addVar==TRUE){
+  #           addVar <- FALSE
+  #         }else{
+  #           addVar <- TRUE
+  #         }
+  #         next
+  #       }else{
+  #         next
+  #       }
+  #     }else{
+  #       if(strategy=="bidirection" && addVar==TRUE){
+  #         break
+  #       }else if(strategy=="bidirection" && addVar==FALSE){
+  #         addVar <- TRUE
+  #         next
+  #       }else if(strategy != "bidirecion"){
+  #         break
+  #       }
+  #     }
+  #   }#while
+  #   if(strategy!="backward"){
+  #     if(is.null(includeName)){
+  #       nInc <- 0
+  #     }else{
+  #       nInc <- 1
+  #     }
+  #     if(1+nInc<nrow(bestPoint)){
+  #       bestPoint[,1] <- c(rep(0,1+nInc),1:(nrow(bestPoint)-1-nInc))
+  #     }
+  #   }else{
+  #     bestPoint[,1] <- c(1:nrow(bestPoint))
+  #   }
+  #   result$'Process of Selection' <- bestPoint
+  # }
+  # lastModel <- reformulate(xModel,yName)
+  # lastFit <- glm(lastModel,data=data,weights=weights,family="binomial")
+  # MLE <- coef(summary(lastFit))
+  # MLE <- data.frame(rownames(MLE),MLE)
+  # colnames(MLE) <- c("Variable","Estimate","StdError","t.value","P.value")
+  # variables <- as.data.frame(t(data.frame(xModel)))
+  # colnames(variables) <- paste0("variables",1:length(xModel))
+  # result$'Selected Varaibles' <- variables
+  # result$'Coefficients of the Selected Variables' <- MLE
+  # class(result) <- c("StepReg","list")
   return(result)
 }

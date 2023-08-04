@@ -156,180 +156,196 @@ stepwiseCox <- function(formula,
     # }
   	
   }else{ #forward # bidirection # backward
-    subBestPoint <- data.frame(Step=numeric(),
-                               EnteredEffect=character(),
-                               RemovedEffect=character(),
-                               DF=numeric(),
-                               NumberIn=numeric(),
-                               metric=numeric())
-    colnames(subBestPoint)[6] <- metric
-    bestPoint <- subBestPoint
-    if(strategy=="backward"){
-      addVar <- FALSE
-      xModel <- c(includeName,setdiff(xName,includeName))
-      xResidual <- NULL
-      fmFull <- reformulate(xModel, yName)
-      fitFull <- survival::coxph(fmFull,data=data,weights=weights,method=test_method_cox)
-      if(metric=="SL"){
-        PIC <- 1
-      }else{
-        PIC <- modelFitStat(metric,fitFull,"Likelihood",TRUE)
-      }
-      k <- attr(logLik(fitFull),"df")
-      bestPoint[1,-1] <- c("","","",k,PIC)
-    }else{
-      addVar <- TRUE
-      xModel <- c(includeName)
-      xResidual <- setdiff(xName,includeName)
-      if(metric=="SL"){
-        PIC <- 1
-      }else{
-        PIC <- Inf
-      }
-      bestPoint[1,] <- c(0,"","",0,0,PIC)
-      if(!is.null(includeName)){
-        fmInt <- reformulate("0",yName)
-        fitInt <- survival::coxph(fmInt,data=data,weights=weights,method=test_method_cox)
-        fmInc <- reformulate(includeName,yName)
-        fitInc <- survival::coxph(fmInc,data=data,weights=weights,method=test_method_cox)
-        if(metric=="SL"){
-          PIC <- anova(fitInt,fitInc)[2,'Pr(>|Chi|)']
-        }else{
-          PIC <- modelFitStat(metric,fitInc,"Likelihood",TRUE)
-        }
-        k <- attr(logLik(fitInc),"df")
-        subBestPoint[1,-1] <- c(paste0(includeName,collapse=" "),"",anova(fitInt,fitInc)[2,'Df'],k,PIC)
-        bestPoint <- rbind(bestPoint,subBestPoint)
-      }
-    }
-    while(TRUE){
-      if(addVar==TRUE){
-        if(is.null(xModel)){
-          xMod <- "0"
-        }else{
-          xMod <- xModel
-        }
-        fm0 <- reformulate(xMod, yName)
-        fit0 <- survival::coxph(fm0,data = data,weights=weights,method=test_method_cox)
-        if(length(xResidual)==0){
-          break
-        }
-        xResidualList <- as.list(xResidual)
-        names(xResidualList) <- xResidual
-        fm1 <- lapply(xResidualList,function(x){reformulate(c(xModel,x),yName)})
-        fit1 <- lapply(fm1,function(x){survival::coxph(x,data = data,weights=weights,method=test_method_cox)})
-        if(metric=="SL"){
-          threshold <- sle
-          PICset <- sapply(fit1,function(x){anova(fit0,x)[2,'Pr(>|Chi|)']})
-        }else{
-          threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
-          PICset <- sapply(fit1,function(x){modelFitStat(metric,x,"Likelihood",TRUE)})
-        }
-        mPIC <- min(PICset)
-        minmaxVar <- names(which.min(PICset))
-        minmaxFit1 <- fit1[[minmaxVar]]
-        if(mPIC < threshold){
-          indicator <- TRUE
-          xModel <- append(xModel,minmaxVar)
-          xResidual <- setdiff(xResidual,minmaxVar)
-          k <- attr(logLik(minmaxFit1),"df")
-          subBestPoint[1,-1] <- c(minmaxVar,"",anova(fit0,minmaxFit1)[2,'Df'],k,mPIC)
-          bestPoint <- rbind(bestPoint,subBestPoint)
-        }else{
-          indicator <- FALSE
-        }
-      }else{
-        fm1 <- reformulate(xModel,yName)
-        fit1 <- survival::coxph(fm1,data=data,weights=weights,method=test_method_cox)
-        xChcek <- setdiff(xModel,c(includeName))
-        if(is.null(xChcek)){
-          break
-        }else if(length(xChcek)==1){
-          fm0 <- list(reformulate("0",yName))
-          names(fm0) <- xChcek
-        }else{
-          xChcekList <- as.list(xChcek)
-          names(xChcekList) <- xChcek
-          fm0 <- lapply(xChcekList,function(x){reformulate(setdiff(xModel,x),yName)})
-        }
-        fit0 <- lapply(fm0,function(x){survival::coxph(x,data=data,weights=weights,method=test_method_cox)})
-        if(metric=="SL"){
-          threshold <- sls
-          PIC <- sapply(fit0,function(x){anova(x,fit1)[2,'Pr(>|Chi|)']})
-          mPIC <- max(PIC)
-          minmaxVar <- names(which.max(PIC))
-          if(mPIC > threshold){
-            indicator <- TRUE
-          }else{
-            indicator <- FALSE
-          }
-        }else{
-          threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
-          PIC <- sapply(fit0,function(x){modelFitStat(metric,x,"Likelihood",TRUE)})
-          mPIC <- min(PIC)
-          minmaxVar <- names(which.min(PIC))
-          if(mPIC < threshold){
-            indicator <- TRUE
-          }else{
-            indicator <- FALSE
-          }
-        }
-        if(indicator==TRUE){
-          minmaxFit0 <- fit0[[minmaxVar]]
-          xResidual <- append(xResidual,minmaxVar)
-          xModel <- setdiff(xModel,minmaxVar)
-          k <- attr(logLik(minmaxFit0),"df")
-          subBestPoint[1,-1] <- c("",minmaxVar,anova(minmaxFit0)[2,'Df'],k,mPIC)
-          bestPoint <- rbind(bestPoint,subBestPoint)
-        }
-      }
-      ## change direction or stop for this while loop
-      if(indicator==TRUE){
-        if(strategy=="bidirection"){
-          if(addVar==TRUE){
-            addVar <- FALSE
-          }else{
-            addVar <- TRUE
-          }
-          next
-        }else{
-          next
-        }
-      }else{
-        if(strategy=="bidirection" && addVar==TRUE){
-          break
-        }else if(strategy=="bidirection" && addVar==FALSE){
-          addVar <- TRUE
-          next
-        }else if(strategy != "bidirecion"){
-          break
-        }
-      }
-    }#while
-    if(strategy!="backward"){
-      bestPoint <- bestPoint[-1,]
-      if(is.null(includeName)){
-        nInc <- 0
-      }else{
-        nInc <- 1
-      }
-      if(nInc<nrow(bestPoint)){
-        bestPoint[,1] <- c(rep(0,nInc),1:(nrow(bestPoint)-nInc))
-      }
-    }else{
-      bestPoint[,1] <- c(1:nrow(bestPoint)-1)
-    }
-    result$'Process of Selection' <- bestPoint
-  }
-  lastModel <- reformulate(xModel,yName)
-  lastFit <- survival::coxph(lastModel,data,weights=weights,method=test_method_cox)
-  MLE <- coef(summary(lastFit))
-  MLE <- as.data.frame(cbind(rownames(MLE),MLE))
-  colnames(MLE)[1] <- c("Variable")
-  variables <- as.data.frame(t(data.frame(xModel)))
-  colnames(variables) <- paste0("variables",1:length(xModel))
-  result$'Selected Varaibles' <- variables
-  result$'Coefficients of the Selected Variables' <- MLE
-  class(result) <- c("StepReg","list")
+    ## get intial stepwise model
+    out_init_stepwise <- getInitialStepwise(data,type,strategy,metric,weights,x_name,y_name,intercept,include,method=test_method_cox)
+    add_or_not <- out_init_stepwise$add_or_not
+    x_in_model <- out_init_stepwise$x_in_model
+    x_notin_model <- out_init_stepwise$x_notin_model
+    best_point <- out_init_stepwise$best_point
+    
+    ## get final stepwise model
+    out_final_stepwise <- getFinalStepModel(add_or_not,data,type,metric,weights,y_name,x_in_model,x_notin_model,intercept, include,test_method_cox,test_method_linear,test_method_logit)
+    x_in_model <- out_final_stepwise$x_in_model
+    best_point <- out_final_stepwise$best_point
+    
+    ## get table3-table5
+    table3 <- formatTable(best_point, tbl_name = "Table 3. Process of Selection")
+    table4 <- getTable4(include,x_in_model)
+    table5 <- getTable5(type,intercept,include,x_in_model,y_name,nY,data,test_method_cox)
+  #   subBestPoint <- data.frame(Step=numeric(),
+  #                              EnteredEffect=character(),
+  #                              RemovedEffect=character(),
+  #                              DF=numeric(),
+  #                              NumberIn=numeric(),
+  #                              metric=numeric())
+  #   colnames(subBestPoint)[6] <- metric
+  #   bestPoint <- subBestPoint
+  #   if(strategy=="backward"){
+  #     addVar <- FALSE
+  #     xModel <- c(includeName,setdiff(xName,includeName))
+  #     xResidual <- NULL
+  #     fmFull <- reformulate(xModel, yName)
+  #     fitFull <- survival::coxph(fmFull,data=data,weights=weights,method=test_method_cox)
+  #     if(metric=="SL"){
+  #       PIC <- 1
+  #     }else{
+  #       PIC <- modelFitStat(metric,fitFull,"Likelihood",TRUE)
+  #     }
+  #     k <- attr(logLik(fitFull),"df")
+  #     bestPoint[1,-1] <- c("","","",k,PIC)
+  #   }else{
+  #     addVar <- TRUE
+  #     xModel <- c(includeName)
+  #     xResidual <- setdiff(xName,includeName)
+  #     if(metric=="SL"){
+  #       PIC <- 1
+  #     }else{
+  #       PIC <- Inf
+  #     }
+  #     bestPoint[1,] <- c(0,"","",0,0,PIC)
+  #     if(!is.null(includeName)){
+  #       fmInt <- reformulate("0",yName)
+  #       fitInt <- survival::coxph(fmInt,data=data,weights=weights,method=test_method_cox)
+  #       fmInc <- reformulate(includeName,yName)
+  #       fitInc <- survival::coxph(fmInc,data=data,weights=weights,method=test_method_cox)
+  #       if(metric=="SL"){
+  #         PIC <- anova(fitInt,fitInc)[2,'Pr(>|Chi|)']
+  #       }else{
+  #         PIC <- modelFitStat(metric,fitInc,"Likelihood",TRUE)
+  #       }
+  #       k <- attr(logLik(fitInc),"df")
+  #       subBestPoint[1,-1] <- c(paste0(includeName,collapse=" "),"",anova(fitInt,fitInc)[2,'Df'],k,PIC)
+  #       bestPoint <- rbind(bestPoint,subBestPoint)
+  #     }
+  #   }
+  #   while(TRUE){
+  #     if(addVar==TRUE){
+  #       if(is.null(xModel)){
+  #         xMod <- "0"
+  #       }else{
+  #         xMod <- xModel
+  #       }
+  #       fm0 <- reformulate(xMod, yName)
+  #       fit0 <- survival::coxph(fm0,data = data,weights=weights,method=test_method_cox)
+  #       if(length(xResidual)==0){
+  #         break
+  #       }
+  #       xResidualList <- as.list(xResidual)
+  #       names(xResidualList) <- xResidual
+  #       fm1 <- lapply(xResidualList,function(x){reformulate(c(xModel,x),yName)})
+  #       fit1 <- lapply(fm1,function(x){survival::coxph(x,data = data,weights=weights,method=test_method_cox)})
+  #       if(metric=="SL"){
+  #         threshold <- sle
+  #         PICset <- sapply(fit1,function(x){anova(fit0,x)[2,'Pr(>|Chi|)']})
+  #       }else{
+  #         threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
+  #         PICset <- sapply(fit1,function(x){modelFitStat(metric,x,"Likelihood",TRUE)})
+  #       }
+  #       mPIC <- min(PICset)
+  #       minmaxVar <- names(which.min(PICset))
+  #       minmaxFit1 <- fit1[[minmaxVar]]
+  #       if(mPIC < threshold){
+  #         indicator <- TRUE
+  #         xModel <- append(xModel,minmaxVar)
+  #         xResidual <- setdiff(xResidual,minmaxVar)
+  #         k <- attr(logLik(minmaxFit1),"df")
+  #         subBestPoint[1,-1] <- c(minmaxVar,"",anova(fit0,minmaxFit1)[2,'Df'],k,mPIC)
+  #         bestPoint <- rbind(bestPoint,subBestPoint)
+  #       }else{
+  #         indicator <- FALSE
+  #       }
+  #     }else{
+  #       fm1 <- reformulate(xModel,yName)
+  #       fit1 <- survival::coxph(fm1,data=data,weights=weights,method=test_method_cox)
+  #       xChcek <- setdiff(xModel,c(includeName))
+  #       if(is.null(xChcek)){
+  #         break
+  #       }else if(length(xChcek)==1){
+  #         fm0 <- list(reformulate("0",yName))
+  #         names(fm0) <- xChcek
+  #       }else{
+  #         xChcekList <- as.list(xChcek)
+  #         names(xChcekList) <- xChcek
+  #         fm0 <- lapply(xChcekList,function(x){reformulate(setdiff(xModel,x),yName)})
+  #       }
+  #       fit0 <- lapply(fm0,function(x){survival::coxph(x,data=data,weights=weights,method=test_method_cox)})
+  #       if(metric=="SL"){
+  #         threshold <- sls
+  #         PIC <- sapply(fit0,function(x){anova(x,fit1)[2,'Pr(>|Chi|)']})
+  #         mPIC <- max(PIC)
+  #         minmaxVar <- names(which.max(PIC))
+  #         if(mPIC > threshold){
+  #           indicator <- TRUE
+  #         }else{
+  #           indicator <- FALSE
+  #         }
+  #       }else{
+  #         threshold <- as.numeric(bestPoint[nrow(bestPoint),6])
+  #         PIC <- sapply(fit0,function(x){modelFitStat(metric,x,"Likelihood",TRUE)})
+  #         mPIC <- min(PIC)
+  #         minmaxVar <- names(which.min(PIC))
+  #         if(mPIC < threshold){
+  #           indicator <- TRUE
+  #         }else{
+  #           indicator <- FALSE
+  #         }
+  #       }
+  #       if(indicator==TRUE){
+  #         minmaxFit0 <- fit0[[minmaxVar]]
+  #         xResidual <- append(xResidual,minmaxVar)
+  #         xModel <- setdiff(xModel,minmaxVar)
+  #         k <- attr(logLik(minmaxFit0),"df")
+  #         subBestPoint[1,-1] <- c("",minmaxVar,anova(minmaxFit0)[2,'Df'],k,mPIC)
+  #         bestPoint <- rbind(bestPoint,subBestPoint)
+  #       }
+  #     }
+  #     ## change direction or stop for this while loop
+  #     if(indicator==TRUE){
+  #       if(strategy=="bidirection"){
+  #         if(addVar==TRUE){
+  #           addVar <- FALSE
+  #         }else{
+  #           addVar <- TRUE
+  #         }
+  #         next
+  #       }else{
+  #         next
+  #       }
+  #     }else{
+  #       if(strategy=="bidirection" && addVar==TRUE){
+  #         break
+  #       }else if(strategy=="bidirection" && addVar==FALSE){
+  #         addVar <- TRUE
+  #         next
+  #       }else if(strategy != "bidirecion"){
+  #         break
+  #       }
+  #     }
+  #   }#while
+  #   if(strategy!="backward"){
+  #     bestPoint <- bestPoint[-1,]
+  #     if(is.null(includeName)){
+  #       nInc <- 0
+  #     }else{
+  #       nInc <- 1
+  #     }
+  #     if(nInc<nrow(bestPoint)){
+  #       bestPoint[,1] <- c(rep(0,nInc),1:(nrow(bestPoint)-nInc))
+  #     }
+  #   }else{
+  #     bestPoint[,1] <- c(1:nrow(bestPoint)-1)
+  #   }
+  #   result$'Process of Selection' <- bestPoint
+  # }
+  # lastModel <- reformulate(xModel,yName)
+  # lastFit <- survival::coxph(lastModel,data,weights=weights,method=test_method_cox)
+  # MLE <- coef(summary(lastFit))
+  # MLE <- as.data.frame(cbind(rownames(MLE),MLE))
+  # colnames(MLE)[1] <- c("Variable")
+  # variables <- as.data.frame(t(data.frame(xModel)))
+  # colnames(variables) <- paste0("variables",1:length(xModel))
+  # result$'Selected Varaibles' <- variables
+  # result$'Coefficients of the Selected Variables' <- MLE
+  # class(result) <- c("StepReg","list")
   return(result)
 }

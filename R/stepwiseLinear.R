@@ -182,200 +182,217 @@ stepwiseLinear <- function(
     #   xModel <- unlist(strsplit(finalResult[which.min(as.numeric(finalResult[,3])),4]," "))
     # }
   }else{
-    subBestPoint <- data.frame(Step=numeric(),
-                               EnteredEffect=character(),
-                               RemovedEffect=character(),
-                               DF=numeric(),
-                               NumberEffectIn=numeric(),
-                               NumberParmsIn=numeric(),
-                               metric=numeric())
-    colnames(subBestPoint)[7] <- metric
-    bestPoint <- subBestPoint
-    if(strategy == "backward"){
-      addIdx <- FALSE
-      xModel <- c(intercept,includeName,setdiff(xName,includeName))
-      xResidual <- NULL
-      if (metric == 'SL') {
-        PIC <- 1
-      }else{
-        PIC <- modelFitStat(metric,lmFull,"LeastSquare")
-      }
-      bestPoint[1,-1] <- c("","","",length(attr(lmFull$terms,"term.labels")),lmFull$rank,PIC)
-    }else{
-      addIdx <- TRUE
-      xModel <- c(intercept,includeName)
-      xResidual <- setdiff(xName,includeName)
-      fmInt <- reformulate(intercept, yName)
-      fitInt <- lm(fmInt,data=weightData)
-      if(metric == 'SL') {
-        PIC <- 1
-      }else{
-        if(intercept=='1'){
-          PIC <- modelFitStat(metric,fitInt,"LeastSquare")
-        }else{
-          if(metric %in% c("Rsq","adjRsq")){
-            PIC <- 0
-          }else{
-            PIC <- Inf
-          }
-        }
-      }
-      bestPoint[1,] <- c(0,intercept,"",fitInt$rank,length(attr(fitInt$terms,"term.labels")),fitInt$rank,PIC)
-      if(!is.null(includeName)){
-        fmInc <- reformulate(c(intercept,includeName),yName)
-        fitInc <- lm(fmInc,data=weightData)
-        if(metric == 'SL') {
-          PIC <- anova(fitInc,fitInt,test=approxF)[2,'Pr(>F)']
-        }else{
-          PIC <- modelFitStat(metric,fitInc,"LeastSquare")
-        }
-        subBestPoint[1,] <- c(0,mergeIncName,"",anova(fitInc,fitInt,test=approxF)[2,'Df'],length(attr(fitInt$terms,"term.labels")),fitInc$rank,PIC)
-        bestPoint <- rbind(bestPoint,subBestPoint)
-      }
-    }
-    while(TRUE){
-      fm0 <- reformulate(xModel,yName)
-      lmAlt <- lm(fm0,data=weightData)
-      if(addIdx==TRUE){
-        xCheck <- xResidual
-        if(length(xCheck)==0){
-          break
-        }
-        xCheckList <- as.list(xCheck)
-        names(xCheckList) <- xCheck
-        fmX <- lapply(xCheckList, function(x){reformulate(c(xModel,x),yName)})
-      }else{
-        xCheck <- setdiff(xModel,c(intercept,includeName))
-        if(length(xCheck)==0){
-          break
-        }
-        xCheckList <- as.list(xCheck)
-        names(xCheckList) <- xCheck
-        fmX <- lapply(xCheckList,function(x){reformulate(setdiff(xModel,x),yName)})
-      }
-      fitX <- lapply(fmX,function(x){lm(x,data=weightData)})
-      if(metric=="SL"){
-        PICset <- sapply(fitX,function(x){anova(x,lmAlt,test=approxF)[2,'Pr(>F)']})
-        Fset <- sapply(fitX,function(x){anova(x,lmAlt,test=approxF)[2,'F']})
-      }else{
-        if(addIdx==FALSE & length(xCheck)==1 & intercept=="0"){
-          PICset <- Inf
-          names(PICset) <- xCheck
-        }else{
-          PICset <- sapply(fitX,function(x){modelFitStat(metric,x,"LeastSquare")})
-        }
-      }
-      if(metric=="Rsq" | metric=="adjRsq" | (metric=="SL" & addIdx==FALSE)){
-        PIC <- max(PICset)
-        minmaxVar <- names(which.max(PICset))
-        bestLm <- fitX[[minmaxVar]]
-      }else{
-        PIC <- min(PICset)
-        minmaxVar <- names(which.min(PICset))
-        bestLm <- fitX[[minmaxVar]]
-        if(sum(PICset %in% PIC)>1 & metric=="SL"){
-          Fvalue <- max(Fset)
-          minmaxVar <- names(which.max(Fset))
-          bestLm <- fitX[[minmaxVar]]
-          PIC <- PICset[minmaxVar]
-        }
-      }
-      if(bestLm$rank==lmAlt$rank & addIdx==TRUE){
-        break
-      }else{
-        if(metric=='SL'){
-          if(addIdx==FALSE){
-            indicator <- PIC > sls
-          }else{
-            indicator <- PIC < sle
-          }
-        }else if(metric=='Rsq' | metric=='adjRsq'){
-          indicator <- PIC > as.numeric(bestPoint[nrow(bestPoint),7])
-        }else{
-          indicator <- PIC <= as.numeric(bestPoint[nrow(bestPoint),7])
-        }
-        if(indicator==TRUE){
-          #goodness of fit
-          smr <- summary(bestLm)
-          if(nY==1){
-            f <- smr$fstatistic
-            if(is.nan(f[1])){
-              pval <- NaN
-            }else{
-              pval <- pf(f[1],f[2],f[3],lower.tail=F)
-            }
-          }else{
-            for(ny in 1:nY){
-              f <- smr[[ny]]$fstatistic
-              if(is.nan(f[1])){
-                pval <- NaN
-              }else{
-                pval <- pf(f[1],f[2],f[3],lower.tail=F)
-              }
-            }
-          }
-          if(is.nan(pval)==TRUE & (metric!='Rsq' | metric!='adjRsq')){
-            break
-          }
-          if(addIdx==TRUE){
-            xModel <- append(xModel,minmaxVar)
-            xResidual <- setdiff(xResidual,minmaxVar)
-            subBestPoint[1,] <- c(as.numeric(bestPoint[nrow(bestPoint),1])+1,minmaxVar,"",anova(lmAlt,bestLm,test=approxF)[2,'Df'],length(attr(bestLm$terms,"term.labels")),bestLm$rank,PIC)
-          }else{
-            xResidual <- append(xResidual,minmaxVar)
-            xModel <- setdiff(xModel,minmaxVar)
-            subBestPoint[1,] <- c(as.numeric(bestPoint[nrow(bestPoint),1])+1,"",minmaxVar,anova(bestLm,lmAlt,test=approxF)[2,'Df'],length(attr(bestLm$terms,"term.labels")),bestLm$rank,PIC)
-          }
-          bestPoint <- rbind(bestPoint,subBestPoint)
-
-          if(strategy == 'bidirection'){
-            if(addIdx==FALSE){
-              next
-            }else{
-              addIdx <- FALSE
-              next
-            }
-          }else{
-            next
-          }
-        }else{
-          if(strategy == 'bidirection' & addIdx==FALSE) {
-            addIdx <- TRUE
-            next
-          }else{
-            break
-          }
-        }
-      }
-    }#while
-    bestPoint$DF <- abs(as.numeric(bestPoint$DF))
-    bestPoint$DF[is.na(bestPoint$DF)] <- ""
-    result$'Process of Selection' <- bestPoint
-  }
-  if(is.null(xModel)){
-    parEst <- NULL
-  }else{
-    parEst <- summary(lm(reformulate(xModel,yName),data=weightData))
-    parEstList <- list()
-    if(nY>1){
-      for(i in names(parEst)){
-        subParEst <- parEst[[i]]$coefficients
-        subParEst <- data.frame(rownames(subParEst),subParEst)
-        colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","P.value")
-        parEstList[i] <- list(subParEst)
-      }
-    }else{
-      subParEst <- parEst$coefficients
-      subParEst <- data.frame(rownames(subParEst),subParEst)
-      colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","P.value")
-      parEstList <- list(subParEst)
-      names(parEstList) <- yName
-    }
-  }
-  variables <- as.data.frame(t(data.frame(xModel)))
-  colnames(variables) <- paste0("variables",1:length(xModel))
-  result$'Selected Varaibles' <- variables
-  result$'Coefficients of the Selected Variables' <- parEstList
-  class(result) <- c("StepReg","list")
+    ## get intial stepwise model
+    out_init_stepwise <- getInitialStepwise(data,type,strategy,metric,weights,x_name,y_name,intercept,include,method=test_method_cox)
+    add_or_not <- out_init_stepwise$add_or_not
+    x_in_model <- out_init_stepwise$x_in_model
+    x_notin_model <- out_init_stepwise$x_notin_model
+    best_point <- out_init_stepwise$best_point
+    
+    ## get final stepwise model
+    out_final_stepwise <- getFinalStepModel(add_or_not,data,type,metric,weights,y_name,x_in_model,x_notin_model,intercept, include,test_method_cox,test_method_linear,test_method_logit)
+    x_in_model <- out_final_stepwise$x_in_model
+    best_point <- out_final_stepwise$best_point
+    
+    ## get table3-table5
+    table3 <- formatTable(best_point, tbl_name = "Table 3. Process of Selection")
+    table4 <- getTable4(include,x_in_model)
+    table5 <- getTable5(type,intercept,include,x_in_model,y_name,nY,data,test_method_cox)
+    
+  #   subBestPoint <- data.frame(Step=numeric(),
+  #                              EnteredEffect=character(),
+  #                              RemovedEffect=character(),
+  #                              DF=numeric(),
+  #                              NumberEffectIn=numeric(),
+  #                              NumberParmsIn=numeric(),
+  #                              metric=numeric())
+  #   colnames(subBestPoint)[7] <- metric
+  #   bestPoint <- subBestPoint
+  #   if(strategy == "backward"){
+  #     addIdx <- FALSE
+  #     xModel <- c(intercept,includeName,setdiff(xName,includeName))
+  #     xResidual <- NULL
+  #     if (metric == 'SL') {
+  #       PIC <- 1
+  #     }else{
+  #       PIC <- modelFitStat(metric,lmFull,"LeastSquare")
+  #     }
+  #     bestPoint[1,-1] <- c("","","",length(attr(lmFull$terms,"term.labels")),lmFull$rank,PIC)
+  #   }else{
+  #     addIdx <- TRUE
+  #     xModel <- c(intercept,includeName)
+  #     xResidual <- setdiff(xName,includeName)
+  #     fmInt <- reformulate(intercept, yName)
+  #     fitInt <- lm(fmInt,data=weightData)
+  #     if(metric == 'SL') {
+  #       PIC <- 1
+  #     }else{
+  #       if(intercept=='1'){
+  #         PIC <- modelFitStat(metric,fitInt,"LeastSquare")
+  #       }else{
+  #         if(metric %in% c("Rsq","adjRsq")){
+  #           PIC <- 0
+  #         }else{
+  #           PIC <- Inf
+  #         }
+  #       }
+  #     }
+  #     bestPoint[1,] <- c(0,intercept,"",fitInt$rank,length(attr(fitInt$terms,"term.labels")),fitInt$rank,PIC)
+  #     if(!is.null(includeName)){
+  #       fmInc <- reformulate(c(intercept,includeName),yName)
+  #       fitInc <- lm(fmInc,data=weightData)
+  #       if(metric == 'SL') {
+  #         PIC <- anova(fitInc,fitInt,test=approxF)[2,'Pr(>F)']
+  #       }else{
+  #         PIC <- modelFitStat(metric,fitInc,"LeastSquare")
+  #       }
+  #       subBestPoint[1,] <- c(0,mergeIncName,"",anova(fitInc,fitInt,test=approxF)[2,'Df'],length(attr(fitInt$terms,"term.labels")),fitInc$rank,PIC)
+  #       bestPoint <- rbind(bestPoint,subBestPoint)
+  #     }
+  #   }
+  #   while(TRUE){
+  #     fm0 <- reformulate(xModel,yName)
+  #     lmAlt <- lm(fm0,data=weightData)
+  #     if(addIdx==TRUE){
+  #       xCheck <- xResidual
+  #       if(length(xCheck)==0){
+  #         break
+  #       }
+  #       xCheckList <- as.list(xCheck)
+  #       names(xCheckList) <- xCheck
+  #       fmX <- lapply(xCheckList, function(x){reformulate(c(xModel,x),yName)})
+  #     }else{
+  #       xCheck <- setdiff(xModel,c(intercept,includeName))
+  #       if(length(xCheck)==0){
+  #         break
+  #       }
+  #       xCheckList <- as.list(xCheck)
+  #       names(xCheckList) <- xCheck
+  #       fmX <- lapply(xCheckList,function(x){reformulate(setdiff(xModel,x),yName)})
+  #     }
+  #     fitX <- lapply(fmX,function(x){lm(x,data=weightData)})
+  #     if(metric=="SL"){
+  #       PICset <- sapply(fitX,function(x){anova(x,lmAlt,test=approxF)[2,'Pr(>F)']})
+  #       Fset <- sapply(fitX,function(x){anova(x,lmAlt,test=approxF)[2,'F']})
+  #     }else{
+  #       if(addIdx==FALSE & length(xCheck)==1 & intercept=="0"){
+  #         PICset <- Inf
+  #         names(PICset) <- xCheck
+  #       }else{
+  #         PICset <- sapply(fitX,function(x){modelFitStat(metric,x,"LeastSquare")})
+  #       }
+  #     }
+  #     if(metric=="Rsq" | metric=="adjRsq" | (metric=="SL" & addIdx==FALSE)){
+  #       PIC <- max(PICset)
+  #       minmaxVar <- names(which.max(PICset))
+  #       bestLm <- fitX[[minmaxVar]]
+  #     }else{
+  #       PIC <- min(PICset)
+  #       minmaxVar <- names(which.min(PICset))
+  #       bestLm <- fitX[[minmaxVar]]
+  #       if(sum(PICset %in% PIC)>1 & metric=="SL"){
+  #         Fvalue <- max(Fset)
+  #         minmaxVar <- names(which.max(Fset))
+  #         bestLm <- fitX[[minmaxVar]]
+  #         PIC <- PICset[minmaxVar]
+  #       }
+  #     }
+  #     if(bestLm$rank==lmAlt$rank & addIdx==TRUE){
+  #       break
+  #     }else{
+  #       if(metric=='SL'){
+  #         if(addIdx==FALSE){
+  #           indicator <- PIC > sls
+  #         }else{
+  #           indicator <- PIC < sle
+  #         }
+  #       }else if(metric=='Rsq' | metric=='adjRsq'){
+  #         indicator <- PIC > as.numeric(bestPoint[nrow(bestPoint),7])
+  #       }else{
+  #         indicator <- PIC <= as.numeric(bestPoint[nrow(bestPoint),7])
+  #       }
+  #       if(indicator==TRUE){
+  #         #goodness of fit
+  #         smr <- summary(bestLm)
+  #         if(nY==1){
+  #           f <- smr$fstatistic
+  #           if(is.nan(f[1])){
+  #             pval <- NaN
+  #           }else{
+  #             pval <- pf(f[1],f[2],f[3],lower.tail=F)
+  #           }
+  #         }else{
+  #           for(ny in 1:nY){
+  #             f <- smr[[ny]]$fstatistic
+  #             if(is.nan(f[1])){
+  #               pval <- NaN
+  #             }else{
+  #               pval <- pf(f[1],f[2],f[3],lower.tail=F)
+  #             }
+  #           }
+  #         }
+  #         if(is.nan(pval)==TRUE & (metric!='Rsq' | metric!='adjRsq')){
+  #           break
+  #         }
+  #         if(addIdx==TRUE){
+  #           xModel <- append(xModel,minmaxVar)
+  #           xResidual <- setdiff(xResidual,minmaxVar)
+  #           subBestPoint[1,] <- c(as.numeric(bestPoint[nrow(bestPoint),1])+1,minmaxVar,"",anova(lmAlt,bestLm,test=approxF)[2,'Df'],length(attr(bestLm$terms,"term.labels")),bestLm$rank,PIC)
+  #         }else{
+  #           xResidual <- append(xResidual,minmaxVar)
+  #           xModel <- setdiff(xModel,minmaxVar)
+  #           subBestPoint[1,] <- c(as.numeric(bestPoint[nrow(bestPoint),1])+1,"",minmaxVar,anova(bestLm,lmAlt,test=approxF)[2,'Df'],length(attr(bestLm$terms,"term.labels")),bestLm$rank,PIC)
+  #         }
+  #         bestPoint <- rbind(bestPoint,subBestPoint)
+  # 
+  #         if(strategy == 'bidirection'){
+  #           if(addIdx==FALSE){
+  #             next
+  #           }else{
+  #             addIdx <- FALSE
+  #             next
+  #           }
+  #         }else{
+  #           next
+  #         }
+  #       }else{
+  #         if(strategy == 'bidirection' & addIdx==FALSE) {
+  #           addIdx <- TRUE
+  #           next
+  #         }else{
+  #           break
+  #         }
+  #       }
+  #     }
+  #   }#while
+  #   bestPoint$DF <- abs(as.numeric(bestPoint$DF))
+  #   bestPoint$DF[is.na(bestPoint$DF)] <- ""
+  #   result$'Process of Selection' <- bestPoint
+  # }
+  # if(is.null(xModel)){
+  #   parEst <- NULL
+  # }else{
+  #   parEst <- summary(lm(reformulate(xModel,yName),data=weightData))
+  #   parEstList <- list()
+  #   if(nY>1){
+  #     for(i in names(parEst)){
+  #       subParEst <- parEst[[i]]$coefficients
+  #       subParEst <- data.frame(rownames(subParEst),subParEst)
+  #       colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","P.value")
+  #       parEstList[i] <- list(subParEst)
+  #     }
+  #   }else{
+  #     subParEst <- parEst$coefficients
+  #     subParEst <- data.frame(rownames(subParEst),subParEst)
+  #     colnames(subParEst) <- c("Variable","Estimate","StdError","t.value","P.value")
+  #     parEstList <- list(subParEst)
+  #     names(parEstList) <- yName
+  #   }
+  # }
+  # variables <- as.data.frame(t(data.frame(xModel)))
+  # colnames(variables) <- paste0("variables",1:length(xModel))
+  # result$'Selected Varaibles' <- variables
+  # result$'Coefficients of the Selected Variables' <- parEstList
+  # class(result) <- c("StepReg","list")
   return(result)
 }
