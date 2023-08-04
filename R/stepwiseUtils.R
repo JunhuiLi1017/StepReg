@@ -945,23 +945,23 @@ getNumberEffect <- function(fit,type){
   return(vec)
 }
 
-initialSubBestPoint <- function(metric){
-  sub_best_point <- data.frame(Step=numeric(),
+initialProcessTable <- function(metric){
+  sub_init_process_table <- data.frame(Step=numeric(),
                                EnteredEffect=character(),
                                RemovedEffect=character(),
                                DF=numeric(),
                                NumberEffectIn=numeric(),
                                NumberParmsIn=numeric(),
                                metric=numeric())
-  colnames(sub_best_point)[ncol(sub_best_point)] <- metric
-  return(sub_best_point)
+  colnames(sub_init_process_table)[ncol(sub_init_process_table)] <- metric
+  return(sub_init_process_table)
 }
 
 ##getInitialStepwise -> getInitialModel
 ##getInitialSubset -> 
 getInitialStepwise <- function(data,type,strategy,metric,weights,x_name,y_name,intercept,include,method=c("efron","breslow","exact")){
-  sub_best_point <- initialSubBestPoint(metric)
-  best_point <- sub_best_point
+  sub_init_process_table <- initialProcessTable(metric)
+  process_table <- sub_init_process_table
   if(strategy == "backward"){
     add_or_remove <- "remove"
     #the order of variable in x_in_model will affect pic calculation.
@@ -971,7 +971,7 @@ getInitialStepwise <- function(data,type,strategy,metric,weights,x_name,y_name,i
     fit_full <- getModel(data=data, type=type, x_name=c(include,x_in_model), y_name=y_name, weights=weights, intercept=intercept)
     pic <- getInitStepModelStat(fit_intercept=NULL,fit_fm=fit_full,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method_cox=test_method_cox,test_method_linear=test_method_linear,test_method_logit=test_method_logit)
     num_eff_para_in <- getNumberEffect(fit=fit_full,type=type)
-    best_point[1,] <- c(rep("",3),num_eff_para_in,pic)
+    process_table[1,] <- c(rep("",3),num_eff_para_in,pic)
   }else{
     add_or_remove <- "add"
     x_in_model <- NULL
@@ -981,22 +981,22 @@ getInitialStepwise <- function(data,type,strategy,metric,weights,x_name,y_name,i
     fit_intercept <- getModel(data=data, type=type, x_name=NULL, y_name=y_name, weights=weights, intercept=intercept)
     pic <- getInitStepModelStat(fit_intercept=fit_intercept,fit_fm=fit_intercept,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method_cox=test_method_cox,test_method_linear=test_method_linear,test_method_logit=test_method_logit)
     num_eff_para_in <- getNumberEffect(fit=fit_intercept,type=type)
-    best_point[1,] <- c("",intercept,"",num_eff_para_in,pic)
+    process_table[1,] <- c("",intercept,"",num_eff_para_in,pic)
     ## for include
     if(!is.null(include)){
       #fit_include <- getModel(data=data, type=type, x_name=x_in_model, y_name=y_name, weights=weights, intercept=intercept, method=test_method_logit)
       fit_include <- getModel(data=data, type=type, x_name=include, y_name=y_name, weights=weights, intercept=intercept)
       pic <- getInitStepModelStat(fit_intercept=fit_intercept,fit_fm=fit_include,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method_cox=test_method_cox,test_method_linear=test_method_linear,test_method_logit=test_method_logit)
       num_eff_para_in <- getNumberEffect(fit=fit_include,type=type)
-      sub_best_point[1,] <- c("",paste0(include,collapse=" "),"",anova(fit_include,fit_intercept)[2,'Df'],num_eff_para_in[-1],pic)
-      best_point <- rbind(best_point,sub_best_point)
+      sub_init_process_table[1,] <- c("",paste0(include,collapse=" "),"",anova(fit_include,fit_intercept)[2,'Df'],num_eff_para_in[-1],pic)
+      process_table <- rbind(process_table,sub_init_process_table)
     }
   }
-  best_point$Step <- 0
-  return(list("add_or_remove"=add_or_remove,"x_in_model"=x_in_model,"x_notin_model"=x_notin_model,"best_point"=best_point))
+  process_table$Step <- 0
+  return(list("add_or_remove"=add_or_remove,"x_in_model"=x_in_model,"x_notin_model"=x_notin_model,"process_table"=process_table))
 }
 
-#addOrRemX2StepModel <- function(add_or_remove,data,type,strategy,metric,sle,sls,weights,y_name,x_in_model,x_notin_model,intercept, include,index,test_method_cox,test_method_linear,test_method_logit,best_point){
+#addOrRemX2StepModel <- function(add_or_remove,data,type,strategy,metric,sle,sls,weights,y_name,x_in_model,x_notin_model,intercept, include,index,test_method_cox,test_method_linear,test_method_logit,process_table){
 getCandStepModel <- function(add_or_remove,data,type,metric,weights,y_name,x_in_model,x_notin_model,intercept, include,test_method_cox,test_method_linear,test_method_logit){
   #fit_x_in_model <- getModel(data=data, type=type, x_name=x_in_model, y_name=y_name, weights=weights, intercept=intercept, method=test_method_cox)
   fit_x_in_model <- getModel(data=data, type=type, x_name=c(include,x_in_model), y_name=y_name, weights=weights, intercept=intercept)
@@ -1083,7 +1083,7 @@ getGoodnessFit <- function(best_candidate_model,y_name,metric){
   return(BREAK)
 }
 
-checkEnterOrRemove <- function(add_or_remove,best_candidate_model,type,metric,y_name,pic,sls,sle,best_point){
+checkEnterOrRemove <- function(add_or_remove,best_candidate_model,type,metric,y_name,pic,sls,sle,process_table){
   if(metric == 'SL'){
     if(add_or_remove == "remove"){
       indicator <- pic > sls
@@ -1091,9 +1091,9 @@ checkEnterOrRemove <- function(add_or_remove,best_candidate_model,type,metric,y_
       indicator <- pic < sle
     }
   }else if(metric == 'Rsq' | metric == 'adjRsq'){
-    indicator <- pic > as.numeric(best_point[nrow(best_point),7])
+    indicator <- pic > as.numeric(process_table[nrow(process_table),7])
   }else{
-    indicator <- pic <= as.numeric(best_point[nrow(best_point),7])
+    indicator <- pic <= as.numeric(process_table[nrow(process_table),7])
   }
   if(indicator == TRUE & type == "linear" & (metric != "Rsq"|metric != "adjRsq")){
     BREAK <- getGoodnessFit(best_candidate_model,y_name,metric)
@@ -1103,24 +1103,24 @@ checkEnterOrRemove <- function(add_or_remove,best_candidate_model,type,metric,y_
   return(c("indicator"=indicator,"BREAK"=BREAK))
 }
 
-updateXinModel <- function(add_or_remove,indicator,best_candidate_model,BREAK,pic,x_in_model,x_notin_model,best_point,minmax_var){
-  sub_best_point <- initialSubBestPoint(metric)
+updateXinModel <- function(add_or_remove,indicator,best_candidate_model,BREAK,pic,x_in_model,x_notin_model,process_table,minmax_var){
+  sub_init_process_table <- initialProcessTable(metric)
   if(indicator == TRUE & BREAK == FALSE){
     if(add_or_remove == "add"){
       x_in_model <- append(x_in_model,minmax_var)
       x_notin_model <- setdiff(x_notin_model,minmax_var)
-      sub_best_point[1,] <- c(as.numeric(best_point[nrow(best_point),1])+1,minmax_var,"",getNumberEffect(fit=best_candidate_model,type),pic)
+      sub_init_process_table[1,] <- c(as.numeric(process_table[nrow(process_table),1])+1,minmax_var,"",getNumberEffect(fit=best_candidate_model,type),pic)
     }else{
       x_notin_model <- append(x_notin_model,minmax_var)
       x_in_model <- setdiff(x_in_model,minmax_var)
-      sub_best_point[1,] <- c(as.numeric(best_point[nrow(best_point),1])+1,"",minmax_var,getNumberEffect(fit=best_candidate_model,type),pic)
+      sub_init_process_table[1,] <- c(as.numeric(process_table[nrow(process_table),1])+1,"",minmax_var,getNumberEffect(fit=best_candidate_model,type),pic)
     }
-    best_point <- rbind(best_point,sub_best_point)
-    #best_point[nrow(best_point),1] <- as.numeric(best_point[1,nrow(best_point)-1]) + 1
+    process_table <- rbind(process_table,sub_init_process_table)
+    #process_table[nrow(process_table),1] <- as.numeric(process_table[1,nrow(process_table)-1]) + 1
   }else{
     BREAK <- TRUE
   }
-  return(list("BREAK"=BREAK,"best_point"=best_point,"x_in_model"=x_in_model,"x_notin_model"=x_notin_model))
+  return(list("BREAK"=BREAK,"process_table"=process_table,"x_in_model"=x_in_model,"x_notin_model"=x_notin_model))
 }
 
 getFinalStepModel <- function(add_or_remove,data,type,metric,weights,y_name,x_in_model,x_notin_model,intercept, include,test_method_cox,test_method_linear,test_method_logit){
@@ -1144,17 +1144,17 @@ getFinalStepModel <- function(add_or_remove,data,type,metric,weights,y_name,x_in
       }
     }
     
-    out_check <- checkEnterOrRemove(add_or_remove,best_candidate_model,type,metric,y_name,pic,sls,sle,best_point)
+    out_check <- checkEnterOrRemove(add_or_remove,best_candidate_model,type,metric,y_name,pic,sls,sle,process_table)
     indicator <- out_check["indicator"]
     BREAK <- out_check["BREAK"]
     if(BREAK == TRUE){
       break
     }
     
-    out_updateX <- updateXinModel(add_or_remove,indicator,best_candidate_model,BREAK,pic,x_in_model,x_notin_model,best_point,minmax_var)
+    out_updateX <- updateXinModel(add_or_remove,indicator,best_candidate_model,BREAK,pic,x_in_model,x_notin_model,process_table,minmax_var)
     x_in_model <- out_updateX$x_in_model
     x_notin_model <- out_updateX$x_notin_model
-    best_point <- out_updateX$best_point
+    process_table <- out_updateX$process_table
     
     if(indicator == TRUE){
       if(strategy == 'bidirection'){
@@ -1177,12 +1177,12 @@ getFinalStepModel <- function(add_or_remove,data,type,metric,weights,y_name,x_in
     }
   }
   
-  best_point$DF <- abs(as.numeric(best_point$DF))
-  best_point$DF[is.na(best_point$DF)] <- ""
+  process_table$DF <- abs(as.numeric(process_table$DF))
+  process_table$DF[is.na(process_table$DF)] <- ""
   if(type == "cox" && strategy != "backward"){
-    best_point <- best_point[-1,]
+    process_table <- process_table[-1,]
   }
-  return(list("best_point"=best_point,"x_in_model"=x_in_model))
+  return(list("process_table"=process_table,"x_in_model"=x_in_model))
 }
 
 getTBLFianlVariable <- function(include,x_in_model){
