@@ -57,7 +57,8 @@
 #' data(mtcars)
 #' mtcars$yes <- mtcars$wt
 #' formula <- cbind(mpg,drat) ~ . + 0
-#' stepwise(formula=formula,
+#' stepwise(type = "linear",
+#'          formula=formula,
 #'          data=mtcars,
 #'          strategy="bidirection",
 #'          metric="AIC")
@@ -83,33 +84,73 @@ stepwise <- function(type = c("linear", "logit", "cox"),
                      tolerance = 1e-7,
                      weights = NULL,
                      best_n = Inf,
-										 output_excel = NULL){
-	## validate input:
-	## check required parameters
-	## place match.arg() in the main function because validationUtils.R can't return type even with <<-, and type represents all values in c().
-	type <- match.arg(type)
-	strategy <- match.arg(strategy)
-	metric <- match.arg(metric)
-	test_method_linear <- match.arg(test_method_linear)
-	test_method_logit <- match.arg(test_method_logit)
-	test_method_cox <- match.arg(test_method_cox)
-	
-	validateUtils(type = type, formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, weights = weights, tolerance = tolerance, best_n = best_n, excel_name = output_excel)
-	
-	## invoke corresponding function:
-	shared_params <- list(formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, weights = weights, best_n = best_n)
-	if(type == "linear"){
-		res <- do.call(stepwiseLinear, append(shared_params, list(test_method_linear = test_method_linear)))
-	}else if(type == "logit"){
-		res <- do.call(stepwiseLogit, append(shared_params, list(test_method_logit = test_method_logit)))
-	}else if(type == "cox"){
-	  res <- do.call(stepwiseCox, append(shared_params, list(test_method_cox = test_method_cox)))
-	}
-	class(alist) <- c("StepReg","list")
-	return(res)
-	
-	if(!is.null(excel_name)){
-		# also extract and generate excel output
-		test <- 1
-	}
+                     output_excel = NULL){
+  ## validate input:
+  ## check required parameters
+  ## place match.arg() in the main function because validationUtils.R can't return type even with <<-, and type represents all values in c().
+  type <- match.arg(type)
+  strategy <- match.arg(strategy)
+  metric <- match.arg(metric)
+  test_method_linear <- match.arg(test_method_linear)
+  test_method_logit <- match.arg(test_method_logit)
+  test_method_cox <- match.arg(test_method_cox)
+  
+  validateUtils(type = type, formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, weights = weights, tolerance = tolerance, best_n = best_n, excel_name = output_excel)
+  
+  x_name_orig <- getXname(formula, data)
+  y_name <- getYname(formula, data)
+  intercept <- getIntercept(formula, data, type = type) # char type
+  merged_include <- getMergedInclude(include)
+  model_raw <- getModel(data, type = type, x_name_orig, y_name, weights, intercept)
+  if(type == "linear"){
+    y_df <- as.matrix(model_raw$model[,y_name])
+    n_y <- ncol(y_df)
+  }else{
+    n_y <- 1
+  }
+
+  multico_x <- getMulticolX(data, x_name_orig, tolerance)
+  merged_multico_x <- paste0(multico_x, sep = " ")
+  x_name <- setdiff(x_name_orig, multico_x)
+  
+  if(type == "linear"){
+    test_method_linear <- getTestMethod(data, model_raw, metric, n_y, test_method_linear, test_method_logit, test_method_cox)
+  }
+    
+  result <- list()
+  ## table1
+  table1_para_value <- getTable1SummaryOfParameters(data, x_name_orig, y_name, merged_multico_x, merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept)
+  result$'Summary of Parameters' <- table1_para_value
+  
+  ## table2
+  table2_class_table <- getTable2TypeOfVariables(model_raw)
+  result$'Variables and Type' <- table2_class_table
+  
+  ## table3
+  if(strategy == "subset"){
+    table3_process_table <- getSubsetWrapper(data, type, metric, x_name, y_name, intercept, include, weights, best_n, test_method_cox)
+    result$'Process of Selection' <- table3_process_table
+    x_final_model <- getXNameSelected(table3_process_table)
+  } else {
+    out_final_stepwise <- getStepwiseWrapper(data,type=type,strategy,metric,weights,x_name,y_name,intercept,include,test_method_cox,test_method_linear,test_method_logit)
+    table3_process_table <- out_final_stepwise$process_table
+    x_in_model <- out_final_stepwise$x_in_model
+    x_final_model <- c(intercept,include,x_in_model)
+  }
+  result$"Process of Selection" <- table3_process_table
+  
+  ##table4
+  table4_x_in_model <- getTBLFianlVariable(x_final_model)
+  result$"Selected Varaibles" <- table4_x_in_model
+  
+  ##table5
+  table5_coef_model <- getTBLCoefModel(type=type,intercept,include,x_final_model,y_name,n_y,data,test_method_cox)
+  result$"Summary of Selected Variables" <- table5_coef_model
+  
+  if(!is.null(output_excel)){
+    # also extract and generate excel output
+    test <- 1
+  }
+  class(result) <- c("StepReg","list")
+  return(result)
 }

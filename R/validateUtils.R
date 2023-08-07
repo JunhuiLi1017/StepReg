@@ -5,7 +5,7 @@
 #' @return Stop and exit if any error detected in input parameters
 #' 
 #' @author Junhui Li, Kai Hu
-validateInputStepwise <- function(type = c("linear", "logit", "cox"),
+validateUtils <- function(type = c("linear", "logit", "cox"),
                                   formula,
                                   data,
                                   include = NULL,
