@@ -3,8 +3,6 @@
 S3method(print,StepReg)
 export(modelFitStat)
 export(stepwise)
-export(stepwiseCox)
-export(stepwiseLogit)
 import(survival)
 importFrom(dplyr,`%>%`)
 importFrom(dplyr,mutate_if)

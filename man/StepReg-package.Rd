@@ -13,21 +13,6 @@ The package provides functions to perform Stepwise Regression using various algo
 \tabular{ll}{ Package: \tab StepReg\cr Type: \tab Package\cr Version:
 \tab 1.4.4\cr GitHub: \tab https://github.com/JunhuiLi1017/StepReg\cr Date: \tab 2023-01-23\cr }
 }
-\examples{
-# exaple 1: stepwise logistic regression
-if(interactive()) {
-  data(mtcars)
-  formula <- vs ~ .
-  stepwiseLogit(formula,
-                data      = mtcars,
-                selection = "bidirection",
-                select    = "SL",
-                sle       = 0.15,
-                sls       = 0.15,
-                sigMethod = "Rao")
-}
-
-}
 \references{
 1. [to be added]
 }

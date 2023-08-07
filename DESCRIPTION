@@ -8,7 +8,7 @@ Description: Three most common types of stepwise regression including linear reg
 License: MIT + file LICENSE
 VignetteBuilder: knitr
 Suggests: knitr
-Imports: 
+Imports:
     dplyr,
     purrr,
     stringr,
