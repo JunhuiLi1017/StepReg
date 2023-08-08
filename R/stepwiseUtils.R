@@ -108,7 +108,7 @@ getTestMethod <- function(data, model_raw, type, metric, n_y, test_method_linear
 #' @param fit Object of linear model or general linear model
 #' 
 #' @param type "linear", "cox", or "logit": to calculate information criteria value; for "linear", the "Least Square" method will be used; for "cox" and "logit", "Maximum Likelyhood" method will be used.
-#' 
+
 getModelFitStat <- function(metric=c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SBC", "IC(3/2)", "IC(1)"), fit, type = c("linear","logit", "cox")){
 	# "LeastSquare" is for linear; "Likelihood" is for cox and logit; cox and logit are essentially the same except for sample size calculation.
 	if (type == "linear"){
