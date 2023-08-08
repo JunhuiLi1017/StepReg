@@ -70,7 +70,7 @@
 #' 
 #' @export
 #' 
-stepwise <- function(type = c("linear", "logit", "cox"),
+stepwise2 <- function(type = c("linear", "logit", "cox"),
                      formula,
                      data,
                      include = NULL,
@@ -102,24 +102,22 @@ stepwise <- function(type = c("linear", "logit", "cox"),
   intercept <- getIntercept(formula, data, type = type) # char type
   merged_include <- getMergedInclude(include)
   model_raw <- getModel(data, type = type, x_name_orig, y_name, weights, intercept)
-  if(type == "linear"){
+  if(type != "cox"){
     y_df <- as.matrix(model_raw$model[,y_name])
     n_y <- ncol(y_df)
   }else{
     n_y <- 1
   }
-
+  
+  test_method <- getTestMethod(data, model_raw, type, metric, n_y, test_method_linear, test_method_logit, test_method_cox)
+  
   multico_x <- getMulticolX(data, x_name_orig, tolerance)
   merged_multico_x <- paste0(multico_x, sep = " ")
   x_name <- setdiff(x_name_orig, multico_x)
-  
-  if(type == "linear"){
-    test_method_linear <- getTestMethod(data, model_raw, metric, n_y, test_method_linear, test_method_logit, test_method_cox)
-  }
     
   result <- list()
   ## table1
-  table1_para_value <- getTable1SummaryOfParameters(data, x_name_orig, y_name, merged_multico_x, merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept)
+  table1_para_value <- getTable1SummaryOfParameters(data, type, x_name_orig, y_name, merged_multico_x, merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept)
   result$'Summary of Parameters' <- table1_para_value
   
   ## table2
@@ -128,11 +126,11 @@ stepwise <- function(type = c("linear", "logit", "cox"),
   
   ## table3
   if(strategy == "subset"){
-    table3_process_table <- getSubsetWrapper(data, type, metric, x_name, y_name, intercept, include, weights, best_n, test_method_cox)
+    table3_process_table <- getSubsetWrapper(data, type, metric, x_name, y_name, intercept, include, weights, best_n, test_method)
     result$'Process of Selection' <- table3_process_table
     x_final_model <- getXNameSelected(table3_process_table)
-  } else {
-    out_final_stepwise <- getStepwiseWrapper(data,type=type,strategy,metric,weights,x_name,y_name,intercept,include,test_method_cox,test_method_linear,test_method_logit)
+  }else{
+    out_final_stepwise <- getStepwiseWrapper(data,type=type,strategy,metric,weights,x_name,y_name,intercept,include,test_method)
     table3_process_table <- out_final_stepwise$process_table
     x_in_model <- out_final_stepwise$x_in_model
     x_final_model <- c(intercept,include,x_in_model)
