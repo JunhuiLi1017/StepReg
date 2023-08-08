@@ -19,11 +19,12 @@ best_n = Inf
 excel_name = NULL
 #weight = NULL
 
-stepwise2(formula = formula,
+a <- stepwise2(formula = formula,
          data = mtcars,
          type  =  "linear",
          strategy = "bidirection",
          metric = "AIC")
+
 
 StepReg::stepwise(formula = formula,
           data = mtcars,
@@ -60,7 +61,7 @@ formula = Surv(time, status1) ~ . - status
 a2 <- stepwise2(formula = formula,
          data = my.data,
          type = "cox",
-         strategy = "bidirection",
+         strategy = "subset",
          metric = "AIC")
 #?stepwiseCox
 lung <- survival::lung
@@ -71,7 +72,7 @@ formula = Surv(time, status1) ~ . - status
 
 StepReg::stepwiseCox(formula=formula,
             data=my.data,
-            selection="bidirection",
+            selection="score",
             select="AIC",
             method="efron")
 

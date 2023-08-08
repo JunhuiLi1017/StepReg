@@ -52,7 +52,6 @@ getModel <- function(data, type, intercept, x_name, y_name, weight, method=c("ef
 		## cannot perform multivariate multiple regression in glm() function
 		#lm_raw <- glm(formula_raw,data = data, weights=weights, family="gaussian")
 		model_raw <- lm(formula_raw, data = data, weights = weight)
-	  #model_raw <- lm(formula_raw, data = data, weights = NULL)
 	}else if(type == "logit"){
 		model_raw <- glm(formula_raw, data = data, weights = weight, family = "binomial")
 	}else if(type == 'cox'){
@@ -667,7 +666,7 @@ getStepwiseWrapper <- function(data,type=type,strategy,metric,weight,x_name,y_na
   return(out_final_stepwise)
 }
 
-getTBLFianlVariable <- function(all_x_in_model){
+getTable4FinalVariable <- function(all_x_in_model){
   variables <- as.data.frame(t(data.frame(all_x_in_model)))
   colnames(variables) <- paste0("variable",1:ncol(variables))
   rownames(variables) <- c("x in model")
@@ -676,26 +675,26 @@ getTBLFianlVariable <- function(all_x_in_model){
   return(table4)
 }
 
-getTBLCoefModel <- function(type,intercept,include,x_in_model,y_name,n_y,data,weight,test_method){
+getTable5CoefModel <- function(type,intercept,include,x_in_model,y_name,n_y,data,weight,test_method){
   if(is.null(c(include,x_in_model))){
     summary_model <- NULL
   }else{
     summary_model <- summary(getModel(data, type, intercept=intercept, x_name=c(x_in_model), y_name, weight=weight,  method=test_method))
     summary_model_list <- list()
-    if(n_y>1){
+    if (n_y>1) {
       #i=names(summary_model)[1]
       for(i in names(summary_model)){
         subsummary_model <- summary_model[[i]]$coefficients
         col_name <- colnames(subsummary_model)
-        subsummary_model <- data.frame(rownames(subsummary_model),subsummary_model)
-        colnames(subsummary_model) <- c("Variable",col_name)
+        subsummary_model <- data.frame(rownames(subsummary_model), subsummary_model)
+        colnames(subsummary_model) <- c("Variable", col_name)
         summary_model_list[i] <- list(subsummary_model)
       }
-    }else{
+    } else {
       subsummary_model <- summary_model$coefficients
       col_name <- colnames(subsummary_model)
       subsummary_model <- data.frame(rownames(subsummary_model),subsummary_model)
-      colnames(subsummary_model) <- c("Variable",col_name)
+      colnames(subsummary_model) <- c("Variable", col_name)
       summary_model_list <- list(subsummary_model)
       names(summary_model_list) <- y_name
     }
