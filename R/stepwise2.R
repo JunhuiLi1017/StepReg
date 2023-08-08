@@ -134,7 +134,7 @@ stepwise2 <- function(formula,
     out_final_stepwise <- getStepwiseWrapper(data,type=type,strategy,metric,weight=weight,x_name,y_name,intercept,include,test_method)
     table3_process_table <- out_final_stepwise$process_table
     x_in_model <- out_final_stepwise$x_in_model
-    x_final_model <- c(intercept,include,x_in_model)
+    x_final_model <- c(include,x_in_model)
   }
   result$"Process of Selection" <- table3_process_table
   

@@ -23,8 +23,7 @@ stepwise2(formula = formula,
          data = mtcars,
          type  =  "linear",
          strategy = "bidirection",
-         metric = "AIC",
-         weight = NULL)
+         metric = "AIC")
 
 StepReg::stepwise(formula = formula,
           data = mtcars,
@@ -34,19 +33,6 @@ StepReg::stepwise(formula = formula,
 ## logit stepwise
 data(mtcars)
 formula <- vs ~ .
-
-type = "logit"
-data = mtcars
-strategy = "forward"
-metric = "SBC"
-include = NULL
-sle = 0.15
-sls = 0.15
-tolerance = 1e-7
-weight = NULL
-best_n = Inf
-excel_name = NULL
-
 
 stepwise2(formula,
          data = mtcars,
