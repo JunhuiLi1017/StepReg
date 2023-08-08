@@ -45,19 +45,20 @@ getMergedInclude <- function(include){
 	return(merge_include_name)
 }
 
-getModel <- function(data, type, x_name, y_name, weights, intercept, method=c("efron","breslow","exact")){
+getModel <- function(data, type, intercept, x_name, y_name, weight, method=c("efron","breslow","exact")){
 	# create a new formula given explicit x, y, and intercept, bypassed the x being .
 	formula_raw <- reformulate(c(intercept, x_name), y_name)
 	if(type == 'linear'){
 		## cannot perform multivariate multiple regression in glm() function
 		#lm_raw <- glm(formula_raw,data = data, weights=weights, family="gaussian")
-		model_raw <- lm(formula_raw, data = data, weights = weights)
+		model_raw <- lm(formula_raw, data = data, weights = weight)
+	  #model_raw <- lm(formula_raw, data = data, weights = NULL)
 	}else if(type == "logit"){
-		model_raw <- glm(formula_raw, data = data, weights = weights, family = "binomial")
+		model_raw <- glm(formula_raw, data = data, weights = weight, family = "binomial")
 	}else if(type == 'cox'){
 	  ## "method" is only used for cox regression
 	  method <- match.arg(method)
-		model_raw <- survival::coxph(formula_raw, data = data, weights = weights, method= method)
+		model_raw <- survival::coxph(formula_raw, data = data, weights = weight, method= method)
 	}
 	return(model_raw)
 }
@@ -171,18 +172,18 @@ getModelFitStat <- function(metric=c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "R
 	return(PIC)
 }
 
-getInitialSubSet <- function(data, type, metric, y_name, intercept, include, weights, test_method){
+getInitialSubSet <- function(data, type, metric, y_name, intercept, include, weight, test_method){
 	# obtain the initial model information: if no include variable, return NULL, otherwise return a matrix containing columns of "NumberOfVariables", metric, and "VariablesInModel"
 	# metric refers to PIC method, e.g. AIC, BIC, etc. for "logit" and "cox" type, if metric is "SL", the PIC is calculated differently
   initial_process_table <- NULL
   if (length(include) != 0){
     initial_process_table <- matrix(NA, 1, 3)
     colnames(initial_process_table) <- c("NumberOfVariables", metric, "VariablesInModel")
-    x_fit <- getModel(data=data, type=type, x_name=c(intercept,include), y_name=y_name, weights=weights, intercept=intercept, method=test_method)
+    x_fit <- getModel(data=data, type=type, intercept=intercept, x_name=c(intercept,include), y_name=y_name, weight=weight, method=test_method)
 
     if(metric == "SL"){
       if(type == "logit"){
-        fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weights, family = "binomial")
+        fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "binomial")
         f_pic_vec <- getAnovaStat(fit_reduced=fit_reduce,fit_full=x_fit,type=type,test_method="Rao")
         pic_set <- f_pic_vec[2]
       }else if(type == "cox"){
@@ -196,7 +197,7 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
   return(initial_process_table)
 }
 
-getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_table, y_name, include, weights, intercept, best_n = Inf, test_method){
+getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_table, y_name, include, weight, intercept, best_n = Inf, test_method){
 	process_table <- initial_process_table
 	for (nv in 1:length(x_notin_model)){
 		com_table <- as.data.frame(combn(x_notin_model, nv))
@@ -210,11 +211,11 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		colnames(com_table) <- com_var_set
 		x_test_list <- as.list(com_table)
 		x_name_list <- lapply(x_test_list,function(x){c(intercept, include, x)})
-		x_fit_list <- lapply(x_name_list,function(x){getModel(data=data, type=type, x_name=x, y_name=y_name, weights=weights, intercept=intercept, method=test_method)})
+		x_fit_list <- lapply(x_name_list,function(x){getModel(data=data, type=type, intercept=intercept, x_name=x, y_name=y_name, weight=weight, method=test_method)})
 		
 		if(metric == "SL"){
 		  if(type == "logit"){
-		    fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weights, family = "binomial")
+		    fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "binomial")
 		    f_pic_vec <- sapply(x_fit_list,function(x){getAnovaStat(fit_reduced=fit_reduce,fit_full=x,type=type,test_method="Rao")})
 		    pic_set <- f_pic_vec[2,]
 		  }else if(type == "cox"){
@@ -252,14 +253,14 @@ getXNameSelected <- function(process_table){
 	return(x_name_selected)
 }
 
-getSubsetWrapper <- function(data, type, metric, x_name, y_name, intercept, include, weights, best_n, test_method){
+getSubsetWrapper <- function(data, type, metric, x_name, y_name, intercept, include, weight, best_n, test_method){
   # a wrapper to obtain x_name_selected
 	## obtain initial model info
-	initial_process_table <- getInitialSubSet(data, type, metric, y_name, intercept, include, weights, test_method)
+	initial_process_table <- getInitialSubSet(data, type, metric, y_name, intercept, include, weight=weight, test_method)
 	
 	## obtain final model info
 	x_notin_model <- setdiff(x_name, include)
-	process_table <- getFinalSubSet(data, type, metric, x_notin_model, initial_process_table, y_name, include, weights, intercept, best_n, test_method)
+	process_table <- getFinalSubSet(data, type, metric, x_notin_model, initial_process_table, y_name, include, weight=weight, intercept, best_n, test_method)
 	
 	## add rownames to sort the variables in process_table when output
 	rownames(process_table) <- c(1:nrow(process_table))
@@ -436,9 +437,7 @@ initialProcessTable <- function(metric){
   return(sub_init_process_table)
 }
 
-##getInitialStepwise -> getInitialModel
-##getInitialSubset -> 
-getInitialStepwise <- function(data,type,strategy,metric,weights,x_name,y_name,intercept,include,test_method){
+getInitialStepwise <- function(data,type,strategy,metric,intercept,include,x_name,y_name,weight,test_method){
   sub_init_process_table <- initialProcessTable(metric)
   process_table <- sub_init_process_table
   if(strategy == "backward"){
@@ -446,7 +445,7 @@ getInitialStepwise <- function(data,type,strategy,metric,weights,x_name,y_name,i
     #the order of variable in x_in_model will affect pic calculation.
     x_in_model <- c(setdiff(x_name,include))
     x_notin_model <- NULL
-    fit_full <- getModel(data=data, type=type, x_name=c(include,x_in_model), y_name=y_name, weights=weights, intercept=intercept, method=test_method)
+    fit_full <- getModel(data=data, type=type, intercept=intercept, x_name=c(include,x_in_model), y_name=y_name, weight=weight, method=test_method)
     pic <- getInitStepModelStat(fit_intercept=NULL,fit_fm=fit_full,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method=test_method)
     num_eff_para_in <- getNumberEffect(fit=fit_full,type=type)
     process_table[1,] <- c(rep("",3),num_eff_para_in,pic)
@@ -455,13 +454,13 @@ getInitialStepwise <- function(data,type,strategy,metric,weights,x_name,y_name,i
     x_in_model <- NULL
     x_notin_model <- setdiff(x_name,include)
     ## for intercept
-    fit_intercept <- getModel(data=data, type=type, x_name=NULL, y_name=y_name, weights=weights, intercept=intercept, method=test_method)
+    fit_intercept <- getModel(data=data, type=type, intercept=intercept, x_name=NULL, y_name=y_name, weight=weight, method=test_method)
     pic <- getInitStepModelStat(fit_intercept=fit_intercept,fit_fm=fit_intercept,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method=test_method)
     num_eff_para_in <- getNumberEffect(fit=fit_intercept,type=type)
     process_table[1,] <- c("",intercept,"",num_eff_para_in,pic)
     ## for include
     if(!is.null(include)){
-      fit_include <- getModel(data=data, type=type, x_name=include, y_name=y_name, weights=weights, intercept=intercept, method=test_method)
+      fit_include <- getModel(data=data, type=type, intercept=intercept, x_name=include, y_name=y_name, weight=weight, method=test_method)
       pic <- getInitStepModelStat(fit_intercept=fit_intercept,fit_fm=fit_include,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method=test_method)
       num_eff_para_in <- getNumberEffect(fit=fit_include,type=type)
       sub_init_process_table[1,] <- c("",paste0(include,collapse=" "),"",anova(fit_include,fit_intercept)[2,'Df'],num_eff_para_in[-1],pic)
@@ -472,8 +471,8 @@ getInitialStepwise <- function(data,type,strategy,metric,weights,x_name,y_name,i
   return(list("add_or_remove"=add_or_remove,"x_in_model"=x_in_model,"x_notin_model"=x_notin_model,"process_table"=process_table))
 }
 
-getCandStepModel <- function(add_or_remove,data,type,metric,weights,y_name,x_in_model,x_notin_model,intercept, include, test_method){
-  fit_x_in_model <- getModel(data=data, type=type, x_name=c(include,x_in_model), y_name=y_name, weights=weights, intercept=intercept, method=test_method)
+getCandStepModel <- function(add_or_remove,data,type,metric,weight,y_name,x_in_model,x_notin_model,intercept, include, test_method){
+  fit_x_in_model <- getModel(data=data, type=type, intercept=intercept, x_name=c(include,x_in_model), y_name=y_name, weight=weight, method=test_method)
   BREAK <- FALSE
   if(add_or_remove == "add"){
     x_test <- x_notin_model
@@ -490,7 +489,7 @@ getCandStepModel <- function(add_or_remove,data,type,metric,weights,y_name,x_in_
   }else{
     x_name_list <- lapply(x_test_list,function(x){setdiff(x_in_model,x)})
   }
-  x_fit_list <- lapply(x_name_list,function(x){getModel(data=data, type=type, x_name=c(include,x), y_name=y_name, weights=weights, intercept=intercept, method=test_method)})
+  x_fit_list <- lapply(x_name_list,function(x){getModel(data=data, type=type, intercept=intercept, x_name=c(include,x), y_name=y_name, weight=weight, method=test_method)})
 
   if(metric == "SL"){
     f_pic_vec <- sapply(x_fit_list,function(x){getAnovaStat(fit_reduced=x,fit_full=fit_x_in_model,type=type,test_method=test_method)})
@@ -595,9 +594,9 @@ updateXinModel <- function(add_or_remove,indicator,best_candidate_model,type,met
   return(list("BREAK"=BREAK,"process_table"=process_table,"x_in_model"=x_in_model,"x_notin_model"=x_notin_model))
 }
 
-getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,weights,y_name,x_in_model,x_notin_model,intercept, include,process_table,test_method){
+getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,weight,y_name,x_in_model,x_notin_model,intercept, include,process_table,test_method){
   while(TRUE){
-    out_cand_stepwise <- getCandStepModel(add_or_remove,data,type,metric,weights,y_name,x_in_model,x_notin_model,intercept, include,test_method)
+    out_cand_stepwise <- getCandStepModel(add_or_remove,data,type,metric,weight=weight,y_name,x_in_model,x_notin_model,intercept, include,test_method)
     BREAK <- out_cand_stepwise$BREAK
     minmax_var <- out_cand_stepwise$minmax_var
     if(BREAK == TRUE){
@@ -656,15 +655,15 @@ getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,weights,y_
   return(list("process_table"=process_table,"x_in_model"=x_in_model))
 }
 
-getStepwiseWrapper <- function(data,type=type,strategy,metric,weights,x_name,y_name,intercept,include,test_method){
-  out_init_stepwise <- getInitialStepwise(data,type=type,strategy,metric,weights,x_name,y_name,intercept,include,test_method=test_method)
+getStepwiseWrapper <- function(data,type=type,strategy,metric,weight,x_name,y_name,intercept,include,test_method){
+  out_init_stepwise <- getInitialStepwise(data,type=type,strategy,metric,intercept,include,x_name,y_name,weight=weight,test_method=test_method)
   add_or_remove <- out_init_stepwise$add_or_remove
   x_in_model <- out_init_stepwise$x_in_model
   x_notin_model <- out_init_stepwise$x_notin_model
   process_table <- out_init_stepwise$process_table
   
   ## get final stepwise model
-  out_final_stepwise <- getFinalStepModel(add_or_remove,data,type=type,strategy,metric,weights,y_name,x_in_model,x_notin_model,intercept, include, process_table, test_method)
+  out_final_stepwise <- getFinalStepModel(add_or_remove,data,type=type,strategy,metric,weight=weight,y_name,x_in_model,x_notin_model,intercept, include, process_table, test_method)
   return(out_final_stepwise)
 }
 
@@ -677,11 +676,11 @@ getTBLFianlVariable <- function(all_x_in_model){
   return(table4)
 }
 
-getTBLCoefModel <- function(type,intercept,include,x_in_model,y_name,n_y,data,test_method){
+getTBLCoefModel <- function(type,intercept,include,x_in_model,y_name,n_y,data,weight,test_method){
   if(is.null(c(include,x_in_model))){
     summary_model <- NULL
   }else{
-    summary_model <- summary(getModel(data, type, x_name=c(x_in_model), y_name, weights, intercept, method=test_method))
+    summary_model <- summary(getModel(data, type, intercept=intercept, x_name=c(x_in_model), y_name, weight=weight,  method=test_method))
     summary_model_list <- list()
     if(n_y>1){
       #i=names(summary_model)[1]

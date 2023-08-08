@@ -5,21 +5,22 @@
 #' @return Stop and exit if any error detected in input parameters
 #' 
 #' @author Junhui Li, Kai Hu
-validateUtils <- function(type = c("linear", "logit", "cox"),
-                                  formula,
-                                  data,
-                                  include = NULL,
-                                  strategy = c("forward", "backward", "bidirectional", "subset"),
-                                  metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
-                                  sle = 0.15,
-                                  sls = 0.15,
-                                  test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
-                                  test_method_logit = c("Rao", "LRT"),
-                                  test_method_cox = c("efron", "breslow", "exact"),
-																	tolerance = 10e-7,
-																	weights = NULL,
-                                  best_n = Inf,
-																	excel_name = NULL) {
+#' 
+validateUtils <- function(formula,
+                          data,
+                          type = c("linear", "logit", "cox"),
+                          include = NULL,
+                          strategy = c("forward", "backward", "bidirectional", "subset"),
+                          metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
+                          sle = 0.15,
+                          sls = 0.15,
+                          test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
+                          test_method_logit = c("Rao", "LRT"),
+                          test_method_cox = c("efron", "breslow", "exact"),
+													tolerance = 10e-7,
+													weight = NULL,
+                          best_n = Inf,
+													excel_name = NULL) {
 	## check required parameters
 	if(missing(data)){ 
 		stop("'data' parameter is missing.") 
@@ -107,12 +108,11 @@ validateUtils <- function(type = c("linear", "logit", "cox"),
 	}
 	
 	## check 'weights'
-	predictor_variable_n <- length(all.vars(formula[[3]]))
-	if(!is.null(weights)){
-		if(!is.numeric(weights)){
-			stop("the 'weights' must be a numeric vector.")
-		}else if(length(weights) != predictor_variable_n){
-			stop("the length of the 'weights' vector must equal the number of predictor variables specified in the 'formula'.")
+	if(!is.null(weight)){
+		if(!is.numeric(weight)){
+			stop("the 'weight' must be a numeric vector.")
+		}else if(length(weight) != nrow(data)){
+			stop("the length of the 'weight' vector must equal the number of observation of dataset.")
 		}
 	}
 	

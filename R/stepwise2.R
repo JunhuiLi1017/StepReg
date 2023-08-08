@@ -2,11 +2,11 @@
 #' 
 #' Stepwise regression is a common technique used for automatically selecting predictor variable(s) (independent) to determine an optimal model for the prediction of the response variable(s) (dependent). The StepReg package supports three types of models: linear regression, logistic regression, and Cox regression. Meanwhile, multiple model fit scoring methods are implemented.
 #' 
-#' @param type (character) The stepwise regression type. Choose from 'linear', 'logit', and 'cox'. Default is 'linear'.
-#' 
 #' @param formula (formula) The formula used for model fitting. The formula takes the form of a '~' (tilde) symbol, with the response variable(s) on the left-hand side, and the predictor variable(s) on the right-hand side. The 'lm()' function uses this formula to fit a regression model. A formula can be as simple as 'y ~ x'. For multiple predictors, they must be separated by the '+' (plus) symbol, e.g. 'y ~ x1 + x2'. To include an interaction term between variables, use the ':' (colon) symbol: 'y ~ x1 + x1:x2'. Use the '.' (dot) symbol to indicate that all other variables in the dataset should be included as predictors, e.g. 'y ~ .'. In the case of multiple response variables (multivariate), the formula can be specified as 'cbind(y1, y2) ~ x1 + x2'. By default, an intercept term is always included in the models, to exclude it, include '0' or '- 1' in your formula: 'y ~ 0 + x1', 'y ~ x1 + 0', and 'y ~ x1 - 1'.
 #' 
 #' @param data (data.frame) A dataset consisting of predictor variable(s) and response variable(s).
+#' 
+#' @param type (character) The stepwise regression type. Choose from 'linear', 'logit', and 'cox'. Default is 'linear'.
 #' 
 #' @param include (NULL|character) A character vector specifying predictor variables that will always stay in the model. A subset of the predictors in the dataset.
 #' 
@@ -20,7 +20,7 @@
 #' 
 #' @param tolerance (numeric)  A statistical measure used to assess multicollinearity in a multiple regression model. It is calculated as the proportion of the variance in a predictor variable that is not accounted for by the other predictor variables in the model. Default is 1e-07.
 #' 
-#' @param weights (numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weights reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weights should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is NULL, which means that all weights are set equal.
+#' @param weight (numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weight reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weight should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is NULL, which means that all weight are set equal.
 #' 
 #' @param test_method_linear (character) Test method for multivariate linear regression analysis, choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'. Default is 'Pillai'. For univariate regression, 'F-test' will be used. 
 #' 
@@ -70,9 +70,9 @@
 #' 
 #' @export
 #' 
-stepwise2 <- function(type = c("linear", "logit", "cox"),
-                     formula,
+stepwise2 <- function(formula,
                      data,
+                     type = c("linear", "logit", "cox"),
                      include = NULL,
                      strategy = c("forward", "backward", "bidirection", "subset"),
                      metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
@@ -82,26 +82,27 @@ stepwise2 <- function(type = c("linear", "logit", "cox"),
                      test_method_logit = c("Rao", "LRT"),
                      test_method_cox = c("efron", "breslow", "exact"),
                      tolerance = 1e-7,
-                     weights = NULL,
+                     weight = NULL,
                      best_n = Inf,
-                     output_excel = NULL){
+                     excel_name = NULL){
   ## validate input:
   ## check required parameters
   ## place match.arg() in the main function because validationUtils.R can't return type even with <<-, and type represents all values in c().
   type <- match.arg(type)
   strategy <- match.arg(strategy)
   metric <- match.arg(metric)
+  
   test_method_linear <- match.arg(test_method_linear)
   test_method_logit <- match.arg(test_method_logit)
   test_method_cox <- match.arg(test_method_cox)
   
-  validateUtils(type = type, formula = formula, data = data, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, weights = weights, tolerance = tolerance, best_n = best_n, excel_name = output_excel)
+  validateUtils(formula = formula, data = data, type = type, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, tolerance = tolerance, weight = weight, best_n = best_n, excel_name = excel_name)
   
   x_name_orig <- getXname(formula, data)
   y_name <- getYname(formula, data)
   intercept <- getIntercept(formula, data, type = type) # char type
   merged_include <- getMergedInclude(include)
-  model_raw <- getModel(data, type = type, x_name_orig, y_name, weights, intercept)
+  model_raw <- getModel(data, type = type, intercept=intercept, x_name_orig, y_name, weight=weight, method=test_method_cox)
   if(type != "cox"){
     y_df <- as.matrix(model_raw$model[,y_name])
     n_y <- ncol(y_df)
@@ -126,11 +127,11 @@ stepwise2 <- function(type = c("linear", "logit", "cox"),
   
   ## table3
   if(strategy == "subset"){
-    table3_process_table <- getSubsetWrapper(data, type, metric, x_name, y_name, intercept, include, weights, best_n, test_method)
+    table3_process_table <- getSubsetWrapper(data, type, metric, x_name, y_name, intercept, include, weight=weight, best_n, test_method)
     result$'Process of Selection' <- table3_process_table
     x_final_model <- getXNameSelected(table3_process_table)
   }else{
-    out_final_stepwise <- getStepwiseWrapper(data,type=type,strategy,metric,weights,x_name,y_name,intercept,include,test_method)
+    out_final_stepwise <- getStepwiseWrapper(data,type=type,strategy,metric,weight=weight,x_name,y_name,intercept,include,test_method)
     table3_process_table <- out_final_stepwise$process_table
     x_in_model <- out_final_stepwise$x_in_model
     x_final_model <- c(intercept,include,x_in_model)
@@ -142,10 +143,10 @@ stepwise2 <- function(type = c("linear", "logit", "cox"),
   result$"Selected Varaibles" <- table4_x_in_model
   
   ##table5
-  table5_coef_model <- getTBLCoefModel(type=type,intercept,include,x_final_model,y_name,n_y,data,test_method_cox)
+  table5_coef_model <- getTBLCoefModel(type=type,intercept,include,x_final_model,y_name,n_y,data,weight,test_method_cox)
   result$"Summary of Selected Variables" <- table5_coef_model
   
-  if(!is.null(output_excel)){
+  if(!is.null(excel_name)){
     # also extract and generate excel output
     test <- 1
   }
