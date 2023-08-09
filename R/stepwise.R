@@ -117,7 +117,6 @@ stepwise <- function(formula,
   x_name <- setdiff(x_name_orig, multico_x)
     
   result <- list()
-
   ## table1
   table1_para_value <- getTable1SummaryOfParameters(data, type, x_name_orig, y_name, merged_multico_x, merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept)
   result$'Summary of Parameters' <- table1_para_value
@@ -144,11 +143,16 @@ stepwise <- function(formula,
   
   ##table5
   table5_coef_model <- getTable5CoefModel(type=type,intercept,include,x_final_model,y_name,n_y,data,weight,test_method_cox)
-  result$"Summary of Selected Variables" <- table5_coef_model
-  
+  if(length(table5_coef_model) > 1){
+    for(i in names(table5_coef_model)){
+      result[[paste0("Summary Model for ",i)]] <- table5_coef_model[[i]]
+    }
+  }else{
+    result$"Summary Model" <- table5_coef_model
+  }
+
   if(!is.null(excel_name)){
-    # also extract and generate excel output
-    test <- 1
+    openxlsx::write.xlsx(x=result, file=paste0(excel_name,".xlsx"))
   }
   class(result) <- c("StepReg","list")
   return(result)
