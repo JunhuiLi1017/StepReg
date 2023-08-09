@@ -129,7 +129,7 @@ stepwise <- function(formula,
   ## table3
   if(strategy == "subset"){
     table3_process_table <- getSubsetWrapper(data, type, metric, x_name, y_name, intercept, include, weight=weight, best_n, test_method)
-    x_final_model <- getXNameSelected(table3_process_table)
+    x_final_model <- getXNameSelected(table3_process_table,metric)
   }else{
     out_final_stepwise <- getStepwiseWrapper(data,type=type,strategy,metric,weight=weight,x_name,y_name,intercept,include,test_method)
     table3_process_table <- out_final_stepwise$process_table

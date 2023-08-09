@@ -241,7 +241,7 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 	return(process_table)
 }
 
-getXNameSelected <- function(process_table){
+getXNameSelected <- function(process_table,metric){
 	if (metric %in% c("SL", "Rsq", "adjRsq")){
 		# "Rsq" and "adjRsq" are for type "linear"; "SL" is for type "logit" and "cox"
 		x_name_selected <- unlist(strsplit(process_table[which.max(as.numeric(process_table[, 2])), 3]," "))

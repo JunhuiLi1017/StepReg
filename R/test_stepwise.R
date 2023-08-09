@@ -19,7 +19,7 @@ best_n = Inf
 excel_name = NULL
 #weight = NULL
 
-a <- stepwise2(formula = formula,
+a <- stepwise(formula = formula,
          data = mtcars,
          type  =  "linear",
          strategy = "bidirection",
@@ -35,7 +35,7 @@ StepReg::stepwise(formula = formula,
 data(mtcars)
 formula <- vs ~ .
 
-stepwise2(formula,
+stepwise(formula,
          data = mtcars,
          type = "logit",
          strategy = "forward",
@@ -58,7 +58,7 @@ my.data <- na.omit(lung)
 my.data$status1 <- ifelse(my.data$status==2,1,0)
 formula = Surv(time, status1) ~ . - status 
 
-a2 <- stepwise2(formula = formula,
+a2 <- stepwise(formula = formula,
          data = my.data,
          type = "cox",
          strategy = "subset",
