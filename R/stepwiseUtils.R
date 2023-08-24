@@ -483,43 +483,45 @@ getCandStepModel <- function(add_or_remove,data,type,metric,weight,y_name,x_in_m
   if(length(x_test) == 0){
     BREAK <- TRUE
   }
-  if(add_or_remove == "add"){
-    x_name_list <- lapply(x_test_list,function(x){c(x_in_model,x)})
-  }else{
-    x_name_list <- lapply(x_test_list,function(x){setdiff(x_in_model,x)})
-  }
-  x_fit_list <- lapply(x_name_list,function(x){getModel(data=data, type=type, intercept=intercept, x_name=c(include,x), y_name=y_name, weight=weight, method=test_method)})
-
-  if(metric == "SL"){
-    f_pic_vec <- sapply(x_fit_list,function(x){getAnovaStat(fit_reduced=x,fit_full=fit_x_in_model,type=type,test_method=test_method)})
-    pic_set <- f_pic_vec[2,]
-    f_set <- f_pic_vec[1,]
-  }else{
-    if(add_or_remove == "remove" & length(x_test) == 1 & intercept == "0"){
-      pic_set <- Inf
-      names(pic_set) <- x_test
+  if(BREAK == FALSE){
+    if(add_or_remove == "add"){
+      x_name_list <- lapply(x_test_list,function(x){c(x_in_model,x)})
     }else{
-      pic_set <- sapply(x_fit_list,function(x){getModelFitStat(metric,x,type)})
+      x_name_list <- lapply(x_test_list,function(x){setdiff(x_in_model,x)})
     }
-  }
-  if(metric == "Rsq" | metric == "adjRsq" | (metric == "SL" & add_or_remove == "remove")){
-    pic <- max(pic_set)
-    minmax_var <- names(which.max(pic_set))
-    best_candidate_model <- x_fit_list[[minmax_var]]
-  }else{
-    pic <- min(pic_set)
-    minmax_var <- names(which.min(pic_set))
-    best_candidate_model <- x_fit_list[[minmax_var]]
-    if(sum(pic_set %in% pic) > 1 & metric == "SL"){
-      Fvalue <- max(f_set)
-      minmax_var <- names(which.max(f_set))
+    x_fit_list <- lapply(x_name_list,function(x){getModel(data=data, type=type, intercept=intercept, x_name=c(include,x), y_name=y_name, weight=weight, method=test_method)})
+    
+    if(metric == "SL"){
+      f_pic_vec <- sapply(x_fit_list,function(x){getAnovaStat(fit_reduced=x,fit_full=fit_x_in_model,type=type,test_method=test_method)})
+      pic_set <- f_pic_vec[2,]
+      f_set <- f_pic_vec[1,]
+    }else{
+      if(add_or_remove == "remove" & length(x_test) == 1 & intercept == "0"){
+        pic_set <- Inf
+        names(pic_set) <- x_test
+      }else{
+        pic_set <- sapply(x_fit_list,function(x){getModelFitStat(metric,x,type)})
+      }
+    }
+    if(metric == "Rsq" | metric == "adjRsq" | (metric == "SL" & add_or_remove == "remove")){
+      pic <- max(pic_set)
+      minmax_var <- names(which.max(pic_set))
       best_candidate_model <- x_fit_list[[minmax_var]]
-      pic <- pic_set[minmax_var]
+    }else{
+      pic <- min(pic_set)
+      minmax_var <- names(which.min(pic_set))
+      best_candidate_model <- x_fit_list[[minmax_var]]
+      if(sum(pic_set %in% pic) > 1 & metric == "SL"){
+        Fvalue <- max(f_set)
+        minmax_var <- names(which.max(f_set))
+        best_candidate_model <- x_fit_list[[minmax_var]]
+        pic <- pic_set[minmax_var]
+      }
     }
-  }
-  if(type != "cox"){
-    if(best_candidate_model$rank == fit_x_in_model$rank & add_or_remove == "add"){
-      BREAK <- TRUE
+    if(type != "cox"){
+      if(best_candidate_model$rank == fit_x_in_model$rank & add_or_remove == "add"){
+        BREAK <- TRUE
+      }
     }
   }
   return(list("pic"=pic,"minmax_var"=minmax_var,"best_candidate_model"=best_candidate_model,"BREAK"=BREAK))
@@ -530,6 +532,7 @@ getGoodnessFit <- function(best_candidate_model,y_name,metric){
   n_y <- ncol(as.matrix(best_candidate_model$model[,y_name]))
   if(n_y == 1){
     f <- smr$fstatistic
+    t <- smr
     if(is.nan(f[1])){
       pval <- NaN
     }else{

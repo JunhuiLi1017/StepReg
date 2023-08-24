@@ -26,24 +26,27 @@ test_that("test_utils.R failed", {
 	# test3: getInitialModel()
 	
 	
-	getIntercept <- function(formula, data, type){
-		# for 'cox', we need to set intercept to NULL
-		term_form <- terms(formula, data = data)
-		if(type != 'cox'){
-			if(attr(term_form, "intercept") == 0){
-				intercept <- "0"
-			}else{
-				intercept <- "1"
-			}
-		}else{
-			intercept <- NULL
-		}
-		return(intercept)
-	}
+  # test4: linear stepwise regression vs older version
+  #test_data1 <- readRDS(system.file("tests/data/test_data1.Rdata", package = "StepReg"))
+	test_data1 <- readRDS(system.file("tests","test_data1.Rdata", package = "StepReg"))
+	data(mtcars)
+	mtcars$yes <- mtcars$wt
+  
+  for (strategy in names(test_data1)){
+    for(metric in names(test_data1[[strategy]])){
+      message(strategy,metric)
+      output_new <- NA
+      try(output_new <- stepwise1(type = "linear",
+                                  formula=formula1,
+                                  data=mtcars,
+                                  strategy=strategy,
+                                  metric=metric)[[3]][,c(2,3,7)],silent = TRUE)
+      expect_identical(output_new,test_data1[[strategy]][[metric]])
+    }
+  }
+	# new one
 	
-	
-		
-    
+	traceback()
 
 		
     # mtcars$yes <- mtcars$wt

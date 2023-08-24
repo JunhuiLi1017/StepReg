@@ -70,7 +70,14 @@
 #' 
 #' @export
 #' 
-stepwise <- function(formula,
+#' 
+#' 
+type = "linear"
+formula=formula1
+data=mtcars
+strategy=strategy
+metric=metric
+stepwise1 <- function(formula,
                      data,
                      type = c("linear", "logit", "cox"),
                      include = NULL,
