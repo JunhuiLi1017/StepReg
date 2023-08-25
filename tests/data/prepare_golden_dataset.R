@@ -73,7 +73,7 @@ for (strategy in c("forward","backward","bidirection")){
                                   data = lung,
                                   selection = strategy,
                                   select = metric,
-                                  method = "efron")[[3]][,c(2,3,5)],silent = TRUE)
+                                  method = "efron")[[3]][,c(2,3,6)],silent = TRUE)
     output_cox_stepwise[[strategy]][[metric]] <- output_old
   }
 }

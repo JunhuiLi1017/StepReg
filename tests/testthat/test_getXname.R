@@ -65,10 +65,33 @@ test_that("test_utils.R failed", {
 	                                formula=formula_logit_1,
 	                                data=mtcars,
 	                                strategy=strategy,
-	                                metric=metric)[[3]][,c(2,3,7)],silent = TRUE)
+	                                metric=metric
+	                                )[[3]][,c(2,3,7)],silent = TRUE)
 	    expect_identical(output_new,output_logit_stepwise[[strategy]][[metric]])
 	  }
 	}
+	
+	# test6: cox stepwise regression vs older version
+	#note1: output_cox_stepwise.Rdata
+	#data: lung <- survival::lung %>% na.omit()
+	#formula: Surv(time, status) ~ .
+	#method: version 1.4.4
+	output_cox_stepwise <- readRDS("../data/output_cox_stepwise.Rdata")
+	
+	for (strategy in names(output_cox_stepwise)){
+	  for(metric in names(output_cox_stepwise[[strategy]])){
+	    message(strategy,metric)
+	    output_new <- NA
+	    try(output_new <- stepwise1(type = "cox",
+	                                formula=formula3,
+	                                data=lung,
+	                                strategy=strategy,
+	                                metric=metric,
+	                                test_method_cox="efron")[[3]][,c(2,3,7)],silent = TRUE)
+	    expect_identical(output_new,output_cox_stepwise[[strategy]][[metric]])
+	  }
+	}
+	
 	#traceback()
 
 		
