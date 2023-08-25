@@ -495,6 +495,8 @@ getCandStepModel <- function(add_or_remove,data,type,metric,weight,y_name,x_in_m
       f_pic_vec <- sapply(x_fit_list,function(x){getAnovaStat(fit_reduced=x,fit_full=fit_x_in_model,type=type,test_method=test_method)})
       pic_set <- f_pic_vec[2,]
       f_set <- f_pic_vec[1,]
+      names(pic_set) <- colnames(f_pic_vec)
+      names(f_set) <- colnames(f_pic_vec)
     }else{
       if(add_or_remove == "remove" & length(x_test) == 1 & intercept == "0"){
         pic_set <- Inf
@@ -569,7 +571,9 @@ checkEnterOrRemove <- function(add_or_remove,best_candidate_model,type,metric,y_
     indicator <- pic <= as.numeric(process_table[nrow(process_table),7])
   }
   if(indicator == TRUE & type == "linear" & (metric != "Rsq"|metric != "adjRsq")){
-    BREAK <- getGoodnessFit(best_candidate_model,y_name,metric)
+    if(best_candidate_model$rank != 0){
+      BREAK <- getGoodnessFit(best_candidate_model,y_name,metric)
+    }
   }else{
     BREAK <- FALSE
   }
@@ -606,15 +610,6 @@ getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,weight,y_n
     }
     best_candidate_model <- out_cand_stepwise$best_candidate_model
     pic <- out_cand_stepwise$pic
-    
-    if(type == "linear"){
-      if(best_candidate_model$rank != 0){
-        BREAK <- getGoodnessFit(best_candidate_model,y_name,metric)
-        if(BREAK == TRUE){
-          break
-        }
-      }
-    }
     
     out_check <- checkEnterOrRemove(add_or_remove,best_candidate_model,type,metric,y_name,pic,sls,sle,process_table)
     indicator <- out_check["indicator"]
