@@ -27,13 +27,16 @@ test_that("test_utils.R failed", {
 	
 	
   # test4: linear stepwise regression vs older version
-  #test_data1 <- readRDS(system.file("tests/data/test_data1.Rdata", package = "StepReg"))
-	test_data1 <- readRDS(system.file("tests","test_data1.Rdata", package = "StepReg"))
+	#note1: output_linear_stepwise.Rdata
+	#data: mtcars$yes <- mtcars$wt
+	#formula: mpg ~ . + 0
+	#method: version 1.4.4
+	output_linear_stepwise <- readRDS(system.file("tests/data","output_linear_stepwise.Rdata", package = "StepReg"))
 	data(mtcars)
 	mtcars$yes <- mtcars$wt
   
-  for (strategy in names(test_data1)){
-    for(metric in names(test_data1[[strategy]])){
+  for (strategy in names(output_linear_stepwise)){
+    for(metric in names(output_linear_stepwise[[strategy]])){
       message(strategy,metric)
       output_new <- NA
       try(output_new <- stepwise1(type = "linear",
@@ -41,12 +44,32 @@ test_that("test_utils.R failed", {
                                   data=mtcars,
                                   strategy=strategy,
                                   metric=metric)[[3]][,c(2,3,7)],silent = TRUE)
-      expect_identical(output_new,test_data1[[strategy]][[metric]])
+      expect_identical(output_new,output_linear_stepwise[[strategy]][[metric]])
     }
   }
-	# new one
 	
-	traceback()
+	# test5: logit stepwise regression vs older version
+	#note1: output_logit_stepwise.Rdata
+	#data: mtcars
+	#formula: vs ~ .
+	#method: version 1.4.4
+	output_logit_stepwise <- readRDS(system.file("tests/data","output_logit_stepwise.Rdata", package = "StepReg"))
+	data(mtcars)
+	formula_logit_1 <- vs ~ .
+	
+	for (strategy in names(output_logit_stepwise)){
+	  for(metric in names(output_logit_stepwise[[strategy]])){
+	    message(strategy,metric)
+	    output_new <- NA
+	    try(output_new <- stepwise1(type = "logit",
+	                                formula=formula_logit_1,
+	                                data=mtcars,
+	                                strategy=strategy,
+	                                metric=metric)[[3]][,c(2,3,7)],silent = TRUE)
+	    expect_identical(output_new,output_logit_stepwise[[strategy]][[metric]])
+	  }
+	}
+	#traceback()
 
 		
     # mtcars$yes <- mtcars$wt
@@ -64,11 +87,7 @@ test_that("test_utils.R failed", {
     
     
     # save test results
-    get_x_name <- getXname()
 
-    Feature.distribution <- 
-        assignChromosomeRegion(exons, nucleotideLevel=TRUE, TxDb=TxDb)
-    expect_equal(as.integer(Feature.distribution$percentage["Exons"]), 100)
 
     # create expect_xxx()
 
