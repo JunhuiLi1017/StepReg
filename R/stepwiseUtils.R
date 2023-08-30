@@ -558,7 +558,7 @@ getGoodnessFit <- function(best_candidate_model,y_name,metric){
   return(BREAK)
 }
 
-checkEnterOrRemove <- function(add_or_remove,best_candidate_model,type,metric,y_name,pic,sls,sle,process_table){
+checkEnterOrRemove <- function(add_or_remove,best_candidate_model,type,metric,sle,sls,y_name,pic,process_table){
   if(metric == 'SL'){
     if(add_or_remove == "remove"){
       indicator <- pic > sls
@@ -600,7 +600,7 @@ updateXinModel <- function(add_or_remove,indicator,best_candidate_model,type,met
   return(list("BREAK"=BREAK,"process_table"=process_table,"x_in_model"=x_in_model,"x_notin_model"=x_notin_model))
 }
 
-getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,weight,y_name,x_in_model,x_notin_model,intercept, include,process_table,test_method){
+getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,sle,sls,weight,y_name,x_in_model,x_notin_model,intercept, include,process_table,test_method){
   while(TRUE){
     out_cand_stepwise <- getCandStepModel(add_or_remove,data,type,metric,weight=weight,y_name,x_in_model,x_notin_model,intercept, include,test_method)
     BREAK <- out_cand_stepwise$BREAK
@@ -611,7 +611,7 @@ getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,weight,y_n
     best_candidate_model <- out_cand_stepwise$best_candidate_model
     pic <- out_cand_stepwise$pic
     
-    out_check <- checkEnterOrRemove(add_or_remove,best_candidate_model,type,metric,y_name,pic,sls,sle,process_table)
+    out_check <- checkEnterOrRemove(add_or_remove,best_candidate_model,type,metric,sle,sls,y_name,pic,process_table)
     indicator <- out_check["indicator"]
     BREAK <- out_check["BREAK"]
     if(BREAK == TRUE){
@@ -652,7 +652,7 @@ getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,weight,y_n
   return(list("process_table"=process_table,"x_in_model"=x_in_model))
 }
 
-getStepwiseWrapper <- function(data,type=type,strategy,metric,weight,x_name,y_name,intercept,include,test_method){
+getStepwiseWrapper <- function(data,type=type,strategy,metric,sle,sls,weight,x_name,y_name,intercept,include,test_method){
   out_init_stepwise <- getInitialStepwise(data,type=type,strategy,metric,intercept,include,x_name,y_name,weight=weight,test_method=test_method)
   add_or_remove <- out_init_stepwise$add_or_remove
   x_in_model <- out_init_stepwise$x_in_model
@@ -660,7 +660,7 @@ getStepwiseWrapper <- function(data,type=type,strategy,metric,weight,x_name,y_na
   process_table <- out_init_stepwise$process_table
   
   ## get final stepwise model
-  out_final_stepwise <- getFinalStepModel(add_or_remove,data,type=type,strategy,metric,weight=weight,y_name,x_in_model,x_notin_model,intercept, include, process_table, test_method)
+  out_final_stepwise <- getFinalStepModel(add_or_remove,data,type=type,strategy,metric,sle,sls,weight=weight,y_name,x_in_model,x_notin_model,intercept, include, process_table, test_method)
   return(out_final_stepwise)
 }
 

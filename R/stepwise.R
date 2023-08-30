@@ -70,13 +70,7 @@
 #' 
 #' @export
 #' 
-#' 
-#' 
-type = "linear"
-formula=formula1
-data=mtcars
-strategy=strategy
-metric=metric
+
 stepwise1 <- function(formula,
                      data,
                      type = c("linear", "logit", "cox"),
@@ -134,10 +128,10 @@ stepwise1 <- function(formula,
   
   ## table3
   if(strategy == "subset"){
-    table3_process_table <- getSubsetWrapper(data, type, metric, x_name, y_name, intercept, include, weight=weight, best_n, test_method)
+    table3_process_table <- getSubsetWrapper(data, type, metric,sle,sls, x_name, y_name, intercept, include, weight=weight, best_n, test_method)
     x_final_model <- getXNameSelected(table3_process_table,metric)
   }else{
-    out_final_stepwise <- getStepwiseWrapper(data,type=type,strategy,metric,weight=weight,x_name,y_name,intercept,include,test_method)
+    out_final_stepwise <- getStepwiseWrapper(data,type=type,strategy,metric,sle,sls,weight=weight,x_name,y_name,intercept,include,test_method)
     table3_process_table <- out_final_stepwise$process_table
     x_in_model <- out_final_stepwise$x_in_model
     x_final_model <- c(include,x_in_model)
