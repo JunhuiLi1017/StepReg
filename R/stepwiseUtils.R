@@ -198,6 +198,7 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
 
 getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_table, y_name, include, weight, intercept, best_n = Inf, test_method){
 	process_table <- initial_process_table
+	#nv=1
 	for (nv in 1:length(x_notin_model)){
 		com_table <- as.data.frame(combn(x_notin_model, nv))
 		n_test <- ncol(com_table)
@@ -234,9 +235,9 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		}
 		sub_process_table_sort <- sub_process_table[order(sub_process_table[, 2], decreasing = decreasing), ]
 		if(nrow(sub_process_table_sort) < best_n){
-		  best_n <- nrow(sub_process_table_sort)
+		  best_n_model <- nrow(sub_process_table_sort)
 		}
-		process_table <- rbind(process_table,sub_process_table_sort[1:best_n, ])
+		process_table <- rbind(process_table,sub_process_table_sort[1:best_n_model, ])
 	}
 	return(process_table)
 }
