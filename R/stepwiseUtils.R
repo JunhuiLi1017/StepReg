@@ -478,11 +478,12 @@ getCandStepModel <- function(add_or_remove,data,type,metric,weight,y_name,x_in_m
   }else{
     x_test <- x_in_model
   }
-  x_test_list <- as.list(x_test)
-  names(x_test_list) <- x_test
   if(length(x_test) == 0){
     BREAK <- TRUE
   }
+  x_test_list <- as.list(x_test)
+  names(x_test_list) <- x_test
+
   if(BREAK == FALSE){
     if(add_or_remove == "add"){
       x_name_list <- lapply(x_test_list,function(x){c(x_in_model,x)})
@@ -525,8 +526,10 @@ getCandStepModel <- function(add_or_remove,data,type,metric,weight,y_name,x_in_m
         BREAK <- TRUE
       }
     }
+    return(list("pic"=pic,"minmax_var"=minmax_var,"best_candidate_model"=best_candidate_model,"BREAK"=BREAK))
+  }else{
+    return(list("BREAK"=BREAK))
   }
-  return(list("pic"=pic,"minmax_var"=minmax_var,"best_candidate_model"=best_candidate_model,"BREAK"=BREAK))
 }
 
 getGoodnessFit <- function(best_candidate_model,y_name,metric){
