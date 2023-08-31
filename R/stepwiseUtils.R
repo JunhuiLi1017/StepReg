@@ -354,7 +354,7 @@ getAnovaStat <- function(fit_reduced, fit_full, type, test_method){
   } else if (type == "cox") {
     # test is not used in cox regression
     test_method <- ""
-    ptype <- 'Pr(>|Chi|)'
+    ptype <- 'P(>|Chi|)'
     stattype <- "Chisq"
   }
   anova_table <- anova(fit_reduced, fit_full, test = test_method)
