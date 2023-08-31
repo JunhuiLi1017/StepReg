@@ -50,7 +50,7 @@ test_that("test_utils.R failed", {
 	    if(strategy=="score"){
 	      strategy_new <- "subset"
 	      select_col1 <- c(2,3,4)-1
-	      select_col2 <- c(2,3,4)-1
+	      select_col2 <- c(2,3,4)
 	      
 	      index_n <- 2
 	    }else{
@@ -78,10 +78,24 @@ test_that("test_utils.R failed", {
 	      
 	      if(length(output_new) > 1 & length(output_old) > 1){
 	        output_new[, c(index_n)] <- sapply(output_new[, c(index_n)], as.numeric)
+	        output_new[,3] <- str_replace_all(output_new[,3]," ",":")
 	        output_old[,select_col2][,index_n] <- sapply(output_old[,select_col2][,index_n], as.numeric)
 	        output_old <- output_old[,select_col2]
+	        if(strategy_new=="subset"){
+	          output_old1 <- NULL
+	          #i=sort(as.numeric(levels(as.factor(output_old[,1]))))[1]
+	          for(i in sort(as.numeric(levels(as.factor(output_old[,1]))))){
+	            output_old_sub <- output_old[output_old[,1]==i,]
+	            output_old_sub_sort <- output_old_sub[order(output_old_sub[,2]),]
+	            output_old1 <- rbind(output_old1,output_old_sub_sort)
+	          }
+	          output_old <- output_old1
+	          colnames(output_old)[c(1,3)] <- c("NumberOfVariables",             "VariablesInModel")
+	          output_old[,3] <- str_replace_all(output_old[,3]," ",":")
+	          rownames(output_old) <- NULL
+	        }
 	      }
-	      
+
 	      res <- try(expect_equal(output_new,output_old),silent = TRUE)
 	      if(inherits(res, "try-error")){
           message("Error",mod,strategy,metric)
