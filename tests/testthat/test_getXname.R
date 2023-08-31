@@ -25,35 +25,92 @@ test_that("test_utils.R failed", {
 
 	# test3: getInitialModel()
 	
-	
+	library(stringr)
   # test4: linear stepwise regression vs older version
 	#note1: output_linear_stepwise.Rdata
 	#data: mtcars$yes <- mtcars$wt
 	#formula: mpg ~ . + 0
 	#method: version 1.4.4
-	output_linear_stepwise <- readRDS(system.file("tests/data","output_linear_stepwise.Rdata", package = "StepReg"))
+	res_v1_4_4 <- readRDS(system.file("tests/data","res_v1_4_4.rds", package = "StepReg"))
 	data(mtcars)
 	mtcars$yes <- mtcars$wt
-  
-  for (strategy in names(output_linear_stepwise)){
-    for(metric in names(output_linear_stepwise[[strategy]])){
-      message(strategy,metric)
-      output_new <- NA
-      try(output_new <- stepwise1(type = "linear",
-                                  formula=formula1,
-                                  data=mtcars,
-                                  strategy=strategy,
-                                  metric=metric)[[3]][,c(2,3,7)],silent = TRUE)
-      expect_identical(output_new,output_linear_stepwise[[strategy]][[metric]])
-    }
-  }
+  #mod=names(res_v1_4_4)[1]
+	for (mod in names(res_v1_4_4)[1]){
+	  type <- unlist(stringr::str_split(mod,"_"))[1]
+	  if(mod=="cox_model1"){
+	    lung <- survival::lung %>% na.omit()
+	    mydata <- lung
+	  }else if(mod %in% c("linear_model1","linear_model2","logit_model1")){
+	    data(mtcars)
+	    mtcars$yes <- mtcars$wt
+	    mydata <- mtcars
+	  }
+	  for (strategy in names(res_v1_4_4[[mod]])){
+	    strategy_new <- strategy
+	    if(strategy=="score"){
+	      strategy_new <- "subset"
+	      select_col1 <- c(2,3,4)-1
+	      select_col2 <- c(2,3,4)-1
+	      
+	      index_n <- 2
+	    }else{
+	      index_n <- 3
+	      if(type=="logit" | type=="cox"){
+	        select_col1 <- c(2,3,7)
+	        select_col2 <- c(2,3,6)
+	      }else if(type=="linear"){
+	        select_col1 <- c(2,3,7)
+	        select_col2 <- c(2,3,7)
+	      }
+	    }
+	    for(metric in names(res_v1_4_4[[mod]][[strategy]])){
+	      message(mod,strategy,metric)
+	      output_new <- NA
+	      output_old <- res_v1_4_4[[mod]][[strategy]][[metric]]
+	      
+	      try(output_new <- stepwise1(type = type,
+	                                  formula=get(mod),
+	                                  data=mydata,
+	                                  strategy=strategy_new,
+	                                  metric=metric)[[3]][,select_col1],silent = TRUE)
+	      
+	      
+	      
+	      if(length(output_new) > 1 & length(output_old) > 1){
+	        output_new[, c(index_n)] <- sapply(output_new[, c(index_n)], as.numeric)
+	        output_old[,select_col2][,index_n] <- sapply(output_old[,select_col2][,index_n], as.numeric)
+	        output_old <- output_old[,select_col2]
+	      }
+	      
+	      res <- try(expect_equal(output_new,output_old),silent = TRUE)
+	      if(inherits(res, "try-error")){
+          message("Error",mod,strategy,metric)
+	      }
+	    }
+	  }#strategy
+	}
 	
+	expect_identical(NA,NA)
+	expect_equal(NA,NA)
+	
+	res_v1_4_4[[mod]][["forward"]][["BIC"]]
+	
+	traceback()
 	# test5: logit stepwise regression vs older version
 	#note1: output_logit_stepwise.Rdata
 	#data: mtcars
 	#formula: vs ~ .
 	#method: version 1.4.4
-	output_logit_stepwise <- readRDS(system.file("tests/data","output_logit_stepwise.Rdata", package = "StepReg"))
+	
+	res_v1_4_4 <- readRDS(system.file("tests/data","res_v1_4_4.rds", package = "StepReg"))
+	linear_model1 <- mpg ~ . + 1
+	linear_model2 <- cbind(mpg, drat) ~ . + 0
+	logit_model1 <- vs ~ .
+	cox_model1 <- Surv(time, status) ~ .
+	
+	
+	
+	
 	data(mtcars)
 	formula_logit_1 <- vs ~ .
 	

@@ -4,7 +4,7 @@
     # linear_model2: cbind(mpg, drat) ~ . + 1 (mtcars)
     # logit_model1: vs ~ . (mtcars)
     # cox_model1:  Surv(time, status) ~ . (lung)
-# output is a list which can be queried as: res_v1_4_4[["linear_model1"]][["forward"]][["AIC]] (res_v1_4_4[[model]][[strategy]][[metric]])
+# output is a list which can be queried as: res_v1_4_4[["linear_model1"]][["forward"]][["AIC"]] (res_v1_4_4[[model]][[strategy]][[metric]])
 
 library(StepReg)
 library(dplyr)
