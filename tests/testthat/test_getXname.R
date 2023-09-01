@@ -34,7 +34,7 @@ test_that("test_utils.R failed", {
 	res_v1_4_4 <- readRDS(system.file("tests/data","res_v1_4_4.rds", package = "StepReg"))
 	data(mtcars)
 	mtcars$yes <- mtcars$wt
-  #mod=names(res_v1_4_4)[1]
+  #mod=names(res_v1_4_4)[4]
 	for (mod in names(res_v1_4_4)[1]){
 	  type <- unlist(stringr::str_split(mod,"_"))[1]
 	  if(mod=="cox_model1"){
@@ -45,6 +45,7 @@ test_that("test_utils.R failed", {
 	    mtcars$yes <- mtcars$wt
 	    mydata <- mtcars
 	  }
+	  #strategy="forward"
 	  for (strategy in names(res_v1_4_4[[mod]])){
 	    strategy_new <- strategy
 	    if(strategy=="score"){
@@ -63,6 +64,7 @@ test_that("test_utils.R failed", {
 	        select_col2 <- c(2,3,7)
 	      }
 	    }
+	    #metric="SL"
 	    for(metric in names(res_v1_4_4[[mod]][[strategy]])){
 	      message(mod,strategy,metric)
 	      output_new <- NA
@@ -74,19 +76,34 @@ test_that("test_utils.R failed", {
 	                                  strategy=strategy_new,
 	                                  metric=metric)[[3]][,select_col1],silent = TRUE)
 	      
-	      
+
 	      
 	      if(length(output_new) > 1 & length(output_old) > 1){
 	        output_new[, c(index_n)] <- sapply(output_new[, c(index_n)], as.numeric)
-	        output_new[,3] <- str_replace_all(output_new[,3]," ",":")
-	        output_old[,select_col2][,index_n] <- sapply(output_old[,select_col2][,index_n], as.numeric)
-	        output_old <- output_old[,select_col2]
+	        if(strategy_new=="subset"){
+	          output_new[,3] <- str_replace_all(output_new[,3],"  ",":")
+	          output_new[,3] <- str_replace_all(output_new[,3]," ",":")
+	        }
+	        if(strategy_new=="subset" & type %in%  c("logit","cox")){
+	          output_old[,select_col1][,index_n] <- sapply(output_old[,select_col1][,index_n], as.numeric)
+	          output_old <- output_old[,select_col1]
+	        }else{
+	          output_old[,select_col2][,index_n] <- sapply(output_old[,select_col2][,index_n], as.numeric)
+	          output_old <- output_old[,select_col2]
+	        }
+	        
 	        if(strategy_new=="subset"){
 	          output_old1 <- NULL
 	          #i=sort(as.numeric(levels(as.factor(output_old[,1]))))[1]
 	          for(i in sort(as.numeric(levels(as.factor(output_old[,1]))))){
 	            output_old_sub <- output_old[output_old[,1]==i,]
-	            output_old_sub_sort <- output_old_sub[order(output_old_sub[,2]),]
+	            if (metric %in% c("SL", "Rsq", "adjRsq")){
+	              # "Rsq" and "adjRsq" are for type "linear"; "SL" is for type "logit" and "cox"
+	              decreasing = TRUE
+	            } else{
+	              decreasing = FALSE
+	            }
+	            output_old_sub_sort <- output_old_sub[order(output_old_sub[,2],decreasing = decreasing),]
 	            output_old1 <- rbind(output_old1,output_old_sub_sort)
 	          }
 	          output_old <- output_old1
@@ -104,8 +121,10 @@ test_that("test_utils.R failed", {
 	  }#strategy
 	}
 	
-	expect_identical(NA,NA)
-	expect_equal(NA,NA)
+	head(output_old)
+	head(output_new)
+	
+	res_v1_4_4[[mod]][["score"]][["Rsq"]]
 	
 	res_v1_4_4[[mod]][["forward"]][["BIC"]]
 	

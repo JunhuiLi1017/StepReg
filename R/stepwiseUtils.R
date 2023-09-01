@@ -336,7 +336,7 @@ getTable2TypeOfVariables <- function(model){
 }
 
 #note1: test_method_linear should be 'F' for univariate and c(“Pillai”, “Wilks”, “Hotelling-Lawley”, “Roy”) for multivariates
-#
+#getAnovaStat(fit_reduced=x_fit_list[[1]],fit_full=fit_x_in_model,type=type,test_method=test_method)
 getAnovaStat <- function(fit_reduced, fit_full, type, test_method){
   if (type == "linear") {
     ptype <- 'Pr(>F)'
@@ -355,10 +355,11 @@ getAnovaStat <- function(fit_reduced, fit_full, type, test_method){
   } else if (type == "cox") {
     # test is not used in cox regression
     test_method <- ""
-    ptype <- 'P(>|Chi|)'
+    ptype <- c('P(>|Chi|)','Pr(>|Chi|)')
     stattype <- "Chisq"
   }
   anova_table <- anova(fit_reduced, fit_full, test = test_method)
+  ptype <- names(anova_table)[names(anova_table) %in% ptype]
   statistics <- anova_table[2,stattype]
   pic <- anova_table[2, ptype]
   return(c("statistics" = statistics, "pic" = pic))
