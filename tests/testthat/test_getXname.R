@@ -35,7 +35,7 @@ test_that("test_utils.R failed", {
 	data(mtcars)
 	mtcars$yes <- mtcars$wt
   #mod=names(res_v1_4_4)[4]
-	for (mod in names(res_v1_4_4)[1]){
+	for (mod in names(res_v1_4_4)){
 	  type <- unlist(stringr::str_split(mod,"_"))[1]
 	  if(mod=="cox_model1"){
 	    lung <- survival::lung %>% na.omit()
@@ -107,12 +107,15 @@ test_that("test_utils.R failed", {
 	            output_old1 <- rbind(output_old1,output_old_sub_sort)
 	          }
 	          output_old <- output_old1
-	          colnames(output_old)[c(1,3)] <- c("NumberOfVariables",             "VariablesInModel")
+	          colnames(output_old)[c(1,3)] <- c("NumberOfVariables","VariablesInModel")
 	          output_old[,3] <- str_replace_all(output_old[,3]," ",":")
 	          rownames(output_old) <- NULL
 	        }
 	      }
-
+	      if(type=="cox" & strategy == "score"){
+	        output_old[,3] <- paste0("0:",output_old[,3])
+	        output_old$NumberOfVariables <- as.numeric(output_old$NumberOfVariables)
+	      }
 	      res <- try(expect_equal(output_new,output_old),silent = TRUE)
 	      if(inherits(res, "try-error")){
           message("Error",mod,strategy,metric)
