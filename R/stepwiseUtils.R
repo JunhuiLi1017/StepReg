@@ -62,12 +62,12 @@ getModel <- function(data, type, intercept, x_name, y_name, weight, method=c("ef
 	return(model_raw)
 }
 
-getSigmaFullModel <- function(lmf){
+getSigmaFullModel <- function(lmf,type,n_y){
   if(type=="linear"){
     if(lmf$rank >= nrow(as.data.frame(lmf$residuals))){
       sigma_value <- 0
     }else{ 
-      sigma_value <- sum(deviance(lmf)/df.residual(lmf))/nY
+      sigma_value <- sum(deviance(lmf)/df.residual(lmf))/n_y
     }
   }else{
     sigma_value <- 0
@@ -184,7 +184,7 @@ getModelFitStat <- function(metric=c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "R
 	return(PIC)
 }
 
-getInitialSubSet <- function(data, type, metric, y_name, intercept, include, weight, test_method){
+getInitialSubSet <- function(data, type, metric, y_name, intercept, include, weight, test_method, sigma_value){
 	# obtain the initial model information: if no include variable, return NULL, otherwise return a matrix containing columns of "NumberOfVariables", metric, and "VariablesInModel"
 	# metric refers to PIC method, e.g. AIC, BIC, etc. for "logit" and "cox" type, if metric is "SL", the PIC is calculated differently
   initial_process_table <- NULL
@@ -197,7 +197,7 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
       if(type == "logit"){
         fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "binomial")
         f_pic_vec <- getAnovaStat(fit_reduced=fit_reduce,fit_full=x_fit,type=type,test_method="Rao")
-        pic_set <- f_pic_vec[2]
+        pic_set <- f_pic_vec[1]
       }else if(type == "cox"){
         pic_set <- x_fit$score
       }
@@ -209,7 +209,7 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
   return(initial_process_table)
 }
 
-getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_table, y_name, include, weight, intercept, best_n = Inf, test_method){
+getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_table, y_name, include, weight, intercept, best_n = Inf, test_method, sigma_value){
 	process_table <- initial_process_table
 	#nv=1
 	for (nv in 1:length(x_notin_model)){
@@ -230,7 +230,7 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		  if(type == "logit"){
 		    fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "binomial")
 		    f_pic_vec <- sapply(x_fit_list,function(x){getAnovaStat(fit_reduced=fit_reduce,fit_full=x,type=type,test_method="Rao")})
-		    pic_set <- f_pic_vec[2,]
+		    pic_set <- f_pic_vec[1,]
 		  }else if(type == "cox"){
 		    #pic_set <- fit$score
 		    pic_set <- sapply(x_fit_list,function(x){x$score})
@@ -266,14 +266,14 @@ getXNameSelected <- function(process_table,metric){
 	return(x_name_selected)
 }
 
-getSubsetWrapper <- function(data, type, metric, x_name, y_name, intercept, include, weight, best_n, test_method){
+getSubsetWrapper <- function(data, type, metric, x_name, y_name, intercept, include, weight, best_n, test_method, sigma_value){
   # a wrapper to obtain x_name_selected
 	## obtain initial model info
-	initial_process_table <- getInitialSubSet(data, type, metric, y_name, intercept, include, weight=weight, test_method)
+	initial_process_table <- getInitialSubSet(data, type, metric, y_name, intercept, include, weight=weight, test_method, sigma_value)
 	
 	## obtain final model info
 	x_notin_model <- setdiff(x_name, include)
-	process_table <- getFinalSubSet(data, type, metric, x_notin_model, initial_process_table, y_name, include, weight=weight, intercept, best_n, test_method)
+	process_table <- getFinalSubSet(data, type, metric, x_notin_model, initial_process_table, y_name, include, weight=weight, intercept, best_n, test_method, sigma_value)
 	
 	## add rownames to sort the variables in process_table when output
 	rownames(process_table) <- c(1:nrow(process_table))
@@ -670,7 +670,7 @@ getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,sle,sls,we
   return(list("process_table"=process_table,"x_in_model"=x_in_model))
 }
 
-getStepwiseWrapper <- function(data,type=type,strategy,metric,sle,sls,weight,x_name,y_name,intercept,include,test_method){
+getStepwiseWrapper <- function(data,type=type,strategy,metric,sle,sls,weight,x_name,y_name,intercept,include,test_method,sigma_value){
   fit_full <- getModel(data=data, type=type, intercept=intercept, x_name=c(include,x_name), y_name=y_name, weight=weight, method=test_method)
   out_init_stepwise <- getInitialStepwise(data,type=type,strategy,metric,intercept,include,x_name,y_name,weight=weight,test_method=test_method,sigma_value)
   add_or_remove <- out_init_stepwise$add_or_remove

@@ -102,13 +102,13 @@ stepwise1 <- function(formula,
   intercept <- getIntercept(formula, data, type = type) # char type
   merged_include <- getMergedInclude(include)
   model_raw <- getModel(data, type = type, intercept=intercept, x_name_orig, y_name, weight=weight, method=test_method_cox)
-  sigma_value <- getSigmaFullModel(model_raw)
   if(type != "cox"){
     y_df <- as.matrix(model_raw$model[,y_name])
     n_y <- ncol(y_df)
   }else{
     n_y <- 1
   }
+  sigma_value <- getSigmaFullModel(model_raw,type,n_y)
   
   validateUtils(formula = formula, data = data, type = type, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, sigma_value=sigma_value, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, tolerance = tolerance, weight = weight, best_n = best_n, excel_name = excel_name)
   test_method <- getTestMethod(data, model_raw, type, metric, n_y, test_method_linear, test_method_logit, test_method_cox)
@@ -128,10 +128,10 @@ stepwise1 <- function(formula,
   
   ## table3
   if(strategy == "subset"){
-    table3_process_table <- getSubsetWrapper(data, type, metric, x_name, y_name, intercept, include, weight=weight, best_n, test_method)
+    table3_process_table <- getSubsetWrapper(data, type, metric, x_name, y_name, intercept, include, weight=weight, best_n, test_method, sigma_value)
     x_final_model <- getXNameSelected(table3_process_table,metric)
   }else{
-    out_final_stepwise <- getStepwiseWrapper(data,type=type,strategy,metric,sle,sls,weight=weight,x_name,y_name,intercept,include,test_method)
+    out_final_stepwise <- getStepwiseWrapper(data,type=type,strategy,metric,sle,sls,weight=weight,x_name,y_name,intercept,include,test_method,sigma_value)
     table3_process_table <- out_final_stepwise$process_table
     x_in_model <- out_final_stepwise$x_in_model
     x_final_model <- c(include,x_in_model)

@@ -43,19 +43,19 @@ traceback()
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwise.R")
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwiseUtils.R")
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/validateUtils.R")
-
+?anova.glm
 
 linear_metric <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC")
 logit_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 cox_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 
 
-
-stepwise1(type = "linear",
-          formula=linear_model1,
+##note that in logit stepwise regression, forward use Rao to calculate p value and backward & bidirection use other method to calculate p value
+stepwise1(type = "logit",
+          formula=logit_model1,
           data=mtcars,
-          strategy="forward",
-          metric="CP")
+          strategy="subset",
+          metric="SL")
 
 traceback()
 
