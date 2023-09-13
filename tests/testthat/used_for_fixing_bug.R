@@ -32,10 +32,11 @@ mod=names(res_v1_4_4)[1]
   cox_model1 <- Surv(time, status) ~ .
   
 type = "linear"
-formula=get(mod)
+type = "logit"
+formula="mpg~."
 data=mydata
 strategy="forward"
-metric="Rsq"
+metric="BIC"
 
 traceback()
 
@@ -43,16 +44,23 @@ source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwise.R")
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwiseUtils.R")
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/validateUtils.R")
 
-a <- stepwise1(type = type,
-          formula=get(mod),
-          data=mydata,
-          strategy="backward",
-          metric="SL")
+
+linear_metric <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC")
+logit_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
+cox_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 
 
 
+stepwise1(type = "linear",
+          formula=linear_model1,
+          data=mtcars,
+          strategy="forward",
+          metric="CP")
 
+traceback()
 
+fm <- lm(formula=linear_model1,data=mtcars)
+sigma(fm)
 
 
 

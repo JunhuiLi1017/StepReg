@@ -14,6 +14,7 @@ validateUtils <- function(formula,
                           metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
                           sle = 0.15,
                           sls = 0.15,
+                          sigma_value,
                           test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
                           test_method_logit = c("Rao", "LRT"),
                           test_method_cox = c("efron", "breslow", "exact"),
@@ -89,6 +90,9 @@ validateUtils <- function(formula,
 		if(strategy=="subset" & metric=="SL"){
 			stop("metric = 'SL' is not allowed when strategy = 'subset'")
 		}
+	  if(metric == "CP" & sigma_value == 0){
+	    stop("metric = 'CP' is not allowed when Estimate of pure error variance from fitting the full model(sigma_value) is 0")
+	  }
 	}else if(type == "logit"){
 		if(!metric %in% logit_metric){
 			stop("for type 'logit': 'metric' must be from one of the c('", paste0(logit_metric, collapse = "','"),"').")

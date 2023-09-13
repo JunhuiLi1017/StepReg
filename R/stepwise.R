@@ -97,13 +97,12 @@ stepwise1 <- function(formula,
   test_method_logit <- match.arg(test_method_logit)
   test_method_cox <- match.arg(test_method_cox)
   
-  validateUtils(formula = formula, data = data, type = type, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, tolerance = tolerance, weight = weight, best_n = best_n, excel_name = excel_name)
-  
   x_name_orig <- getXname(formula, data)
   y_name <- getYname(formula, data)
   intercept <- getIntercept(formula, data, type = type) # char type
   merged_include <- getMergedInclude(include)
   model_raw <- getModel(data, type = type, intercept=intercept, x_name_orig, y_name, weight=weight, method=test_method_cox)
+  sigma_value <- getSigmaFullModel(model_raw)
   if(type != "cox"){
     y_df <- as.matrix(model_raw$model[,y_name])
     n_y <- ncol(y_df)
@@ -111,6 +110,7 @@ stepwise1 <- function(formula,
     n_y <- 1
   }
   
+  validateUtils(formula = formula, data = data, type = type, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, sigma_value=sigma_value, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, tolerance = tolerance, weight = weight, best_n = best_n, excel_name = excel_name)
   test_method <- getTestMethod(data, model_raw, type, metric, n_y, test_method_linear, test_method_logit, test_method_cox)
   
   multico_x <- getMulticolX(data, x_name_orig, tolerance)

@@ -34,7 +34,7 @@ test_that("test_utils.R failed", {
 	res_v1_4_4 <- readRDS(system.file("tests/data","res_v1_4_4.rds", package = "StepReg"))
 	data(mtcars)
 	mtcars$yes <- mtcars$wt
-  #mod=names(res_v1_4_4)[4]
+  #mod=names(res_v1_4_4)[3]
 	for (mod in names(res_v1_4_4)){
 	  type <- unlist(stringr::str_split(mod,"_"))[1]
 	  if(mod=="cox_model1"){
@@ -123,6 +123,10 @@ test_that("test_utils.R failed", {
 	    }
 	  }#strategy
 	}
+	
+	output_new[,3]
+	output_old[,3]
+	
 	
 	head(output_old)
 	head(output_new)

@@ -62,6 +62,19 @@ getModel <- function(data, type, intercept, x_name, y_name, weight, method=c("ef
 	return(model_raw)
 }
 
+getSigmaFullModel <- function(lmf){
+  if(type=="linear"){
+    if(lmf$rank >= nrow(as.data.frame(lmf$residuals))){
+      sigma_value <- 0
+    }else{ 
+      sigma_value <- sum(deviance(lmf)/df.residual(lmf))/nY
+    }
+  }else{
+    sigma_value <- 0
+  }
+  return(sigma_value)
+}
+
 getMulticolX <- function(data, x_name, tolerance){
 	x_matrix <- as.matrix(data[, x_name])
 	qrx_list <- qr(x_matrix, tol = tolerance)
@@ -109,7 +122,7 @@ getTestMethod <- function(data, model_raw, type, metric, n_y, test_method_linear
 #' 
 #' @param type "linear", "cox", or "logit": to calculate information criteria value; for "linear", the "Least Square" method will be used; for "cox" and "logit", "Maximum Likelyhood" method will be used.
 
-getModelFitStat <- function(metric=c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SBC", "IC(3/2)", "IC(1)"), fit, type = c("linear","logit", "cox")){
+getModelFitStat <- function(metric=c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SBC", "IC(3/2)", "IC(1)"), fit, type = c("linear","logit", "cox"), sigma_value){
 	# "LeastSquare" is for linear; "Likelihood" is for cox and logit; cox and logit are essentially the same except for sample size calculation.
 	if (type == "linear"){
 		resMatrix <- as.matrix(fit$residuals)
@@ -127,14 +140,14 @@ getModelFitStat <- function(metric=c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "R
 		}else if(metric == "AICc"){
 			PIC <- n*log(SSE/n)+n*(n+p)*nY/(n-p-nY-1)
 		}else if(metric == "CP"){
-			PIC <- SSE/sigma(fit)+2*p-n
+			PIC <- SSE/sigma_value+2*p-n
 		}else if(metric == "HQ"){
 			PIC <- n*log(SSE/n)+2*log(log(n))*p*nY/n
 		}else if(metric == "HQc"){
 			#PIC <- n*log(SSE*SSE/n)+2*log(log(n))*p*nY/(n-p-nY-1)
 			PIC <- n*log(SSE/n)+2*log(log(n))*p*nY/(n-p-nY-1)
 		}else if(metric == "BIC"){
-			PIC <- n*log(SSE/n)+2*(2+p)*(n*sigma(fit)/SSE)-2*(n*sigma(fit)/SSE)*(n*sigma(fit)/SSE)
+			PIC <- n*log(SSE/n)+2*(2+p)*(n*sigma_value/SSE)-2*(n*sigma_value/SSE)*(n*sigma_value/SSE)
 		}else if(metric == "Rsq"){
 			#PIC <- 1-(SSE/SST)
 			PIC <- summary(fit)$r.squared
@@ -189,7 +202,7 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
         pic_set <- x_fit$score
       }
     }else{
-      pic_set <- getModelFitStat(metric,x_fit,type)
+      pic_set <- getModelFitStat(metric,x_fit,type,sigma_value)
     }
     initial_process_table[1,1:3] <- c(as.numeric(intercept)+length(include),pic_set,paste(intercept,include,sep=" "))
   }
@@ -223,7 +236,7 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		    pic_set <- sapply(x_fit_list,function(x){x$score})
 		  }
 		}else{
-		  pic_set <- sapply(x_fit_list,function(x){getModelFitStat(metric,x,type)})
+		  pic_set <- sapply(x_fit_list,function(x){getModelFitStat(metric,x,type,sigma_value)})
 		}
 		sub_process_table[,2] <- pic_set
 		
@@ -368,7 +381,7 @@ getAnovaStat <- function(fit_reduced, fit_full, type, test_method){
 ## get pic based on model fit, it needs fit_reduced and fit_full for SL and only fit_formula for other metrics
 ## used in stepwise in step0: SL:0,1,inf  non-SL:
 ## fit_fm<-fit_intercept
-getInitStepModelStat <- function(fit_intercept,fit_fm,type,strategy,metric,intercept,include,test_method){
+getInitStepModelStat <- function(fit_intercept,fit_fm,type,strategy,metric,intercept,include,test_method,sigma_value){
   if(metric == "SL"){
     if(!is.null(include)){
       if(all(include %in% attr(fit_fm$terms,"term.labels")) & strategy != "backward"){
@@ -382,14 +395,14 @@ getInitStepModelStat <- function(fit_intercept,fit_fm,type,strategy,metric,inter
     }
   }else{
     if(strategy == "backward"){
-      pic <- getModelFitStat(metric,fit_fm,type)
+      pic <- getModelFitStat(metric,fit_fm,type,sigma_value)
     }else{
       if(!is.null(include)){
         if(all(include %in% attr(fit_fm$terms,"term.labels"))){
-          pic <- getModelFitStat(metric,fit_fm,type)
+          pic <- getModelFitStat(metric,fit_fm,type,sigma_value)
         }else{
           if(intercept == '1'){
-            pic <- getModelFitStat(metric,fit_fm,type)
+            pic <- getModelFitStat(metric,fit_fm,type,sigma_value)
           }else{
             if(metric %in% c("Rsq","adjRsq") & type == "linear"){
               pic <- 0
@@ -400,7 +413,7 @@ getInitStepModelStat <- function(fit_intercept,fit_fm,type,strategy,metric,inter
         }
       }else{
         if(intercept == '1'){
-          pic <- getModelFitStat(metric,fit_fm,type)
+          pic <- getModelFitStat(metric,fit_fm,type,sigma_value)
         }else{
           if(metric %in% c("Rsq","adjRsq") & type == "linear"){
             pic <- 0
@@ -438,7 +451,7 @@ initialProcessTable <- function(metric){
   return(sub_init_process_table)
 }
 
-getInitialStepwise <- function(data,type,strategy,metric,intercept,include,x_name,y_name,weight,test_method){
+getInitialStepwise <- function(data,type,strategy,metric,intercept,include,x_name,y_name,weight,test_method,sigma_value){
   sub_init_process_table <- initialProcessTable(metric)
   process_table <- sub_init_process_table
   if(strategy == "backward"){
@@ -447,7 +460,7 @@ getInitialStepwise <- function(data,type,strategy,metric,intercept,include,x_nam
     x_in_model <- c(setdiff(x_name,include))
     x_notin_model <- NULL
     fit_full <- getModel(data=data, type=type, intercept=intercept, x_name=c(include,x_in_model), y_name=y_name, weight=weight, method=test_method)
-    pic <- getInitStepModelStat(fit_intercept=NULL,fit_fm=fit_full,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method=test_method)
+    pic <- getInitStepModelStat(fit_intercept=NULL,fit_fm=fit_full,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method=test_method,sigma_value)
     num_eff_para_in <- getNumberEffect(fit=fit_full,type=type)
     process_table[1,] <- c(rep("",3),num_eff_para_in,pic)
   }else{
@@ -456,13 +469,13 @@ getInitialStepwise <- function(data,type,strategy,metric,intercept,include,x_nam
     x_notin_model <- setdiff(x_name,include)
     ## for intercept
     fit_intercept <- getModel(data=data, type=type, intercept=intercept, x_name=NULL, y_name=y_name, weight=weight, method=test_method)
-    pic <- getInitStepModelStat(fit_intercept=fit_intercept,fit_fm=fit_intercept,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method=test_method)
+    pic <- getInitStepModelStat(fit_intercept=fit_intercept,fit_fm=fit_intercept,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method=test_method,sigma_value)
     num_eff_para_in <- getNumberEffect(fit=fit_intercept,type=type)
     process_table[1,] <- c("",intercept,"",num_eff_para_in,pic)
     ## for include
     if(!is.null(include)){
       fit_include <- getModel(data=data, type=type, intercept=intercept, x_name=include, y_name=y_name, weight=weight, method=test_method)
-      pic <- getInitStepModelStat(fit_intercept=fit_intercept,fit_fm=fit_include,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method=test_method)
+      pic <- getInitStepModelStat(fit_intercept=fit_intercept,fit_fm=fit_include,type=type,strategy=strategy,metric=metric,intercept=intercept,include=include,test_method=test_method,sigma_value)
       num_eff_para_in <- getNumberEffect(fit=fit_include,type=type)
       sub_init_process_table[1,] <- c("",paste0(include,collapse=" "),"",anova(fit_include,fit_intercept)[2,'Df'],num_eff_para_in[-1],pic)
       process_table <- rbind(process_table,sub_init_process_table)
@@ -472,7 +485,7 @@ getInitialStepwise <- function(data,type,strategy,metric,intercept,include,x_nam
   return(list("add_or_remove"=add_or_remove,"x_in_model"=x_in_model,"x_notin_model"=x_notin_model,"process_table"=process_table))
 }
 
-getCandStepModel <- function(add_or_remove,data,type,metric,weight,y_name,x_in_model,x_notin_model,intercept, include, test_method){
+getCandStepModel <- function(add_or_remove,data,type,metric,weight,y_name,x_in_model,x_notin_model,intercept, include, test_method, sigma_value){
   fit_x_in_model <- getModel(data=data, type=type, intercept=intercept, x_name=c(include,x_in_model), y_name=y_name, weight=weight, method=test_method)
   BREAK <- FALSE
   if(add_or_remove == "add"){
@@ -505,7 +518,7 @@ getCandStepModel <- function(add_or_remove,data,type,metric,weight,y_name,x_in_m
         pic_set <- Inf
         names(pic_set) <- x_test
       }else{
-        pic_set <- sapply(x_fit_list,function(x){getModelFitStat(metric,x,type)})
+        pic_set <- sapply(x_fit_list,function(x){getModelFitStat(metric,x,type,sigma_value)})
       }
     }
     if(metric == "Rsq" | metric == "adjRsq" | (metric == "SL" & add_or_remove == "remove")){
@@ -605,9 +618,9 @@ updateXinModel <- function(add_or_remove,indicator,best_candidate_model,type,met
   return(list("BREAK"=BREAK,"process_table"=process_table,"x_in_model"=x_in_model,"x_notin_model"=x_notin_model))
 }
 
-getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,sle,sls,weight,y_name,x_in_model,x_notin_model,intercept, include,process_table,test_method){
+getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,sle,sls,weight,y_name,x_in_model,x_notin_model,intercept, include,process_table,test_method, sigma_value){
   while(TRUE){
-    out_cand_stepwise <- getCandStepModel(add_or_remove,data,type,metric,weight=weight,y_name,x_in_model,x_notin_model,intercept, include,test_method)
+    out_cand_stepwise <- getCandStepModel(add_or_remove,data,type,metric,weight=weight,y_name,x_in_model,x_notin_model,intercept, include,test_method, sigma_value)
     BREAK <- out_cand_stepwise$BREAK
     minmax_var <- out_cand_stepwise$minmax_var
     if(BREAK == TRUE){
@@ -658,14 +671,15 @@ getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,sle,sls,we
 }
 
 getStepwiseWrapper <- function(data,type=type,strategy,metric,sle,sls,weight,x_name,y_name,intercept,include,test_method){
-  out_init_stepwise <- getInitialStepwise(data,type=type,strategy,metric,intercept,include,x_name,y_name,weight=weight,test_method=test_method)
+  fit_full <- getModel(data=data, type=type, intercept=intercept, x_name=c(include,x_name), y_name=y_name, weight=weight, method=test_method)
+  out_init_stepwise <- getInitialStepwise(data,type=type,strategy,metric,intercept,include,x_name,y_name,weight=weight,test_method=test_method,sigma_value)
   add_or_remove <- out_init_stepwise$add_or_remove
   x_in_model <- out_init_stepwise$x_in_model
   x_notin_model <- out_init_stepwise$x_notin_model
   process_table <- out_init_stepwise$process_table
   
   ## get final stepwise model
-  out_final_stepwise <- getFinalStepModel(add_or_remove,data,type=type,strategy,metric,sle,sls,weight=weight,y_name,x_in_model,x_notin_model,intercept, include, process_table, test_method)
+  out_final_stepwise <- getFinalStepModel(add_or_remove,data,type=type,strategy,metric,sle,sls,weight=weight,y_name,x_in_model,x_notin_model,intercept, include, process_table, test_method, sigma_value)
   return(out_final_stepwise)
 }
 
