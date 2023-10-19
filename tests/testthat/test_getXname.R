@@ -21,7 +21,7 @@ test_that("test_utils.R failed", {
 	expect_identical(getIntercept(formula2, data = mtcars, type = "linear"), "0")
 	expect_identical(getIntercept(formula1, data = mtcars, type = "logit"), "1")
 	expect_identical(getIntercept(formula2, data = mtcars, type = "logit"), "0")
-	expect_identical(getIntercept(formula3, data = lung, type = "cox"), NULL)
+	expect_identical(getIntercept(formula3, data = lung, type = "cox"), "0")
 
 	# test3: getInitialModel()
 	
@@ -34,7 +34,7 @@ test_that("test_utils.R failed", {
 	res_v1_4_4 <- readRDS(system.file("tests/data","res_v1_4_4.rds", package = "StepReg"))
 	data(mtcars)
 	mtcars$yes <- mtcars$wt
-  #mod=names(res_v1_4_4)[3]
+  #mod=names(res_v1_4_4)[1]
 	for (mod in names(res_v1_4_4)){
 	  type <- unlist(stringr::str_split(mod,"_"))[1]
 	  if(mod=="cox_model1"){
@@ -64,9 +64,9 @@ test_that("test_utils.R failed", {
 	        select_col2 <- c(2,3,7)
 	      }
 	    }
-	    #metric="SL"
+	    #metric="BIC"
 	    for(metric in names(res_v1_4_4[[mod]][[strategy]])){
-	      message(mod,strategy,metric)
+	      message(mod,"\t",strategy,"\t",metric)
 	      output_new <- NA
 	      output_old <- res_v1_4_4[[mod]][[strategy]][[metric]]
 	      
