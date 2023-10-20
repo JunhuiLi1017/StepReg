@@ -140,33 +140,34 @@ wald_result <- wald.test(model =glm.D93, terms =2)
 print(wald_result)
 
 
-setwd("~/dropbox/Project/UMMS/Github/JunhuiLi1017/SAS/")
-dat <- read.table("cancer_data_from_SAS.txt",sep=" ")
+setwd("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/tests/data/")
+dat <- read.table("cancer_remission.csv",sep=",",header=TRUE)
 dim(dat)
-dat1 <- dat[,seq(1,13,2)]
-colnames(dat1) <- c("remiss","cell","smear","infil","li","blast","temp")
 
-dat1$remiss <- as.factor(dat1$remiss)
-write.table(dat1,"cancer_remiss.txt",sep="\t",quote=F,row.names = F)
-
-model0 <- glm(remiss ~ 1,data =dat1, family = "binomial")
-model1 <- glm(remiss ~ 1 + li ,data =dat1, family = "binomial")
-model2 <- glm(remiss ~ 1 + li + temp,data =dat1, family = "binomial")
+model0 <- glm(remiss ~ 1,data =dat, family = "binomial")
+model1 <- glm(remiss ~ 1 + li ,data =dat, family = "binomial")
+model2 <- glm(remiss ~ 1 + li + temp,data =dat, family = "binomial")
 
 summary(model2)
 Anova(model2, type="III", test="Wald")
 
-?glm
 
 summary(model1)
 Anova(model1, type="III", test="Wald")
 
+2.441^2
+2.740^2
 
-check source code to fighure out mosaic tag condition
-1 mosaic
-4 
-5
-6
+
+
+
+
+
+
+
+
+
+
 
 
 
