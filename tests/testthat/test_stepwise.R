@@ -146,11 +146,30 @@ dim(dat)
 dat1 <- dat[,seq(1,13,2)]
 colnames(dat1) <- c("remiss","cell","smear","infil","li","blast","temp")
 
+dat1$remiss <- as.factor(dat1$remiss)
 write.table(dat1,"cancer_remiss.txt",sep="\t",quote=F,row.names = F)
 
+model0 <- glm(remiss ~ 1,data =dat1, family = "binomial")
+model1 <- glm(remiss ~ 1 + li ,data =dat1, family = "binomial")
+model2 <- glm(remiss ~ 1 + li + temp,data =dat1, family = "binomial")
 
-model1 <- glm(remiss ~ 1 + li,data =dat1, family = "binomial")
+summary(model2)
+Anova(model2, type="III", test="Wald")
+
+?glm
+
 summary(model1)
-Anova(model1, type="I", test="Wald")
+Anova(model1, type="III", test="Wald")
+
+
+check source code to fighure out mosaic tag condition
+1 mosaic
+4 
+5
+6
+
+
+
+
 
 
