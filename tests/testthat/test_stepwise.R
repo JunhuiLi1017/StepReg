@@ -90,7 +90,22 @@ glm.D92 <- glm(vs ~ qsec,data =mtcars, family = "binomial")
 glm.D91 <- glm(vs ~ cyl,data =mtcars, family = "binomial")
 glm.D90 <- glm(vs ~ 1,data =mtcars, family = "binomial")
 fit1 <- anova(glm.D92,glm.D93)
-?anova
+
+
+library(car)
+model1 <- glm(vs ~ 1 + cyl,data =mtcars, family = "binomial")
+summary(model1)
+Anova(model1, type="III", test="Wald")
+
+model2 <- glm(vs ~ 1 + cyl + qsec,data =mtcars, family = "binomial")
+
+summary(model2)
+Anova(model2, type="III", test="Wald")
+
+
+
+
+
 
 #install.packages("mdscore'")
 library(mdscore)
@@ -125,9 +140,17 @@ wald_result <- wald.test(model =glm.D93, terms =2)
 print(wald_result)
 
 
+setwd("~/dropbox/Project/UMMS/Github/JunhuiLi1017/SAS/")
+dat <- read.table("cancer_data_from_SAS.txt",sep=" ")
+dim(dat)
+dat1 <- dat[,seq(1,13,2)]
+colnames(dat1) <- c("remiss","cell","smear","infil","li","blast","temp")
+
+write.table(dat1,"cancer_remiss.txt",sep="\t",quote=F,row.names = F)
 
 
-
-
+model1 <- glm(remiss ~ 1 + li,data =dat1, family = "binomial")
+summary(model1)
+Anova(model1, type="I", test="Wald")
 
 
