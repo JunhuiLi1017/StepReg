@@ -10,7 +10,7 @@ test_that("test_utils.R failed", {
   #res_v1_5_0 <- readRDS(paste0(outdir,"/res_v1_5_0.rds"))
   res_v1_5_0 <- readRDS(system.file("tests/data","res_v1_5_0.rds", package = "StepReg"))
   
-  #mod=names(res_v1_5_0)[3]
+  #mod=names(res_v1_5_0)[1]
   for (mod in names(res_v1_5_0)){
     type <- unlist(stringr::str_split(mod,"_"))[1]
     if(mod=="cox_model1"){
@@ -21,7 +21,7 @@ test_that("test_utils.R failed", {
       mtcars$yes <- mtcars$wt
       mydata <- mtcars
     }
-    #strategy="forward"
+    #strategy="bidirection"
     for (strategy in names(res_v1_5_0[[mod]])){
       if(strategy=="subset"){
         index_n <- 2
@@ -30,17 +30,20 @@ test_that("test_utils.R failed", {
         index_n <- 3
         select_col1 <- c(2,3,7)
       }
-      #metric="AIC"
+      
+      metric="BIC"
+      stepwise1(type = type,
+                formula=get(mod),
+                data=mydata,
+                strategy=strategy,
+                metric="CP")[[3]]
+      
       for(metric in names(res_v1_5_0[[mod]][[strategy]])){
         message(mod,"\t",strategy,"\t",metric)
         output_new <- NA
         output_old <- res_v1_5_0[[mod]][[strategy]][[metric]][,select_col1]
         
-        try(output_new <- stepwise1(type = type,
-                                    formula=get(mod),
-                                    data=mydata,
-                                    strategy=strategy,
-                                    metric=metric)[[3]][,select_col1],silent = TRUE)
+        try(output_new <- [,select_col1],silent = TRUE)
         output_new
         res <- try(expect_equal(output_new,output_old),silent = TRUE)
         if(inherits(res, "try-error")){
@@ -84,12 +87,36 @@ expect_equal(b[[3]][,2],a[[3]][,2])
 
 ?glm
 
-glm.D94 <- glm(vs ~ gear + qsec,data =mtcars, family = "binomial")
-glm.D93 <- glm(vs ~ cyl + qsec,data =mtcars, family = "binomial")
-glm.D92 <- glm(vs ~ qsec,data =mtcars, family = "binomial")
-glm.D91 <- glm(vs ~ cyl,data =mtcars, family = "binomial")
-glm.D90 <- glm(vs ~ 1,data =mtcars, family = "binomial")
+glm.D94 <- glm(am ~ gear + qsec,data =mtcars, family = "binomial")
+glm.D93 <- glm(am ~ cyl + qsec,data =mtcars, family = "binomial")
+glm.D92 <- glm(am ~ qsec,data =mtcars, family = "binomial")
+glm.D91 <- glm(am ~ cyl,data =mtcars, family = "binomial")
+glm.D90 <- glm(am ~ 1,data =mtcars, family = "binomial")
 fit1 <- anova(glm.D92,glm.D93)
+
+model0 <- glm(am ~ 1,data =mtcars, family = "binomial")
+model1 <- glm(am ~ cyl,data =mtcars, family = "binomial")
+model2 <- glm(am ~ cyl + gear,data =mtcars, family = "binomial")
+summary(model1)
+model3 <- glm(am ~ qsec,data =mtcars, family = "binomial")
+allvar <- colnames(mtcars)
+mtcars <- mtcars[,!colnames(mtcars) %in% "gear"]
+
+pset <- rep(0,length(allvar[!allvar %in% c("qsec","vs","yes")]))
+names(pset) <- allvar[!allvar %in% c("qsec","vs","yes")]
+for(i in allvar[!allvar %in% c("qsec","vs","yes")]){
+  formu <- as.formula(paste0("vs ~ qsec+",i))
+  model2 <- glm(formu,data =mtcars, family = "binomial")
+  pset[i] <- anova(model3,model2,test="Rao")[2,"Pr(>Chi)"]
+}
+FITi <- coef(summary(model2))
+PIC <- FITi[-(1:(0+1)),'Pr(>|z|)']
+coef(summary(model2))
+mPIC <- max(PIC)
+mP <- which.max(PIC)
+
+summary(model3)
+anova(model1,model2,test="Rao")
 
 
 library(car)
@@ -105,7 +132,7 @@ Anova(model2, type="III", test="Wald")
 
 
 
-
+?glm
 
 #install.packages("mdscore'")
 library(mdscore)
@@ -144,23 +171,59 @@ setwd("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/tests/data/")
 dat <- read.table("cancer_remission.csv",sep=",",header=TRUE)
 dim(dat)
 
+dat1 <- data.frame(dat,v2)
 model0 <- glm(remiss ~ 1,data =dat, family = "binomial")
 model1 <- glm(remiss ~ 1 + li ,data =dat, family = "binomial")
-model2 <- glm(remiss ~ 1 + li + temp,data =dat, family = "binomial")
+model2 <- glm(remiss ~ 1 + li + v2,data =dat1, family = "binomial")
+
+
+model0 <- glm(remiss ~ 1,data =dat, family = "binomial")
+model1 <- glm(remiss ~ 1 + li ,data =dat, family = "binomial")
+
+anova(model1,model2,test="Rao")
 
 summary(model2)
 Anova(model2, type="III", test="Wald")
 
 
-summary(model1)
-Anova(model1, type="III", test="Wald")
-
-2.441^2
-2.740^2
 
 
+mydata <- dat
+model0 <- glm(remiss ~ 1,data =mydata, family = "binomial")
+model1 <- glm(remiss ~ 1 + li,data =mydata, family = "binomial")
+model2 <- glm(remiss ~ 1 + li + temp,data =mydata, family = "binomial")
+allvar <- colnames(mydata)
+
+pset <- rep(0,length(allvar[!allvar %in% c("remiss","li")]))
+names(pset) <- allvar[!allvar %in% c("remiss","li")]
+for(i in allvar[!allvar %in% c("remiss","li")]){
+  formu <- as.formula(paste0("remiss ~ 1 + li + ",i))
+  model_temp <- glm(formu,data =mydata, family = "binomial")
+  pset[i] <- anova(model1,model_temp,test="Rao")[2,"Pr(>Chi)"]
+}
+
+stat_table <- coef(summary(model2))
+stat_table <- coef(summary(fit_reduced))
 
 
+f_pic_vec <- getAnovaStat(add_or_remove="remove", intercept="1", fit_full=model2,type="logit",test_method="Rao")
+pic_set <- f_pic_vec[2]
+f_set <- f_pic_vec[1]
+var_set <- f_pic_vec[3]
+names(pic_set) <- var_set
+names(f_set) <- var_set
+
+
+
+
+
+
+
+output_new <- stepwise1(type = type,
+                        formula=get(mod),
+                        data=mydata,
+                        strategy=strategy,
+                        metric=metric)
 
 
 

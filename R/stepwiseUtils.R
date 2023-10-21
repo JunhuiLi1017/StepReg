@@ -350,7 +350,7 @@ getTable2TypeOfVariables <- function(model){
 
 #note1: test_method_linear should be 'F' for univariate and c(“Pillai”, “Wilks”, “Hotelling-Lawley”, “Roy”) for multivariates
 #getAnovaStat(fit_reduced=x_fit_list[[1]],fit_full=fit_x_in_model,type=type,test_method=test_method)
-getAnovaStat <- function(fit_reduced, fit_full, type, test_method){
+getAnovaStat <- function(add_or_remove,intercept, fit_reduced, fit_full, type, test_method){
   if (type == "linear") {
     ptype <- 'Pr(>F)'
     if(test_method %in% c("Pillai", "Wilks", "Hotelling-Lawley", "Roy")){
@@ -359,23 +359,38 @@ getAnovaStat <- function(fit_reduced, fit_full, type, test_method){
       stattype <- 'F'
     }
   } else if (type == "logit") {
-    ptype <- 'Pr(>Chi)'
-    if(test_method == "Rao"){
+    if(add_or_remove == "add"){
       stattype <- "Rao"
+      ptype <- 'Pr(>Chi)'
     }else{
-      stattype <- "Deviance"
+      stattype <- "z value"
+      ptype <- 'Pr(>|z|)'
     }
   } else if (type == "cox") {
-    # test is not used in cox regression
+    # need to update for wald test
     test_method <- ""
     ptype <- c('P(>|Chi|)','Pr(>|Chi|)')
     stattype <- "Chisq"
   }
-  anova_table <- anova(fit_reduced, fit_full, test = test_method)
-  ptype <- names(anova_table)[names(anova_table) %in% ptype]
-  statistics <- anova_table[2,stattype]
-  pic <- anova_table[2, ptype]
-  return(c("statistics" = statistics, "pic" = pic))
+  if(type != "linear" & add_or_remove=="remove"){ #wald test for logit and cox with add_or_remove="remove"
+    stat_table <- coef(summary(fit_full))
+    stat_table[,"z value"] <- stat_table[,"z value"]^2
+    ptype <- colnames(stat_table)[colnames(stat_table) %in% ptype]
+    pic_set <- stat_table[, ptype]
+    if(intercept=="1"){
+      pic_set <- pic_set[-1]
+    }
+    maxPVar <- names(which.max(pic_set))
+    statistics <- stat_table[maxPVar,stattype]
+    pic <- stat_table[maxPVar, ptype]
+  }else{
+    stat_table <- anova(fit_reduced, fit_full, test = test_method)
+    ptype <- names(stat_table)[names(stat_table) %in% ptype]
+    statistics <- stat_table[2,stattype]
+    pic <- stat_table[2, ptype]
+    maxPVar <- NA
+  }
+  return(c("statistics" = statistics, "pic" = pic, "variable"=maxPVar))
 }
 
 ## get pic based on model fit, it needs fit_reduced and fit_full for SL and only fit_formula for other metrics
@@ -385,7 +400,8 @@ getInitStepModelStat <- function(fit_intercept,fit_fm,type,strategy,metric,inter
   if(metric == "SL"){
     if(!is.null(include)){
       if(all(include %in% attr(fit_fm$terms,"term.labels")) & strategy != "backward"){
-        f_pic_vec <- getAnovaStat(fit_intercept,fit_fm,type,test_method=test_method)
+        #add_or_remove,intercept, fit_reduced, fit_full, type, test_method
+        f_pic_vec <- getAnovaStat(fit_reduced=fit_intercept,fit_full=fit_fm,type=type,test_method=test_method)
         pic <- f_pic_list["pic"]
       }else{
         pic <- 1
@@ -508,11 +524,20 @@ getCandStepModel <- function(add_or_remove,data,type,metric,weight,y_name,x_in_m
     x_fit_list <- lapply(x_name_list,function(x){getModel(data=data, type=type, intercept=intercept, x_name=c(include,x), y_name=y_name, weight=weight, method=test_method)})
     
     if(metric == "SL"){
-      f_pic_vec <- sapply(x_fit_list,function(x){getAnovaStat(fit_reduced=x,fit_full=fit_x_in_model,type=type,test_method=test_method)})
-      pic_set <- f_pic_vec[2,]
-      f_set <- f_pic_vec[1,]
-      names(pic_set) <- colnames(f_pic_vec)
-      names(f_set) <- colnames(f_pic_vec)
+      if(type != "linear" & add_or_remove=="remove"){
+        f_pic_vec <- getAnovaStat(add_or_remove="remove", intercept=intercept, fit_full=fit_x_in_model,type=type,test_method=test_method)
+        pic_set <- as.numeric(f_pic_vec[2])
+        f_set <- as.numeric(f_pic_vec[1])
+        var_set <- f_pic_vec[3]
+        names(pic_set) <- var_set
+        names(f_set) <- var_set
+      }else{
+        f_pic_vec <- sapply(x_fit_list,function(x){getAnovaStat(add_or_remove=add_or_remove,fit_reduced=x,fit_full=fit_x_in_model,type=type,test_method=test_method)})
+        pic_set <- f_pic_vec[2,]
+        f_set <- f_pic_vec[1,]
+        names(pic_set) <- colnames(f_pic_vec)
+        names(f_set) <- colnames(f_pic_vec)
+      }
     }else{
       if(add_or_remove == "remove" & length(x_test) == 1 & intercept == "0"){
         pic_set <- Inf
@@ -640,6 +665,14 @@ getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,sle,sls,we
     x_in_model <- out_updateX$x_in_model
     x_notin_model <- out_updateX$x_notin_model
     process_table <- out_updateX$process_table
+    last2_step <- process_table[nrow(process_table)-1,]
+    last_step <- process_table[nrow(process_table),]
+    if(last2_step[,2] != "" & last2_step[,2] == last_step[,3]){
+      break
+    }else if(last2_step[,3] == last_step[,2] & last_step[,2] != ""){
+      process_table <- process_table[-nrow(process_table),]
+      break
+    }
     
     if(indicator == TRUE){
       if(strategy == 'bidirection'){

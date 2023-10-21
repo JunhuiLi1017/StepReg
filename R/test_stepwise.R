@@ -9,7 +9,7 @@ formula <- cbind(mpg,drat) ~ . + 0
 
 data = mtcars
 strategy = "bidirection"
-metric = "SBC"
+metric = "SL"
 include = NULL
 sle = 0.15
 sls = 0.15
@@ -58,7 +58,7 @@ my.data <- na.omit(lung)
 my.data$status1 <- ifelse(my.data$status==2,1,0)
 formula = Surv(time, status1) ~ . - status 
 
-a2 <- stepwise(formula = formula,
+a2 <- stepwise1(formula = formula,
          data = my.data,
          type = "cox",
          strategy = "subset",
@@ -81,8 +81,15 @@ StepReg::stepwiseCox(formula=formula,
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwise.R")
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwiseUtils.R")
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/validateUtils.R")
+my.data <- read.table("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/tests/data/cancer_remission.csv",sep=',',header=T)
+formula <- remiss ~ .
+stepwise1(formula = formula,
+                data = my.data,
+                type = "logit",
+                strategy = "bidirection",
+                metric = "SL",
+          sle=0.8,
+          sls=0.6)
 
-
-
-
-
+traceback()
+?mtcars
