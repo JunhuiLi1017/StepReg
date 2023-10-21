@@ -76,20 +76,30 @@ StepReg::stepwiseCox(formula=formula,
             select="AIC",
             method="efron")
 
-
-
+library(StepReg)
+?stepwiseCox
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwise.R")
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwiseUtils.R")
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/validateUtils.R")
+
 my.data <- read.table("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/tests/data/cancer_remission.csv",sep=',',header=T)
 formula <- remiss ~ .
+
+
+
+lung <- survival::lung
+my.data <- na.omit(lung)
+my.data$status1 <- ifelse(my.data$status==2,1,0)
+data <- my.data
+formula = Surv(time, status1) ~ . - status 
+
 stepwise1(formula = formula,
                 data = my.data,
                 type = "logit",
                 strategy = "bidirection",
                 metric = "SL",
           sle=0.8,
-          sls=0.6)
+          sls=0.2)
 
 traceback()
 ?mtcars

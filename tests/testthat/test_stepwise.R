@@ -31,19 +31,16 @@ test_that("test_utils.R failed", {
         select_col1 <- c(2,3,7)
       }
       
-      metric="BIC"
-      stepwise1(type = type,
-                formula=get(mod),
-                data=mydata,
-                strategy=strategy,
-                metric="CP")[[3]]
-      
       for(metric in names(res_v1_5_0[[mod]][[strategy]])){
         message(mod,"\t",strategy,"\t",metric)
         output_new <- NA
         output_old <- res_v1_5_0[[mod]][[strategy]][[metric]][,select_col1]
         
-        try(output_new <- [,select_col1],silent = TRUE)
+        try(output_new <- stepwise1(type = type,
+                                          formula=get(mod),
+                                          data=mydata,
+                                          strategy=strategy,
+                                          metric="CP")[[3]][,select_col1],silent = TRUE)
         output_new
         res <- try(expect_equal(output_new,output_old),silent = TRUE)
         if(inherits(res, "try-error")){
@@ -94,28 +91,27 @@ glm.D91 <- glm(am ~ cyl,data =mtcars, family = "binomial")
 glm.D90 <- glm(am ~ 1,data =mtcars, family = "binomial")
 fit1 <- anova(glm.D92,glm.D93)
 
-model0 <- glm(am ~ 1,data =mtcars, family = "binomial")
-model1 <- glm(am ~ cyl,data =mtcars, family = "binomial")
-model2 <- glm(am ~ cyl + gear,data =mtcars, family = "binomial")
-summary(model1)
+data(mtcars)
+model0 <- glm(vs ~ 1,data =mtcars, family = "binomial")
+model1 <- glm(vs ~ cyl,data =mtcars, family = "binomial")
+model2 <- glm(vs ~ cyl + qsec,data =mtcars, family = "binomial")
+
+
+summary(model2)
 model3 <- glm(am ~ qsec,data =mtcars, family = "binomial")
 allvar <- colnames(mtcars)
 mtcars <- mtcars[,!colnames(mtcars) %in% "gear"]
 
-pset <- rep(0,length(allvar[!allvar %in% c("qsec","vs","yes")]))
-names(pset) <- allvar[!allvar %in% c("qsec","vs","yes")]
-for(i in allvar[!allvar %in% c("qsec","vs","yes")]){
-  formu <- as.formula(paste0("vs ~ qsec+",i))
+pset <- rep(0,length(allvar[!allvar %in% c("vs")]))
+names(pset) <- allvar[!allvar %in% c("vs")]
+for(i in allvar[!allvar %in% c("vs")]){
+  formu <- as.formula(paste0("vs ~ 1 +",i))
   model2 <- glm(formu,data =mtcars, family = "binomial")
-  pset[i] <- anova(model3,model2,test="Rao")[2,"Pr(>Chi)"]
+  pset[i] <- anova(model0,model2,test="Rao")[2,"Pr(>Chi)"]
 }
-FITi <- coef(summary(model2))
-PIC <- FITi[-(1:(0+1)),'Pr(>|z|)']
-coef(summary(model2))
-mPIC <- max(PIC)
-mP <- which.max(PIC)
+anova(model2,test="Rao")
 
-summary(model3)
+summary(model2)
 anova(model1,model2,test="Rao")
 
 

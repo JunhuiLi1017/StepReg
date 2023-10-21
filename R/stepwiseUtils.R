@@ -368,18 +368,25 @@ getAnovaStat <- function(add_or_remove,intercept, fit_reduced, fit_full, type, t
     }
   } else if (type == "cox") {
     # need to update for wald test
-    test_method <- ""
-    ptype <- c('P(>|Chi|)','Pr(>|Chi|)')
-    stattype <- "Chisq"
+    if(add_or_remove == "add"){
+      test_method <- ""
+      ptype <- c('P(>|Chi|)','Pr(>|Chi|)')
+      stattype <- "Chisq"
+    }else{
+      stattype <- "z"
+      ptype <- 'Pr(>|z|)'
+    }
   }
   if(type != "linear" & add_or_remove=="remove"){ #wald test for logit and cox with add_or_remove="remove"
     stat_table <- coef(summary(fit_full))
-    stat_table[,"z value"] <- stat_table[,"z value"]^2
+    stat_table[,stattype] <- stat_table[,stattype]^2
     ptype <- colnames(stat_table)[colnames(stat_table) %in% ptype]
     pic_set <- stat_table[, ptype]
+    names(pic_set) <- rownames(stat_table)
     if(intercept=="1"){
       pic_set <- pic_set[-1]
     }
+    #maxPVar <- rownames(stat_table)[which.max(pic_set)]
     maxPVar <- names(which.max(pic_set))
     statistics <- stat_table[maxPVar,stattype]
     pic <- stat_table[maxPVar, ptype]
