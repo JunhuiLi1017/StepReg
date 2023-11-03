@@ -103,3 +103,5 @@ stepwise1(formula = formula,
 
 traceback()
 ?mtcars
+
+(257.7/308.8)^2

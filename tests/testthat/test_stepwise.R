@@ -3,25 +3,27 @@ test_that("test_utils.R failed", {
   
   linear_model1 <- mpg ~ . + 1
   linear_model2 <- cbind(mpg, drat) ~ . + 0
-  logit_model1 <- vs ~ .
+  logit_model1 <- remiss ~ .
   cox_model1 <- Surv(time, status) ~ .
   
   #outdir <- "~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/tests/data"
   #res_v1_5_0 <- readRDS(paste0(outdir,"/res_v1_5_0.rds"))
   res_v1_5_0 <- readRDS(system.file("tests/data","res_v1_5_0.rds", package = "StepReg"))
   
-  #mod=names(res_v1_5_0)[1]
+  #mod=names(res_v1_5_0)[4]
   for (mod in names(res_v1_5_0)){
     type <- unlist(stringr::str_split(mod,"_"))[1]
     if(mod=="cox_model1"){
       lung <- survival::lung %>% na.omit()
       mydata <- lung
-    }else if(mod %in% c("linear_model1","linear_model2","logit_model1")){
+    }else if(mod %in% c("linear_model1","linear_model2")){
       data(mtcars)
       mtcars$yes <- mtcars$wt
       mydata <- mtcars
+    }else if(mod %in% "logit_model1"){
+      mydata <- read.table("cancer_remission.csv",sep=",",header=T)
     }
-    #strategy="bidirection"
+    #strategy="forward"
     for (strategy in names(res_v1_5_0[[mod]])){
       if(strategy=="subset"){
         index_n <- 2
@@ -30,7 +32,7 @@ test_that("test_utils.R failed", {
         index_n <- 3
         select_col1 <- c(2,3,7)
       }
-      
+      #metric="SL"
       for(metric in names(res_v1_5_0[[mod]][[strategy]])){
         message(mod,"\t",strategy,"\t",metric)
         output_new <- NA
@@ -39,8 +41,9 @@ test_that("test_utils.R failed", {
         try(output_new <- stepwise1(type = type,
                                           formula=get(mod),
                                           data=mydata,
-                                          strategy=strategy,
-                                          metric="CP")[[3]][,select_col1],silent = TRUE)
+                                          strategy="backward",
+                                          metric="SL",
+                                    sle=0.05,sls=0.05)[[3]],silent = TRUE)
         output_new
         res <- try(expect_equal(output_new,output_old),silent = TRUE)
         if(inherits(res, "try-error")){
@@ -111,7 +114,7 @@ for(i in allvar[!allvar %in% c("vs")]){
 }
 anova(model2,test="Rao")
 
-summary(model2)
+summary(model1)
 anova(model1,model2,test="Rao")
 
 
