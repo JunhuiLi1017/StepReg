@@ -97,7 +97,22 @@ validateUtils <- function(formula,
 		if(!metric %in% logit_metric){
 			stop("for type 'logit': 'metric' must be from one of the c('", paste0(logit_metric, collapse = "','"),"').")
 		}
-		
+	  
+	  # check if Y separates X completely, if so, stop
+	  # ref: https://stats.oarc.ucla.edu/other/mult-pkg/faq/general/faqwhat-is-complete-or-quasi-complete-separation-in-logistic-regression-and-what-are-some-strategies-to-deal-with-the-issue/
+	  tryCatch(                
+	    expr = {                      
+	      glm(formula, data = data, family = "binomial")
+	    },
+	    error = function(e) {          
+	      print("There was an error message.")
+	    },
+	    warning = function(w) {  
+	      if (w$message %in% c("glm.fit: fitted probabilities numerically 0 or 1 occurred", "glm.fit: algorithm did not converge")) {
+	        stop("There is a perfect separation of data points, can not obtain a valid model fit.")
+	      }
+	    }
+	  )
 	}else if(type == 'cox'){
 		if(!metric %in% cox_metric){
 			stop("for type 'cox': 'metric' must be from one of the c('", paste0(cox_metric, collapse = "','"),"').")
