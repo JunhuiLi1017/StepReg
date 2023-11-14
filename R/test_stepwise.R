@@ -76,32 +76,104 @@ StepReg::stepwiseCox(formula=formula,
             select="AIC",
             method="efron")
 
-library(StepReg)
+library(rms)
 ?stepwiseCox
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwise.R")
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwiseUtils.R")
 source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/validateUtils.R")
 
+
+0.4825/0.1323 
+
+library(rms)
+library(survival)
 my.data <- read.table("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/tests/data/cancer_remission.csv",sep=',',header=T)
 formula <- remiss ~ .
 
+my.data <- my.data[1:9,]
+m1 <- survival::coxph(Surv(time, status1) ~ 0,data=my.data)
+m2 <- survival::coxph(Surv(time, status1) ~ inst,data=my.data)
+m3 <- survival::coxph(Surv(time, status1) ~ ph.ecog + inst,data=my.data)
+m4 <- survival::coxph(Surv(time, status1) ~ ph.karno,data=my.data)
 
+surv_diff <- survdiff(Surv(time, status1) ~ ph.karno, data = my.data)
+surv_diff
+
+4.5/4
+
+summary(m1)
+m2a <- summary(m2)
+m3a <- summary(m3)
+m4a <- summary(m4)
+m4a$sctest
+m3a$sctest-m2a$sctest
+
+dim(my.data)
+m11 <- rms::cph(Surv(time, status1) ~ 1,data=my.data)
+m22 <- rms::cph(Surv(time, status1) ~ age,data=my.data)
+m33 <- rms::cph(Surv(time, status1) ~ age + meal.cal,data=my.data)
+
+formula=Surv(time, status1) ~ age
+data=my.data
+m2a <- summary(m22)
+m3a <- summary(m33)
+anova(m22,m33)
+m2a
+
+install.packages("glmglrt")
+library(glmglrt)
+?ScoreTest
+data(diabetes)
+ScoreTest(diabetes)
+
+
+logLik(m2)
+
+
+m33$loglik
+m33$score
+
+anova(m11,m22)
+
+
+anova(m1,m2,test="")
+
+
+log(lik1/lik2)=loglik1-loglik2
+
+15.104-13.217
+log2(3.7748)
+
+
+colnames(my.data)
 
 lung <- survival::lung
 my.data <- na.omit(lung)
 my.data$status1 <- ifelse(my.data$status==2,1,0)
-data <- my.data
+
+
+my.data <- my.data[1:50,]
+
 formula = Surv(time, status1) ~ . - status 
 
 stepwise1(formula = formula,
                 data = my.data,
-                type = "logit",
-                strategy = "bidirection",
-                metric = "SL",
-          sle=0.8,
-          sls=0.2)
+                type = "cox",
+                strategy = "backward",
+                metric = "SL")
+offset<- attr(Terms, "offset")
 
-traceback()
-?mtcars
+head(lung)
+surv_diff <- survdiff(Surv(time, status) ~ inst, data = lung)
+surv_diff
+surv_fit <- survival::coxph(Surv(time, status) ~ sex,data=lung)
+surv_fit
+surv_fit$score
+a <- summary(surv_fit)
+a$sctest
 
-(257.7/308.8)^2
+(112-91.6)^2/91.6
+(112-91.6)^2/10.3
+(53-73.4)^2/10.3
+
+

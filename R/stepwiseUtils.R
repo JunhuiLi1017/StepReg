@@ -672,13 +672,24 @@ getFinalStepModel <- function(add_or_remove,data,type,strategy,metric,sle,sls,we
     x_in_model <- out_updateX$x_in_model
     x_notin_model <- out_updateX$x_notin_model
     process_table <- out_updateX$process_table
-    last2_step <- process_table[nrow(process_table)-1,]
-    last_step <- process_table[nrow(process_table),]
-    if(last2_step[,2] != "" & last2_step[,2] == last_step[,3]){
-      break
-    }else if(last2_step[,3] == last_step[,2] & last_step[,2] != ""){
-      process_table <- process_table[-nrow(process_table),]
-      break
+    
+    # stop stepwise infinite loops
+    # enter remove
+    # x1
+    #       x1(stop here)
+    #       
+    # enter remove     
+    #       x1(stop here)
+    # x1
+    if(nrow(process_table)>1){
+      last2_step <- process_table[nrow(process_table)-1,]
+      last1_step <- process_table[nrow(process_table),]
+      if(last2_step[,2] != "" & last2_step[,2] == last1_step[,3]){
+        break
+      }else if(last2_step[,3] == last1_step[,2] & last1_step[,2] != ""){
+        process_table <- process_table[-nrow(process_table),]
+        break
+      }
     }
     
     if(indicator == TRUE){

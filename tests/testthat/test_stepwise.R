@@ -84,14 +84,14 @@ head(b[[3]])
 head(a[[3]])
 expect_equal(b[[3]][,2],a[[3]][,2])
 
-
+library(My.stepwise)
 ?glm
-
+?mtcars
 glm.D94 <- glm(am ~ gear + qsec,data =mtcars, family = "binomial")
-glm.D93 <- glm(am ~ cyl + qsec,data =mtcars, family = "binomial")
-glm.D92 <- glm(am ~ qsec,data =mtcars, family = "binomial")
+glm.D93 <- glm(vs ~ cyl,data =mtcars, family = "binomial")
+glm.D92 <- glm(vs ~ qsec,data =mtcars, family = "binomial")
 glm.D91 <- glm(am ~ cyl,data =mtcars, family = "binomial")
-glm.D90 <- glm(am ~ 1,data =mtcars, family = "binomial")
+glm.D90 <- glm(vs ~ 1,data =mtcars, family = "binomial")
 fit1 <- anova(glm.D92,glm.D93)
 
 data(mtcars)
@@ -100,7 +100,7 @@ model1 <- glm(vs ~ cyl,data =mtcars, family = "binomial")
 model2 <- glm(vs ~ cyl + qsec,data =mtcars, family = "binomial")
 
 
-summary(model2)
+summary(glm.D93)
 model3 <- glm(am ~ qsec,data =mtcars, family = "binomial")
 allvar <- colnames(mtcars)
 mtcars <- mtcars[,!colnames(mtcars) %in% "gear"]
