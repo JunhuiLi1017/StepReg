@@ -77,9 +77,15 @@ The *selection criterion* is another name for the aforementioned *model fit scor
   - adjRsq: adjusted Rseq
   - SBC: Schwarz information criterion
   - SL (Pvalue): Significance level
-- For logistic regression
-  - the score test
-  - the Wald test
+- For logistic, Poisson and cox regression
+  - AIC: Akaike information criterion
+  - AICc: sample-size adjusted AIC
+  - HQ: Hannan-Quinn information criterion
+  - HQc: Corrected Hannan and Quinn information criterion, reference see [here](https://www.jstatsoft.org/article/view/v007i12)
+  - IC(3/2): 
+  - IC(1): 
+  - SBC: Schwarz information criterion
+  - SL (Pvalue): Significance level(logistic and Poisson: score and LRT test for forward, wald test for backward; Cox: LRT test for forward, wald test for backward)
 
 ### Multicollinearity
 
