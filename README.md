@@ -117,8 +117,6 @@ help(package = "StepReg")
 ?StepReg
 
 ?stepwise
-?stepwiseCox
-?stepwiseLogit
 ```
 
 ### Examples
@@ -131,18 +129,20 @@ data(mtcars)
 mtcars$yes <- mtcars$wt
 formula    <- cbind(mpg,drat) ~ . + 0
 stepwise(formula    = formula,
-         data       = mtcars,
-         selection  = "bidirection",
-         select     = "AIC")
+         data = mtcars,
+         type  =  "linear",
+         strategy = "bidirection",
+         metric = "AIC")
 ```
 
 #### Stepwise logistic regression
 ```
 formula=vs ~ .
-stepwiseLogit(formula,
-              data      = mtcars,
-              selection = "bidirection",
-              select    = "SL",
+stepwise(formula,
+              data      = Remission,
+              type  =  "logit",
+              strategy = "bidirection",
+              metric    = "SL",
               sle       = 0.15,
               sls       = 0.15)
 ```
@@ -152,15 +152,15 @@ stepwiseLogit(formula,
 lung <- survival::lung
 my.data <- na.omit(lung)
 my.data$status1 <- ifelse(my.data$status==2,1,0)
-data <- my.data
 formula = Surv(time, status1) ~ . - status
 
 stepwiseCox(formula     = formula,
-            data        = data,
-            selection   = c("bidirection"),
-            select      = "SL",
-            sle         = 0.15,
-            sls         = 0.15)
+              data      = my.data,
+              type  =  "logit",
+              strategy = "bidirection",
+              metric    = "SL",
+              sle       = 0.15,
+              sls       = 0.15)
 ```
 
 ## 4. Validation
