@@ -156,7 +156,7 @@ formula = Surv(time, status1) ~ . - status
 
 stepwiseCox(formula     = formula,
               data      = my.data,
-              type  =  "logit",
+              type  =  "cox",
               strategy = "bidirection",
               metric    = "SL",
               sle       = 0.15,
