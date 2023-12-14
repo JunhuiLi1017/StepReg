@@ -1,3 +1,40 @@
+
+source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwise.R")
+source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwiseUtils.R")
+source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/validateUtils.R")
+
+
+  
+
+
+final_model_poisson_005 <- step(object = model_full_poisson,
+                                k = qchisq(p = 0.1, df = 1, lower.tail = FALSE),
+                                trace = 0,
+                                direction="backward")
+summary(final_model_poisson_005)
+
+final_model_poisson_stepreg <- stepwise1(formula = model_full_poisson$formula,
+          data = model_full_poisson$model,
+          type  =  "poisson",
+          strategy = "bidirection",
+          metric = "SL",
+          sle=0.05,
+          sls=0.05,
+          include="Meta_Disease")
+
+
+stepwise1(formula = model_full_poisson$formula,
+          data = model_full_poisson$model,
+          type  =  "poisson",
+          strategy = "backward",
+          metric = "SL",
+          sle=0.05,
+          sls=0.05,
+          include="Meta_Disease")
+
+
+library(StepReg)
+
 test_method_linear <- "Pillai"
 test_method_logit <- "Rao"
 test_method_cox <- "efron"
@@ -19,7 +56,7 @@ best_n = Inf
 excel_name = NULL
 #weight = NULL
 
-a <- stepwise(formula = formula,
+stepwise1(formula = formula,
          data = mtcars,
          type  =  "linear",
          strategy = "bidirection",
@@ -76,104 +113,87 @@ StepReg::stepwiseCox(formula=formula,
             select="AIC",
             method="efron")
 
-library(rms)
-?stepwiseCox
-source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwise.R")
-source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwiseUtils.R")
-source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/validateUtils.R")
 
 
-0.4825/0.1323 
-
-library(rms)
-library(survival)
-my.data <- read.table("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/tests/data/cancer_remission.csv",sep=',',header=T)
-formula <- remiss ~ .
-
-my.data <- my.data[1:9,]
-m1 <- survival::coxph(Surv(time, status1) ~ 0,data=my.data)
-m2 <- survival::coxph(Surv(time, status1) ~ inst,data=my.data)
-m3 <- survival::coxph(Surv(time, status1) ~ ph.ecog + inst,data=my.data)
-m4 <- survival::coxph(Surv(time, status1) ~ ph.karno,data=my.data)
-
-surv_diff <- survdiff(Surv(time, status1) ~ ph.karno, data = my.data)
-surv_diff
-
-4.5/4
-
-summary(m1)
-m2a <- summary(m2)
-m3a <- summary(m3)
-m4a <- summary(m4)
-m4a$sctest
-m3a$sctest-m2a$sctest
-
-dim(my.data)
-m11 <- rms::cph(Surv(time, status1) ~ 1,data=my.data)
-m22 <- rms::cph(Surv(time, status1) ~ age,data=my.data)
-m33 <- rms::cph(Surv(time, status1) ~ age + meal.cal,data=my.data)
-
-formula=Surv(time, status1) ~ age
-data=my.data
-m2a <- summary(m22)
-m3a <- summary(m33)
-anova(m22,m33)
-m2a
-
-install.packages("glmglrt")
-library(glmglrt)
-?ScoreTest
-data(diabetes)
-ScoreTest(diabetes)
 
 
-logLik(m2)
 
 
-m33$loglik
-m33$score
-
-anova(m11,m22)
 
 
-anova(m1,m2,test="")
 
 
-log(lik1/lik2)=loglik1-loglik2
-
-15.104-13.217
-log2(3.7748)
 
 
-colnames(my.data)
 
+
+
+##--------------------------
+## dataset for linear regression
+##--------------------------
+data(mtcars)
+
+## build two models: reduced and full model
+linear_reduced0 <- lm(mpg ~ 1, data=mtcars)
+linear_reduced1 <- lm(mpg ~ 1 + qsec, data=mtcars)
+linear_full <- lm(mpg ~ 1 + qsec + hp, data=mtcars)
+
+anova(linear_reduced1,linear_full,test="F")
+anova(linear_reduced1,linear_full,test="LRT")
+
+##--------------------------
+## dataset for logistic regression
+##--------------------------
+cancer.data <- read.table("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/tests/data/cancer_remission.csv",sep=',',header=T)
+dim(cancer.data)
+colnames(cancer.data)
+head(cancer.data)
+
+## build two models: reduced and full model
+logit_reduced0 <- glm(remiss ~ 1, data=cancer.data, family = "binomial")
+logit_reduced1 <- glm(remiss ~ 1 + li, data=cancer.data, family = "binomial")
+logit_full <- glm(remiss ~ 1 + li + temp, data=cancer.data, family = "binomial")
+
+anova(logit_reduced1,logit_full,test="Rao")
+anova(logit_reduced1,logit_full,test="LRT")
+
+
+##--------------------------
+## dataset for survival analysis
+##--------------------------
 lung <- survival::lung
 my.data <- na.omit(lung)
 my.data$status1 <- ifelse(my.data$status==2,1,0)
 
+## build two models: reduced and full model
+library(survival)
+surv_redeuced0 <- survival::coxph(Surv(time, status) ~ 1,data=lung)
+surv_redeuced1 <- survival::coxph(Surv(time, status) ~ sex,data=lung)
+surv_full <- survival::coxph(Surv(time, status) ~ sex+age,data=lung)
 
-my.data <- my.data[1:50,]
+#Rao(Score chi square) is valid for logistic regression; 
+# anova only do LRT test no matter what parameter in test=" " 
+anova(surv_redeuced1,surv_full,test="Rao")
+anova(surv_redeuced1,surv_full,test="F")
+anova(surv_redeuced1,surv_full,test="LRT")
 
-formula = Surv(time, status1) ~ . - status 
+#we can find Score (logrank) test in summary(surv_full), but in summary() funcion,
+#reduced model is always coxph(formula = Surv(time, status1) ~ 1
+summary(surv_redeuced1)   #surv_redeuced1 vs surv_redeuced0
+summary(surv_full)   #vs coxph(formula = Surv(time, status1) ~ 1
 
-stepwise1(formula = formula,
-                data = my.data,
-                type = "cox",
-                strategy = "backward",
-                metric = "SL")
-offset<- attr(Terms, "offset")
+#full model
+#coxph(formula = Surv(time, status1) ~ ph.ecog + inst + 1
+#
+#reduced model
+#coxph(formula = Surv(time, status1) ~ 1
+#
+# reduced model we are looking for
+# coxph(formula = Surv(time, status1) ~ ph.ecog + 1
 
-head(lung)
-surv_diff <- survdiff(Surv(time, status) ~ inst, data = lung)
-surv_diff
-surv_fit <- survival::coxph(Surv(time, status) ~ sex,data=lung)
-surv_fit
-surv_fit$score
-a <- summary(surv_fit)
-a$sctest
 
-(112-91.6)^2/91.6
-(112-91.6)^2/10.3
-(53-73.4)^2/10.3
+
+
+
 
 

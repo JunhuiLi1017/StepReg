@@ -8,7 +8,7 @@
 #' 
 validateUtils <- function(formula,
                           data,
-                          type = c("linear", "logit", "cox"),
+                          type = c("linear", "logit", "poisson","cox"),
                           include = NULL,
                           strategy = c("forward", "backward", "bidirectional", "subset"),
                           metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
@@ -17,6 +17,7 @@ validateUtils <- function(formula,
                           sigma_value,
                           test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
                           test_method_logit = c("Rao", "LRT"),
+                          test_method_poisson = c("Rao", "LRT"),
                           test_method_cox = c("efron", "breslow", "exact"),
 													tolerance = 10e-7,
 													weight = NULL,
@@ -81,6 +82,7 @@ validateUtils <- function(formula,
 	## check 'metric' and 'test_method' according to 'type'
 	linear_metric <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC")
 	logit_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
+	poisson_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	cox_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	
 	if(type == "linear"){
@@ -117,8 +119,11 @@ validateUtils <- function(formula,
 		if(!metric %in% cox_metric){
 			stop("for type 'cox': 'metric' must be from one of the c('", paste0(cox_metric, collapse = "','"),"').")
 		}
+	}else if(type == "poisson"){
+	  if(!metric %in% poisson_metric){
+	    stop("for type 'poisson': 'metric' must be from one of the c('", paste0(poisson_metric, collapse = "','"),"').")
+	  }
 	}
-	
 	## check 'tolerance'
 	if(!is.numeric(tolerance)){
 		stop("the 'tolerance' must be a numeric value.")

@@ -6,7 +6,7 @@
 #' 
 #' @param data (data.frame) A dataset consisting of predictor variable(s) and response variable(s).
 #' 
-#' @param type (character) The stepwise regression type. Choose from 'linear', 'logit', and 'cox'. Default is 'linear'.
+#' @param type (character) The stepwise regression type. Choose from 'linear', 'logit', 'poisson', and 'cox'. Default is 'linear'.
 #' 
 #' @param include (NULL|character) A character vector specifying predictor variables that will always stay in the model. A subset of the predictors in the dataset.
 #' 
@@ -24,7 +24,9 @@
 #' 
 #' @param test_method_linear (character) Test method for multivariate linear regression analysis, choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'. Default is 'Pillai'. For univariate regression, 'F-test' will be used. 
 #' 
-#' @param test_method_logit (character) Test method for univariate logit regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'.
+#' @param test_method_logit (character) Test method for univariate logit regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy='subset'.
+#' 
+#' @param test_method_poisson (character) Test method for univariate poisson regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy='subset'.
 #' 
 #' @param test_method_cox (character) Test method for cox regression analysis, choose from 'efron', 'breslow', 'exact'. Default is 'efron'.
 #' 
@@ -71,21 +73,22 @@
 #' @export
 #' 
 
-stepwise1 <- function(formula,
-                     data,
-                     type = c("linear", "logit", "cox"),
-                     include = NULL,
-                     strategy = c("forward", "backward", "bidirection", "subset"),
-                     metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
-                     sle = 0.15,
-                     sls = 0.15,
-                     test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
-                     test_method_logit = c("Rao", "LRT"),
-                     test_method_cox = c("efron", "breslow", "exact"),
-                     tolerance = 1e-7,
-                     weight = NULL,
-                     best_n = Inf,
-                     excel_name = NULL){
+stepwise <- function(formula,
+                      data,
+                      type = c("linear", "logit", "cox", "poisson"),
+                      include = NULL,
+                      strategy = c("forward", "backward", "bidirection", "subset"),
+                      metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
+                      sle = 0.15,
+                      sls = 0.15,
+                      test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
+                      test_method_logit = c("Rao", "LRT"),
+                      test_method_poisson = c("Rao", "LRT"),
+                      test_method_cox = c("efron", "breslow", "exact"),
+                      tolerance = 1e-7,
+                      weight = NULL,
+                      best_n = Inf,
+                      excel_name = NULL){
   ## validate input:
   ## check required parameters
   ## place match.arg() in the main function because validationUtils.R can't return type even with <<-, and type represents all values in c().
@@ -95,6 +98,7 @@ stepwise1 <- function(formula,
   
   test_method_linear <- match.arg(test_method_linear)
   test_method_logit <- match.arg(test_method_logit)
+  test_method_poisson <- match.arg(test_method_poisson)
   test_method_cox <- match.arg(test_method_cox)
   
   x_name_orig <- getXname(formula, data)
@@ -110,13 +114,13 @@ stepwise1 <- function(formula,
   }
   sigma_value <- getSigmaFullModel(model_raw,type,n_y)
   
-  validateUtils(formula = formula, data = data, type = type, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, sigma_value=sigma_value, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_cox = test_method_cox, tolerance = tolerance, weight = weight, best_n = best_n, excel_name = excel_name)
-  test_method <- getTestMethod(data, model_raw, type, metric, n_y, test_method_linear, test_method_logit, test_method_cox)
+  validateUtils(formula = formula, data = data, type = type, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, sigma_value=sigma_value, test_method_linear = test_method_linear, test_method_logit = test_method_logit, test_method_poisson = test_method_poisson, test_method_cox = test_method_cox, tolerance = tolerance, weight = weight, best_n = best_n, excel_name = excel_name)
+  test_method <- getTestMethod(data, model_raw, type, metric, n_y, test_method_linear, test_method_logit, test_method_poisson, test_method_cox)
   
   multico_x <- getMulticolX(data, x_name_orig, tolerance)
   merged_multico_x <- paste0(multico_x, sep = " ")
   x_name <- setdiff(x_name_orig, multico_x)
-    
+  
   result <- list()
   ## table1
   table1_para_value <- getTable1SummaryOfParameters(data, type, x_name_orig, y_name, merged_multico_x, merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept)
@@ -151,7 +155,7 @@ stepwise1 <- function(formula,
   }else{
     result$"Summary Model" <- table5_coef_model
   }
-
+  
   if(!is.null(excel_name)){
     openxlsx::write.xlsx(x=result, file=paste0(excel_name,".xlsx"))
   }
