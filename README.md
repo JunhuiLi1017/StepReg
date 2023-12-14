@@ -39,7 +39,7 @@ There are multiple methods for feature selection serving different tasks. For re
 
 Stepwise regression is a common technique used for automatically selecting the optimal predictive variables to determine an optimal model. It works by **iteratively (step-by-step) adding or removing potential explanatory variables in sequence** and testing for improvement in terms of statistical significance. It repeats this process until no more improvement can be observed. As a result, the stepwise selection procedure eliminates variables irrelevant to the regression model and only includes statistically relevant ones.
 
-**StepReg** currently supports three regression models: linear regression, logistic regression, and Cox regression.
+**StepReg** currently supports 4 regression models: linear regression, logistic regression, poisson regression, and Cox regression.
 
 ## 2. Algorithms implemented in StepReg
 
@@ -78,8 +78,8 @@ The *selection criterion* is another name for the aforementioned *model fit scor
   - SBC: Schwarz information criterion
   - SL (Pvalue): Significance level
 - For logistic regression
-  - the score test
-  - the Wald test
+  - the score test for forward selection and 
+  - the Wald test for backward elimination
 
 ### Multicollinearity
 
@@ -162,9 +162,9 @@ stepwiseCox(formula     = formula,
   - Output from StepReg for multivariate stepwise regression was cross-validated with the reference. (see [publications](#publications))
 
   - Final results using StepReg for three datasets are consistent with that using SAS software.
-    - Dataset1 without class effect: 13 dependent variable, 129 independent variable, and 216 samples.
-    - Dataset2 with 4 class effect: 12 dependent variable, 1270 independent variable, and 647 samples.
-    - Dataset3 with 6 class effect: 5 dependent variable, 2068 independent variable, and 412 samples.
+    - Dataset1 for linear regression: mtcars.
+    - Dataset2 for logit regression: remission (https://support.sas.com/documentation/onlinedoc/stat/ex_code/121/logiex1.html).
+    - Dataset3 for cox regression: survival::lung.
 
 ## 5. Support
 For bug reports and feature requests, raise an [issue](https://github.com/JunhuiLi1017/StepReg/issues/new).
