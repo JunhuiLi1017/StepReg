@@ -87,7 +87,7 @@ StepReg::stepwiseLogit(formula,
               select="SBC",
               sigMethod="Rao")
 
-
+?stepwiseCox
 ## cox stepwise
 library(survival)
 lung <- survival::lung

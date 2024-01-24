@@ -53,7 +53,7 @@
 #' Sawa, T. (1978). Information criteria for discriminating among alternative regression models. Econometrica, 46(6), 1273-1291.
 #' Schwarz, G. (1978). Estimating the dimension of a model. Annals of Statistics, 6(2), pags. 15-18.
 #' 
-#' @author Junhui Li 
+#' @author Junhui Li, Kai Hu, Xiaohuan Lu
 #' 
 #' @examples
 #' data(mtcars)
