@@ -264,6 +264,8 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		sub_process_table_sort <- sub_process_table[order(sub_process_table[, 2], decreasing = decreasing), ]
 		if(nrow(sub_process_table_sort) < best_n){
 		  best_n_model <- nrow(sub_process_table_sort)
+		}else{
+		  best_n_model <- best_n
 		}
 		process_table <- rbind(process_table,sub_process_table_sort[1:best_n_model, ])
 	}
@@ -315,7 +317,7 @@ getTable1SummaryOfParameters <- function(data, type, x_name, y_name, merged_mult
 									"stay significance level (sls)",
 									"test method",
 									"tolerance of multicollinearity",
-									"multicollinearity term",
+									"Multicollinearity variable",
 									"intercept"),
 		Value = c(y_name,
 							merged_include,

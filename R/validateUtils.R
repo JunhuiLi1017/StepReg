@@ -140,9 +140,9 @@ validateUtils <- function(formula,
 		}
 	}
 	
-	## check 'best_n'
+	## check integer of 'best_n'
 	if(!is.infinite(best_n)){
-		if(!is.integer(best_n)){
+		if(!best_n %% 1 == 0){
 			stop("the 'best_n' must be an integer.")
 		}
 	}

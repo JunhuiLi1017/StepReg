@@ -1,58 +1,85 @@
 ---
-title: "StepReg Vignette"
+title: "StepReg: Stepwise Regression make it simple"
 author:
-  - Junhui Li^[China Agricultural University, junhuili@cau.edu.cn]
-  - Junhui Li^[University of Massachusset Chan medical school, junhui.li11@umassmed.edu]
+- name: Junhui Li
+  affiliation: 
+  - University of Massachusset Chan medical school, Worcester, USA
+  - China Agricultural University, Beijing, China
+- name: Kai Hu
+  affiliation: University of Massachusset Chan medical school, Worcester, USA
+- name: Xiaohuan Lu
+  affiliation: Clark University, Worcester, USA
+- name: Julie Lihua Zhu
+  affiliation: University of Massachusset Chan medical school, Worcester, USA
+- name: Wenxin Liu
+  affiliation: China Agricultural University, Beijing, China
 package: StepReg
 output:
-  BiocStyle::html_document
+  BiocStyle::html_document:
+    toc_float: true
+  BiocStyle::pdf_document: default
 abstract: |
-  Stepwise regression is a popular data-mining method to identify a useful subset of the predictors to be used in a multiple regression model. We developed an R package StepReg, which allow users to perform linear, logistic and cox proportional hazard stepwise regression with a widely used selection criteria and stop rules are available in forward selection, backward elimination, both-direcition and best subset method. User can specify effects to be included in all models and do multivariate multiple stepwise regression.
+  Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. This package empowers users to conduct linear, logistic, and Cox proportional hazard stepwise regression, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods.
+
+  With StepReg, users have the flexibility to specify effects to be included in all models and engage in multivariate multiple stepwise regression. The package is designed to streamline the modeling process, offering a range of options for effective variable selection, making it a valuable tool for researchers and analysts working with diverse datasets.
 vignette: |
-  %\VignetteIndexEntry{StepReg Vignette}
+  %\VignetteIndexEntry{StepReg: Stepwise Regression made it simple}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 # Introduction
 
-Here we applied StepReg to the well-known mtcars data and lung data for clarifying how to perform linear, logistic and Cox stepwise regression.
+Here we applied the StepReg package to two well-known datasets, namely the mtcars data and lung data. Our goal was to provide clarity on the procedures for performing linear, logistic, and Cox stepwise regression using this versatile tool.
+
+The mtcars dataset, a classic dataset in the field, and the lung dataset served as illustrative examples to showcase the functionality of StepReg. By applying the package to these datasets, we demonstrated the practical application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, and Cox stepwise regression for survival data.
+
+Through these examples, users can gain insights into how StepReg can be effectively utilized for variable selection in different regression scenarios. The mtcars and lung datasets, being well-established and diverse in nature, provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications.
+
+# Examples
 
 ```{r library}
 #install.package("StepReg")
 library(StepReg)
+library(survival)
+source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwise.R")
+source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwiseUtils.R")
+source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/validateUtils.R")
+
 ```
 
 ## linear stepwise regression with data mtcar
 
-### linear stepwise regression using 'forward' method for variable selection and 'AIC' as criteria for stop rules
+### perform linear stepwise regression using the 'forward' strategy for variable selection and 'AIC' as the criteria for stop rules, you can follow the code below:
 ```{r}
 formula <- mpg ~ .
 sForwAIC <- stepwise(formula=formula,
          data=mtcars,
-         selection="forward",
-         select="AIC")
+         type="linear",
+         strategy="forward",
+         metric="AIC")
 sForwAIC
 ```
 
 From the above result, we can see that stepwise() output a list with 5 tables. 
 
-* 'Summary of Parameters' tells you what parameters is used for this function, where Intercept equals to 1 showing that this stepwise regression has a intercept, otherwise 0 has not a intercept.
+* 'Summary of Parameters' tells you what parameters is used for this function. if "Intercept" equals 1, it indicates that this stepwise regression includes an intercept, otherwise, if it equals 0, the regression does not include an intercept.
 
-* 'Variables Type' is the summary of the type of all variables.
+* 'Variables Type' is the summary detailing the type of all variables.
 
-* 'Process of Selection' let you know how variables are selected, we used AIC as the criteria so the last column is value of AIC.
+* "Process of Selection" provides insights into how variables are chosen. In this instance, AIC serves as the criterion, and the last column displays the corresponding AIC values.
 
-* 'Coefficients of the Selected Variables' is the coefficients of all selected variable.
+* "Coefficients of the Selected Variables" presents the coefficients associated with all selected variables.
 
-### linear stepwise regression using 'bidirection' method for variable selection and 'SL' as criteria for stop rules, and we set significant level for entry(sle) is 0.15, and significant level of stay(sls) is 0.15 too.
+### Conduct linear stepwise regression employing the 'bidirection' strategy with 'SL' as stopping criterion, and set the significance level for entry (sle) to 0.15 and the significance level for stay (sls) to 0.15.
 
 ```{r}
 formula <- mpg ~ .
 sBidiSL <- stepwise(formula=formula,
          data=mtcars,
-         selection="bidirection",
-         select="SL",
+         type="linear",
+         strategy="bidirection",
+         metric="SL",
          sle=0.15,
          sls=0.15)
 sBidiSL
@@ -60,80 +87,90 @@ sBidiSL
 
 The output of this time is similar to the last time except that the last column name of 'Process of Selection' is SL.
 
-### linear stepwise regression using 'backward' method for variable selection and 'SBC' as criteria for stop rules and without intercept in stepwise regression.
+### Perform linear stepwise regression using the 'backward' method for variable selection, employing 'SBC' as the criteria for stop rules, and excluding the intercept in the stepwise regression.
 
 ```{r}
-#formula <- mpg ~ . -1
 formula <- mpg ~ . + 0
 sBackSBC <- stepwise(formula=formula,
                      data=mtcars,
-                     selection="backward",
-                     select="SBC")
+                     type="linear",
+                     strategy="backward",
+                     metric="SBC")
 sBackSBC
 ```
 
-Note that 0 instead of 1 in table 'Summary of Parameters' and 'Selected Varaibles'.
+Note that 0 is displayed instead of 1 in the 'Summary of Parameters' and 'Selected Variables' tables.
 
-### linear stepwise regression using 'score' method for variable selection, 'AICc' as criteria and we perform multivariable multiple stepwise regression with mpg and dra as dependent variables, besides, we select cyl disp hp wt vs am as independent variables, where wt is included always.
+### Conduct linear stepwise regression using the 'subset' strategy for variable selection with 'AICc' as the criteria. Perform multivariable multiple stepwise regression with 'mpg' and 'dra' as dependent variables. Additionally, use 'cyl', 'disp', 'hp', 'wt', 'vs', and 'am' as independent variables, where 'wt' is consistently included in all models.
  
 ```{r}
-formula <- cbind(mpg,drat) ~ cyl+disp+hp+wt+vs+am
+formula <- cbind(mpg,drat) ~ cyl + disp + hp + wt + vs + am
 stepwise(formula=formula,
         data=mtcars,
+        type="linear",
         include='wt',
-        selection="score",
-        select="AICc")
+        strategy="subset",
+        metric="AICc",
+        best_n=3)
 ```
 
-## logistic stepwise regression with data mtcars
+## logistic stepwise regression with data remission
 
-### logistic stepwise regression using 'forward' method for variable selection and 'AIC' as criteria for stop rules
+The remission data, taken from Lee (1974), consist of patient characteristics and whether or not cancer remission occurred, and are saved in the data set remission. The variable remiss is the cancer remission indicator variable with a value of 1 for remission and a value of 0 for nonremission.  The other six variables are the risk factors thought to be related to cancer remission.
+
+### Perform logistic stepwise regression using the 'forward' method for variable selection with 'AIC' as the criteria for stop rules.
 
 ```{r warning=FALSE}
-formula <- am ~ .
-stepwiseLogit(formula=formula,
-              data=mtcars,
-              selection="forward",
-              select="AIC")
+data(remission)
+formula <- remiss ~ .
+stepwise(formula=formula,
+         data=remission,
+         type="logit",
+         strategy="forward",
+         metric="AIC")
 ```
 
-### logistic stepwise regression using 'score' method for variable selection and 'SL' as criteria and only output the first 3 best model.
+### Conduct logistic stepwise regression using the 'subset' method for variable selection with 'SL' as the criteria.
 
 ```{r warning=FALSE}
-formula <- am ~ .
-stepwiseLogit(formula=formula,
-              data=mtcars,
-              selection="score",
-              select="SL",
-              best=3)
+data(remission)
+formula <- remiss ~ .
+stepwise(formula=formula,
+         data=remission,
+         type="logit",
+         strategy="subset",
+         metric="SL",
+         best_n=3)
 ```
 
 ## Cox stepwise regression with data lung
 
-### cox stepwise regression using 'forward' method for variable selection and 'IC(1)' as criteria for stop rules
+### Perform Cox stepwise regression using the 'forward' method for variable selection with 'IC(1)' as the criteria for stop rules.
 
 ```{r warning=FALSE}
 lung <- survival::lung
 my.data <- na.omit(lung)
 my.data$status1 <- ifelse(my.data$status==2,1,0)
-data <- my.data
 formula = Surv(time, status1) ~ . - status 
 
-stepwiseCox(formula=formula,
-  data=my.data,
-  selection="forward",
-  select="IC(1)")
+stepwise(formula=formula,
+            data=my.data,
+            type="cox",
+            strategy="forward",
+            metric="IC(1)")
 ```
 
-### cox stepwise regression using 'score' method for variable selection and 'SL' as criteria and only output the first 3 best model.
+### Conduct Cox stepwise regression using the 'bidirection' method for variable selection with 'SL' as the criteria. Output only the top 3 best models.
 
 ```{r warning=FALSE}
 formula = Surv(time, status1) ~ . - status 
-stepwiseCox(formula=formula,
-  data=my.data,
-  selection="score",
-  select="SL",
-  best=3)
+stepwise(formula=formula,
+         data=my.data,
+         type="cox",
+         strategy="bidirection",
+         metric="SL",
+         sle=0.05,
+         sls=0.05)
 ```
 
 

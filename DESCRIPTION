@@ -2,7 +2,7 @@ Package: StepReg
 Title: Stepwise Regression Analysis
 Version: 1.5.0
 Date: 2023-12-13
-Author: Junhui Li, Kai Hu, Xiaohuan Lu, Kun Cheng, Michael Lodato, Lihua Julie Zhu, Wenxin Liu
+Author: Junhui Li, Kai Hu, Xiaohuan Lu, Kun Cheng, Sushmita Nayak, Cesar Bautista Sotelo, Michael Lodato, Robert H Brown, Lihua Julie Zhu, Wenxin Liu
 Maintainer: Junhui Li <junhuili@cau.edu.cn>
 Description: Four most common types of stepwise regression including linear regression, logistic regression, poisson regression and cox proportional hazard regression can be performed to select best model with methods of forward selection, backward elimination, bidirectional selection and best subset selection. A widely used selection criteria are available for variable selection.
 License: MIT + file LICENSE
@@ -16,6 +16,6 @@ Imports:
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 NeedsCompilation: no
-Packaged: 2022-01-13 08:17:50 UTC; junhuili
+Packaged: 2024-01-13 08:17:50 UTC; junhuili
 Repository: CRAN
 Date/Publication: 2022-01-14 09:22:49 UTC
