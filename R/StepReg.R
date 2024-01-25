@@ -8,15 +8,13 @@
 #' @name StepReg-package
 #' @aliases StepReg-package StepReg
 #' @docType package
-#' @author Junhui Li, Xiaohuan Lu, Kun Cheng, Wenxin Liu
+#' @author Junhui Li, Kai Hu, Xiaohuan Lu, Kun Cheng, Sushmita Nayak, Cesar Bautista Sotelo, Michael Lodato, Robert H Brown, Lihua Julie Zhu, Wenxin Liu
 #'
 #' Maintainers:\cr
-#' Junhui Li <Junhui.li11@umassmed.edu>\cr
+#' Junhui Li <Junhui.li11@cau.edu.cn>\cr
 #' Kai Hu <kai.hu@umassmed.edu>
 #'
 #' @references 1. [to be added]
 #' @keywords package
-#'
-#' @examples
 #' 
 "_PACKAGE"

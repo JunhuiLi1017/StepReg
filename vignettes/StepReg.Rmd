@@ -39,13 +39,8 @@ Through these examples, users can gain insights into how StepReg can be effectiv
 # Examples
 
 ```{r library}
-#install.package("StepReg")
+#install.packages("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg_1.5.0.tar.gz")
 library(StepReg)
-library(survival)
-source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwise.R")
-source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/stepwiseUtils.R")
-source("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/R/validateUtils.R")
-
 ```
 
 ## linear stepwise regression with data mtcar

@@ -17,10 +17,10 @@ The package provides functions to perform Stepwise Regression using various algo
 1. [to be added]
 }
 \author{
-Junhui Li, Xiaohuan Lu, Kun Cheng, Wenxin Liu
+Junhui Li, Kai Hu, Xiaohuan Lu, Kun Cheng, Sushmita Nayak, Cesar Bautista Sotelo, Michael Lodato, Robert H Brown, Lihua Julie Zhu, Wenxin Liu
 
 Maintainers:\cr
-Junhui Li <Junhui.li11@umassmed.edu>\cr
+Junhui Li <Junhui.li11@cau.edu.cn>\cr
 Kai Hu <kai.hu@umassmed.edu>
 }
 \keyword{package}

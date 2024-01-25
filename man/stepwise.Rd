@@ -5,9 +5,9 @@
 \title{StepReg: Stepwise Regression Made Simple}
 \usage{
 stepwise(
-  type = c("linear", "logit", "cox"),
   formula,
   data,
+  type = c("linear", "logit", "cox", "poisson"),
   include = NULL,
   strategy = c("forward", "backward", "bidirection", "subset"),
   metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC",
@@ -16,17 +16,20 @@ stepwise(
   sls = 0.15,
   test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
   test_method_logit = c("Rao", "LRT"),
+  test_method_poisson = c("Rao", "LRT"),
   test_method_cox = c("efron", "breslow", "exact"),
-  weights = NULL,
-  best_n = Inf
+  tolerance = 1e-07,
+  weight = NULL,
+  best_n = Inf,
+  excel_name = NULL
 )
 }
 \arguments{
-\item{type}{(character) The stepwise regression type. Choose from 'linear', 'logit', and 'cox'. Default is 'linear'.}
-
 \item{formula}{(formula) The formula used for model fitting. The formula takes the form of a '~' (tilde) symbol, with the response variable(s) on the left-hand side, and the predictor variable(s) on the right-hand side. The 'lm()' function uses this formula to fit a regression model. A formula can be as simple as 'y ~ x'. For multiple predictors, they must be separated by the '+' (plus) symbol, e.g. 'y ~ x1 + x2'. To include an interaction term between variables, use the ':' (colon) symbol: 'y ~ x1 + x1:x2'. Use the '.' (dot) symbol to indicate that all other variables in the dataset should be included as predictors, e.g. 'y ~ .'. In the case of multiple response variables (multivariate), the formula can be specified as 'cbind(y1, y2) ~ x1 + x2'. By default, an intercept term is always included in the models, to exclude it, include '0' or '- 1' in your formula: 'y ~ 0 + x1', 'y ~ x1 + 0', and 'y ~ x1 - 1'.}
 
 \item{data}{(data.frame) A dataset consisting of predictor variable(s) and response variable(s).}
+
+\item{type}{(character) The stepwise regression type. Choose from 'linear', 'logit', 'poisson', and 'cox'. Default is 'linear'.}
 
 \item{include}{(NULL|character) A character vector specifying predictor variables that will always stay in the model. A subset of the predictors in the dataset.}
 
@@ -40,13 +43,19 @@ stepwise(
 
 \item{test_method_linear}{(character) Test method for multivariate linear regression analysis, choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'. Default is 'Pillai'. For univariate regression, 'F-test' will be used.}
 
-\item{test_method_logit}{(character) Test method for univariate logit regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'.}
+\item{test_method_logit}{(character) Test method for univariate logit regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy='subset'.}
+
+\item{test_method_poisson}{(character) Test method for univariate poisson regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy='subset'.}
 
 \item{test_method_cox}{(character) Test method for cox regression analysis, choose from 'efron', 'breslow', 'exact'. Default is 'efron'.}
 
-\item{weights}{(numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weights reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weights should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is NULL, which means that all weights are set equal.}
+\item{tolerance}{(numeric)  A statistical measure used to assess multicollinearity in a multiple regression model. It is calculated as the proportion of the variance in a predictor variable that is not accounted for by the other predictor variables in the model. Default is 1e-07.}
+
+\item{weight}{(numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weight reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weight should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is NULL, which means that all weight are set equal.}
 
 \item{best_n}{(numeric(integer)) The number of models to keep in the final output. Default is Inf, which means that all models will be displayed.}
+
+\item{excel_name}{(NULL|character) The output excel name. If NULL, do not output excel file. Default is NULL.}
 }
 \description{
 Stepwise regression is a common technique used for automatically selecting predictor variable(s) (independent) to determine an optimal model for the prediction of the response variable(s) (dependent). The StepReg package supports three types of models: linear regression, logistic regression, and Cox regression. Meanwhile, multiple model fit scoring methods are implemented.
@@ -55,7 +64,8 @@ Stepwise regression is a common technique used for automatically selecting predi
 data(mtcars)
 mtcars$yes <- mtcars$wt
 formula <- cbind(mpg,drat) ~ . + 0
-stepwise(formula=formula,
+stepwise(type = "linear",
+         formula=formula,
          data=mtcars,
          strategy="bidirection",
          metric="AIC")
@@ -80,7 +90,7 @@ Sawa, T. (1978). Information criteria for discriminating among alternative regre
 Schwarz, G. (1978). Estimating the dimension of a model. Annals of Statistics, 6(2), pags. 15-18.
 }
 \author{
-Junhui Li
+Junhui Li, Kai Hu, Xiaohuan Lu
 }
 \keyword{regression}
 \keyword{stepwise}
