@@ -48,11 +48,11 @@ library(StepReg)
 ### perform linear stepwise regression using the 'forward' strategy for variable selection and 'AIC' as the criteria for stop rules, you can follow the code below:
 ```{r}
 formula <- mpg ~ .
-sForwAIC <- stepwise(formula=formula,
-         data=mtcars,
-         type="linear",
-         strategy="forward",
-         metric="AIC")
+sForwAIC <- stepwise(formula = formula,
+         data = mtcars,
+         type = "linear",
+         strategy = "forward",
+         metric = "AIC")
 sForwAIC
 ```
 
@@ -70,13 +70,13 @@ From the above result, we can see that stepwise() output a list with 5 tables.
 
 ```{r}
 formula <- mpg ~ .
-sBidiSL <- stepwise(formula=formula,
-         data=mtcars,
-         type="linear",
-         strategy="bidirection",
-         metric="SL",
-         sle=0.15,
-         sls=0.15)
+sBidiSL <- stepwise(formula = formula,
+         data = mtcars,
+         type = "linear",
+         strategy = "bidirection",
+         metric = "SL",
+         sle = 0.15,
+         sls = 0.15)
 sBidiSL
 ```
 
@@ -86,11 +86,11 @@ The output of this time is similar to the last time except that the last column 
 
 ```{r}
 formula <- mpg ~ . + 0
-sBackSBC <- stepwise(formula=formula,
-                     data=mtcars,
-                     type="linear",
-                     strategy="backward",
-                     metric="SBC")
+sBackSBC <- stepwise(formula = formula,
+                     data = mtcars,
+                     type = "linear",
+                     strategy = "backward",
+                     metric = "SBC")
 sBackSBC
 ```
 
@@ -100,13 +100,13 @@ Note that 0 is displayed instead of 1 in the 'Summary of Parameters' and 'Select
  
 ```{r}
 formula <- cbind(mpg,drat) ~ cyl + disp + hp + wt + vs + am
-stepwise(formula=formula,
-        data=mtcars,
-        type="linear",
-        include='wt',
-        strategy="subset",
-        metric="AICc",
-        best_n=3)
+stepwise(formula = formula,
+        data = mtcars,
+        type = "linear",
+        include = 'wt',
+        strategy = "subset",
+        metric = "AICc",
+        best_n = 3)
 ```
 
 ## logistic stepwise regression with data remission
@@ -115,61 +115,61 @@ The remission data, taken from Lee (1974), consist of patient characteristics an
 
 ### Perform logistic stepwise regression using the 'forward' method for variable selection with 'AIC' as the criteria for stop rules.
 
-```{r warning=FALSE}
+```{r warning = FALSE}
 data(remission)
 formula <- remiss ~ .
-stepwise(formula=formula,
-         data=remission,
-         type="logit",
-         strategy="forward",
-         metric="AIC")
+stepwise(formula = formula,
+         data = remission,
+         type = "logit",
+         strategy = "forward",
+         metric = "AIC")
 ```
 
 ### Conduct logistic stepwise regression using the 'subset' method for variable selection with 'SL' as the criteria.
 
-```{r warning=FALSE}
+```{r warning = FALSE}
 data(remission)
 formula <- remiss ~ .
-stepwise(formula=formula,
-         data=remission,
-         type="logit",
-         strategy="subset",
-         metric="SL",
-         best_n=3)
+stepwise(formula = formula,
+         data = remission,
+         type = "logit",
+         strategy = "subset",
+         metric = "SL",
+         best_n = 3)
 ```
 
 ## Cox stepwise regression with data lung
 
 ### Perform Cox stepwise regression using the 'forward' method for variable selection with 'IC(1)' as the criteria for stop rules.
 
-```{r warning=FALSE}
+```{r warning = FALSE}
 lung <- survival::lung
 my.data <- na.omit(lung)
-my.data$status1 <- ifelse(my.data$status==2,1,0)
-formula = Surv(time, status1) ~ . - status 
+my.data$status1 <- ifelse(my.data$status == 2,1,0)
+formula  =  Surv(time, status1) ~ . - status 
 
-stepwise(formula=formula,
-            data=my.data,
-            type="cox",
-            strategy="forward",
-            metric="IC(1)")
+stepwise(formula = formula,
+            data = my.data,
+            type = "cox",
+            strategy = "forward",
+            metric = "IC(1)")
 ```
 
 ### Conduct Cox stepwise regression using the 'bidirection' method for variable selection with 'SL' as the criteria. Output only the top 3 best models.
 
-```{r warning=FALSE}
+```{r warning = FALSE}
 formula = Surv(time, status1) ~ . - status 
-stepwise(formula=formula,
-         data=my.data,
-         type="cox",
-         strategy="bidirection",
-         metric="SL",
-         sle=0.05,
-         sls=0.05)
+stepwise(formula = formula,
+         data = my.data,
+         type = "cox",
+         strategy = "bidirection",
+         metric = "SL",
+         sle = 0.05,
+         sls = 0.05)
 ```
 
 
 # Session Info
-```{r sessionInfo, echo=FALSE}
+```{r sessionInfo, echo = FALSE}
 sessionInfo()
 ```

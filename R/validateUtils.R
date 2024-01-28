@@ -4,7 +4,7 @@
 #'
 #' @return Stop and exit if any error detected in input parameters
 #' 
-#' @author Junhui Li, Kai Hu
+#' @author Kai Hu, Junhui Li
 #' 
 validateUtils <- function(formula,
                           data,
@@ -24,25 +24,25 @@ validateUtils <- function(formula,
                           best_n = Inf,
 													excel_name = NULL) {
 	## check required parameters
-	if(missing(data)){ 
+	if(missing(data)) { 
 		stop("'data' parameter is missing.") 
 	}else{
-		if(!inherits(data, "data.frame")){
+		if(!inherits(data, "data.frame")) {
 			stop("'data' must be a data.frame class.")
 		}
 	}
 	
-	if(missing(formula)){ 
+	if(missing(formula)) { 
 		stop("'formula' parameter is missing.") 
 	}else{
-		if(!inherits(formula, "formula")){
+		if(!inherits(formula, "formula")) {
 			stop("'formula' must be a formula class.")
 		}
 		# term_form <- terms(formula,data=data)
 		# vars <- as.character(attr(term_form, "variables"))[-1]
 		# y_name <<- vars[attr(term_form, "response")]
 		# x_name <<- attr(term_form,"term.labels")
-		# if(attr(term_form, "intercept") == 0){
+		# if(attr(term_form, "intercept") == 0) {
 		# 	intercept <<- "0"
 		# }else{
 		# 	intercept <<- "1"
@@ -52,14 +52,14 @@ validateUtils <- function(formula,
 	
 	 # Ref: https://stackoverflow.com/questions/13217322/how-to-reliably-get-dependent-variable-name-from-formula-object
 	
-	# if(is.null(include)){
+	# if(is.null(include)) {
 	# 	# include_name <<- NULL
 	# 	# merge_inc_name <<- "NULL"
 	# }else{
-	if(!is.null(include)){
+	if(!is.null(include)) {
 		term_form <- terms(formula, data = data)
 		x_name <- attr(term_form, "term.labels")
-		if(!all(include %in% x_name)){
+		if(!all(include %in% x_name)) {
 			stop(paste0("'include' must be a subset of: c('",paste0(x_name,collapse = "','"),"')"))
 		}
 		# else{
@@ -68,11 +68,11 @@ validateUtils <- function(formula,
 		# }
 	}
 	
-	if(is.numeric(sle) & is.numeric(sls)){
-		if(sle <= 0 | sle > 1){
+	if(is.numeric(sle) & is.numeric(sls)) {
+		if(sle <= 0 | sle > 1) {
 			stop("'sle' shoule be a value from 0 to 1.")
 		}
-		if(sls <= 0 | sls > 1){
+		if(sls <= 0 | sls > 1) {
 			stop("'sls' shoule be a value from 0 to 1.")
 		}
 	}else{
@@ -85,18 +85,18 @@ validateUtils <- function(formula,
 	poisson_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	cox_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	
-	if(type == "linear"){
-		if(!metric %in% linear_metric){
+	if(type == "linear") {
+		if(!metric %in% linear_metric) {
 			stop("for type 'linear': 'metric' must be from one of the c('", paste0(linear_metric, collapse = "','"),"').")
 		}
-		if(strategy=="subset" & metric=="SL"){
+		if(strategy == "subset" & metric == "SL") {
 			stop("metric = 'SL' is not allowed when strategy = 'subset'")
 		}
-	  if(metric == "CP" & sigma_value == 0){
+	  if(metric == "CP" & sigma_value == 0) {
 	    stop("metric = 'CP' is not allowed when Estimate of pure error variance from fitting the full model(sigma_value) is 0")
 	  }
-	}else if(type == "logit"){
-		if(!metric %in% logit_metric){
+	}else if(type == "logit") {
+		if(!metric %in% logit_metric) {
 			stop("for type 'logit': 'metric' must be from one of the c('", paste0(logit_metric, collapse = "','"),"').")
 		}
 	  
@@ -115,41 +115,41 @@ validateUtils <- function(formula,
 	      }
 	    }
 	  )
-	}else if(type == 'cox'){
-		if(!metric %in% cox_metric){
+	}else if(type == 'cox') {
+		if(!metric %in% cox_metric) {
 			stop("for type 'cox': 'metric' must be from one of the c('", paste0(cox_metric, collapse = "','"),"').")
 		}
-	}else if(type == "poisson"){
-	  if(!metric %in% poisson_metric){
+	}else if(type == "poisson") {
+	  if(!metric %in% poisson_metric) {
 	    stop("for type 'poisson': 'metric' must be from one of the c('", paste0(poisson_metric, collapse = "','"),"').")
 	  }
 	}
 	## check 'tolerance'
-	if(!is.numeric(tolerance)){
+	if(!is.numeric(tolerance)) {
 		stop("the 'tolerance' must be a numeric value.")
-	}else if (tolerance > 1 | tolerance < 0){
+	}else if (tolerance > 1 | tolerance < 0) {
 		stop("the 'tolenrance' must be in range 0~1.")
 	}
 	
 	## check 'weights'
-	if(!is.null(weight)){
-		if(!is.numeric(weight)){
+	if(!is.null(weight)) {
+		if(!is.numeric(weight)) {
 			stop("the 'weight' must be a numeric vector.")
-		}else if(length(weight) != nrow(data)){
+		}else if(length(weight) != nrow(data)) {
 			stop("the length of the 'weight' vector must equal the number of observation of dataset.")
 		}
 	}
 	
 	## check integer of 'best_n'
-	if(!is.infinite(best_n)){
-		if(!best_n %% 1 == 0){
+	if(!is.infinite(best_n)) {
+		if(!best_n %% 1 == 0) {
 			stop("the 'best_n' must be an integer.")
 		}
 	}
 	
 	## check 'excel_name'
-	if(!is.null(excel_name)){
-		if(!is.character(excel_name)){
+	if(!is.null(excel_name)) {
+		if(!is.character(excel_name)) {
 			stop("the 'excel_name' must be a character string.")
 		}
 	}
