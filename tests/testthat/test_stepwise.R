@@ -1,11 +1,9 @@
-test_that("test_utils.R failed", {
+test_that("test_stepwise.R failed", {
   linear_model1 <- mpg ~ . + 1
   linear_model2 <- cbind(mpg, drat) ~ . + 0
   logit_model1 <- remiss ~ .
   cox_model1 <- Surv(time, status) ~ .
   
-  #outdir <- "~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg/tests/data"
-  #res_v1_5_0 <- readRDS(paste0(outdir,"/res_v1_5_0.rds"))
   res_v1_5_0 <- readRDS(system.file("tests/data","res_v1_5_0.rds", package = "StepReg"))
   for (mod in names(res_v1_5_0)){
     type <- unlist(stringr::str_split(mod,"_"))[1]
@@ -17,7 +15,8 @@ test_that("test_utils.R failed", {
       mtcars$yes <- mtcars$wt
       mydata <- mtcars
     }else if(mod %in% "logit_model1"){
-      mydata <- read.table("cancer_remission.csv",sep=",",header=T)
+      data(remission)
+      mydata <- remission
     }
     #strategy="forward"
     for (strategy in names(res_v1_5_0[[mod]])){
@@ -45,14 +44,8 @@ test_that("test_utils.R failed", {
         res <- try(expect_equal(output_new,output_old),silent = TRUE)
         if(inherits(res, "try-error")){
           message("Error\t",mod,"\t",strategy,"\t",metric)
-        }        
+        }  
       } #metric
     } #strategy
   } #mod
 })
-
-
-
-
-
-

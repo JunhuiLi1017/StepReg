@@ -47,6 +47,7 @@ library(StepReg)
 
 ### perform linear stepwise regression using the 'forward' strategy for variable selection and 'AIC' as the criteria for stop rules, you can follow the code below:
 ```{r}
+data(mtcars)
 formula <- mpg ~ .
 sForwAIC <- stepwise(formula = formula,
          data = mtcars,

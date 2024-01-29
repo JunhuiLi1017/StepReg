@@ -18,6 +18,8 @@ getModelFitStat(
 \item{fit}{Object of linear model or general linear model}
 
 \item{type}{"linear", "cox", "logit",or "poisson": to calculate information criteria value; for "linear", the "Least Square" method will be used; for others, "Maximum Likelyhood" method will be used.}
+
+\item{sigma_value}{Sigma value for calculation of 'BIC' and 'CP'}
 }
 \description{
 Fit Model Statistics with least square or likelihood method to return an information criteria value

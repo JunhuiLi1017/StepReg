@@ -1,10 +1,14 @@
 #' Stepwise helper functions
 #' 
 #' Extract information of parameters from stepwise regression.
-#'
-#' @return data.frame
+#' 
+#' @importFrom stats deviance df.residual
 #' 
 #' @author Junhui Li, Kai Hu
+#' 
+#' @param formula (formula) The formula used for model fitting. The formula takes the form of a '~' (tilde) symbol, with the response variable(s) on the left-hand side, and the predictor variable(s) on the right-hand side. The 'lm()' function uses this formula to fit a regression model. A formula can be as simple as 'y ~ x'. For multiple predictors, they must be separated by the '+' (plus) symbol, e.g. 'y ~ x1 + x2'. To include an interaction term between variables, use the ':' (colon) symbol: 'y ~ x1 + x1:x2'. Use the '.' (dot) symbol to indicate that all other variables in the dataset should be included as predictors, e.g. 'y ~ .'. In the case of multiple response variables (multivariate), the formula can be specified as 'cbind(y1, y2) ~ x1 + x2'. By default, an intercept term is always included in the models, to exclude it, include '0' or '- 1' in your formula: 'y ~ 0 + x1', 'y ~ x1 + 0', and 'y ~ x1 - 1'.
+#' 
+#' @param data (data.frame) A dataset consisting of predictor variable(s) and response variable(s).
 
 getXname <- function(formula, data) {
 	term_form <- terms(formula, data = data)
@@ -65,7 +69,7 @@ getModel <- function(data, type, intercept, x_name, y_name, weight, method = c("
 }
 
 getSigmaFullModel <- function(lmf,type,n_y) {
-  if(typev == "linear") {
+  if(type == "linear") {
     if(lmf$rank >= nrow(as.data.frame(lmf$residuals))) {
       sigma_value <- 0
     }else{ 
@@ -128,6 +132,8 @@ getTestMethod <- function(data, model_raw, type, metric, n_y, test_method_linear
 #' @param fit Object of linear model or general linear model
 #' 
 #' @param type "linear", "cox", "logit",or "poisson": to calculate information criteria value; for "linear", the "Least Square" method will be used; for others, "Maximum Likelyhood" method will be used.
+#' 
+#' @param sigma_value Sigma value for calculation of 'BIC' and 'CP'
 
 getModelFitStat <- function(metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SBC", "IC(3/2)", "IC(1)"), fit, type = c("linear","logit","poisson", "cox"), sigma_value) {
 	# "LeastSquare" is for linear; "Likelihood" is for cox and logit; cox and logit are essentially the same except for sample size calculation.
