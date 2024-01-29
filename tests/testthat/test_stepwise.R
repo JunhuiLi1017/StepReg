@@ -1,4 +1,6 @@
 test_that("test_stepwise.R failed", {
+  Sys.setenv("R_TESTS" = "")
+  
   linear_model1 <- mpg ~ . + 1
   linear_model2 <- cbind(mpg, drat) ~ . + 0
   logit_model1 <- remiss ~ .
