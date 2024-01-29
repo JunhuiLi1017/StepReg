@@ -4,8 +4,10 @@ test_that("test_stepwise.R failed", {
   linear_model2 <- cbind(mpg, drat) ~ . + 0
   logit_model1 <- remiss ~ .
   cox_model1 <- Surv(time, status) ~ .
-  
-  res_v1_5_0 <- readRDS(system.file("tests/data","res_v1_5_0.rds", package = "StepReg"))
+  ## the object should be located in inst/extdata instead of tests/data, since When you run devtools::check(), the package is installed in a temporary directory, tests/data is not in this temporary dir.
+  ## If you have data files that need to be accessed during package checks, it's a good practice to place them in the inst/extdata directory of your package. Files in this directory are installed with the package and can be accessed using system.file().
+  ## When you run devtools::check(), the package is installed in a temporary directory, and the working directory may not be set to the package directory itself. The system.file() function in R looks for files relative to the package installation directory, and if the working directory is not set correctly during the check process, it may lead to issues.
+  res_v1_5_0 <- readRDS(system.file("extdata","res_v1_5_0.rds", package = "StepReg"))
   for (mod in names(res_v1_5_0)){
     type <- unlist(stringr::str_split(mod,"_"))[1]
     if(mod=="cox_model1"){

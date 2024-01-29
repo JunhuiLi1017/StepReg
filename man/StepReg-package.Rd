@@ -3,7 +3,6 @@
 \docType{package}
 \name{StepReg-package}
 \alias{StepReg-package}
-\alias{_PACKAGE}
 \alias{StepReg}
 \title{An R package for stepwise regression analysis}
 \description{
