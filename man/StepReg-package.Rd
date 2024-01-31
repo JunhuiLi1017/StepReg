@@ -3,23 +3,56 @@
 \docType{package}
 \name{StepReg-package}
 \alias{StepReg-package}
+\alias{_PACKAGE}
 \alias{StepReg}
+\alias{Authors:}
+\alias{\itemize{}
+\alias{\item}
+\alias{Hadley}
+\alias{Wickham}
+\alias{\email{hadley@posit.com}
+\alias{}}
+\alias{(\href{https://orcid.org/0000-0003-4757-117X}{ORCID})}
+\alias{Winston}
+\alias{Chang}
+\alias{(\href{https://orcid.org/0000-0002-1576-2126}{ORCID})}
+\alias{Lionel}
+\alias{Henry}
+\alias{Kohske}
+\alias{Takahashi}
+\alias{Claus}
+\alias{Wilke}
+\alias{(\href{https://orcid.org/0000-0002-7470-9261}{ORCID})}
+\alias{Kara}
+\alias{Woo}
+\alias{(\href{https://orcid.org/0000-0002-5125-4188}{ORCID})}
+\alias{Hiroaki}
+\alias{Yutani}
+\alias{(\href{https://orcid.org/0000-0002-3385-7233}{ORCID})}
+\alias{Dewey}
+\alias{Dunnington}
+\alias{(\href{https://orcid.org/0000-0002-9415-4582}{ORCID})}
+\alias{Teun}
+\alias{van}
+\alias{den}
+\alias{Brand}
+\alias{(\href{https://orcid.org/0000-0002-9335-7468}{ORCID})}
+\alias{Maintainers:\cr}
+\alias{Junhui}
+\alias{Li}
+\alias{<junhui.li11@umassmed.edu>\cr}
+\alias{Kai}
+\alias{Hu}
+\alias{<kai.hu@umassmed.edu>}
 \title{An R package for stepwise regression analysis}
 \description{
-The package provides functions to perform Stepwise Regression using various algorithms, e.g., Forward Selection, Backward Elimination, and Bidirectional Elimination. Meanwhile, it also supports the Best Subset method. Multiple selection criteria (stopping criteria) are supported, including AIC, AICc, BIC, HQ, and more.
+The package provides functions to perform Stepwise Regression using various algorithms, e.g., Forward Selection, Backward Elimination, and Bidirectional Elimination. It also supports the Best Subset method. Various types of models are supported such as "linear", "logit", "cox", and "poisson" regression. Users can choose from a wide range of selection criteria (stopping criteria) including AIC, AICc, BIC, HQ, and more.
 }
 \details{
-\tabular{ll}{ Package: \tab StepReg\cr Type: \tab Package\cr Version:
-\tab 1.5.0\cr GitHub: \tab https://github.com/JunhuiLi1017/StepReg\cr Date: \tab 2023-01-23\cr }
+\if{html}{\figure{logo.png}{options: style = "float: right"; alt = "logo"; width = "120"}}
+\if{latex}{\out{\begin{center}}\figure{logo.png}\out{\end{center}}}
 }
 \references{
 1. [to be added]
-}
-\author{
-Junhui Li, Kai Hu, Xiaohuan Lu, Kun Cheng, Sushmita Nayak, Cesar Bautista Sotelo, Michael Lodato, Robert H Brown, Lihua Julie Zhu, Wenxin Liu
-
-Maintainers:\cr
-Junhui Li <junhui.li11@umassmed.edu>\cr
-Kai Hu <kai.hu@umassmed.edu>
 }
 \keyword{package}
