@@ -1,10 +1,7 @@
-# StepReg
+# StepReg <a href="https://github.com/JunhuiLi1017/StepReg"><img src="man/figures/logo.png" align="right" height="138" /></a>
 ---
 - #### An R package for stepwise regression analysis
 ---
-
-![StepReg logo](man/figures/logo.png | width=100)
-
 ## Table of Contents
 [1. Introduction](#1-introduction)
 - [Feature selection](#feature-selection)
