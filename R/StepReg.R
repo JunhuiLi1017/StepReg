@@ -1,20 +1,34 @@
 #' An R package for stepwise regression analysis
-#'
+#' 
+#' \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+#' 
 #' The package provides functions to perform Stepwise Regression using various algorithms, e.g., Forward Selection, Backward Elimination, and Bidirectional Elimination. Meanwhile, it also supports the Best Subset method. Multiple selection criteria (stopping criteria) are supported, including AIC, AICc, BIC, HQ, and more.
 #'
-#' \tabular{ll}{ Package: \tab StepReg\cr Type: \tab Package\cr Version:
-#' \tab 1.5.0\cr GitHub: \tab https://github.com/JunhuiLi1017/StepReg\cr Date: \tab 2023-01-23\cr }
+#' \tabular{ll}{ Package: \tab StepReg\cr Type: \tab Package\cr GitHub: \tab \url{https://github.com/JunhuiLi1017/StepReg}\cr}
 #'
 #' @name StepReg-package
 #' @aliases StepReg-package StepReg
 #' @docType package
-#' @author Junhui Li, Kai Hu, Xiaohuan Lu, Kun Cheng, Sushmita Nayak, Cesar Bautista Sotelo, Michael Lodato, Robert H Brown, Lihua Julie Zhu, Wenxin Liu
+#' @author
+#' \itemize{
+#' \item Junhui Li \email{junhui.li11@umassmed.edu} (\href{https://orcid.org/0000-0003-3973-1700}{ORCID})
+#' \item Kai Hu \email{kaihu@umassmed.edu}
+#' \item Xiaohuan Lu
+#' \item Kun Cheng
+#' \item Sushmita Nayak
+#' \item Cesar Bautista Sotelo
+#' \item Michael Lodato
+#' \item Robert H Brown
+#' \item Lihua Julie Zhu
+#' \item Wenxin Liu
+#' }
+#' \strong{Maintainer}
+#' \itemize{
+#' \item Junhui Li \email{junhui.li11@umassmed.edu} (\href{https://orcid.org/0000-0003-3973-1700}{ORCID})\cr
+#' \item Kai Hu \email{kai.hu@umassmed.edu}
+#' }
 #'
-#' Maintainers:\cr
-#' Junhui Li <junhui.li11@umassmed.edu>\cr
-#' Kai Hu <kai.hu@umassmed.edu>
-#'
-#' @references 1. [to be added]
+#' @references 1. \url{https://CRAN.R-project.org/package=StepReg}
 #' @keywords package
 #' 
 "_PACKAGE"

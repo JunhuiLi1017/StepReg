@@ -2,7 +2,7 @@
 % Please edit documentation in R/stepwise.R
 \name{stepwise}
 \alias{stepwise}
-\title{StepReg: Stepwise Regression Made Simple}
+\title{stepwise: Stepwise Regression Made Simple}
 \usage{
 stepwise(
   formula,

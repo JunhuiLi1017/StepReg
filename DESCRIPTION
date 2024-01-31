@@ -4,12 +4,13 @@ Version: 1.5.0
 Date: 2024-01-27
 Author: Junhui Li, Kai Hu, Xiaohuan Lu, Kun Cheng, Sushmita Nayak, Cesar Bautista Sotelo, Michael Lodato, Robert H Brown, Lihua Julie Zhu, Wenxin Liu
 Maintainer: Junhui Li <junhuili@cau.edu.cn>
-Description: Four most common types of stepwise regression including linear regression, logistic regression, poisson regression and cox proportional hazard regression can be performed to select best model with methods of forward selection, backward elimination, bidirectional selection and best subset selection. A widely used selection criteria are available for variable selection.
+Description: Stepwise regression is a powerful technique for automatically selecting a subset of predictor variables to construct an optimal model for predicting a response variable. This package supports four distinct regression types: linear regression, logistic regression, Cox proportional hazard regression, and Poisson regression. This flexibility empowers users to apply stepwise regression to diverse data types and research questions. The package incorporates widely used selection criteria and stop rules for stepwise regression. Users can choose from forward selection, backward elimination, bidirectional selection, and best subset methods, tailoring the model-building process to their specific needs. 
 License: MIT + file LICENSE
 VignetteBuilder: knitr
 Suggests: 
     knitr,
-    testthat
+    testthat,
+    AER
 Imports:
     dplyr,
     openxlsx,

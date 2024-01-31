@@ -19,7 +19,7 @@ output:
     toc_float: true
   BiocStyle::pdf_document: default
 abstract: |
-  Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. This package empowers users to conduct linear, logistic, and Cox proportional hazard stepwise regression, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods.
+  Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. This package empowers users to conduct linear, logistic, Poisson and Cox proportional hazard stepwise regression, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods.
 
   With StepReg, users have the flexibility to specify effects to be included in all models and engage in multivariate multiple stepwise regression. The package is designed to streamline the modeling process, offering a range of options for effective variable selection, making it a valuable tool for researchers and analysts working with diverse datasets.
 vignette: |
@@ -30,16 +30,23 @@ vignette: |
 
 # Introduction
 
-Here we applied the StepReg package to two well-known datasets, namely the mtcars data and lung data. Our goal was to provide clarity on the procedures for performing linear, logistic, and Cox stepwise regression using this versatile tool.
+Here we applied the StepReg package to two well-known datasets, namely the mtcars, remission, lung, and CreditCard to provide clarity on the procedures for performing linear, logistic, Cox, and Poisson stepwise regression.
 
-The mtcars dataset, a classic dataset in the field, and the lung dataset served as illustrative examples to showcase the functionality of StepReg. By applying the package to these datasets, we demonstrated the practical application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, and Cox stepwise regression for survival data.
+Here is a brief introduction for these four datasets.
 
-Through these examples, users can gain insights into how StepReg can be effectively utilized for variable selection in different regression scenarios. The mtcars and lung datasets, being well-established and diverse in nature, provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications.
+The mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower, and the number of cylinders.
+
+The remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as treatment type, white blood cell count, and remission status (1 for remission and 0 for non-remission). 
+
+The lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient's age, the type of treatment received, and survival status.
+
+The CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status. 
+
+By applying the package to these datasets, we demonstrated the practical application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, Cox stepwise regression for survival data and Poisson stepwise regression for count data. Through these examples, users can gain insights into how StepReg can be effectively utilized for variable selection in different regression scenarios. Thees datasets, being well-established and diverse in nature, provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications.
 
 # Examples
 
 ```{r library}
-#install.packages("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg_1.5.0.tar.gz")
 library(StepReg)
 ```
 
@@ -59,11 +66,11 @@ sForwAIC
 
 From the above result, we can see that stepwise() output a list with 5 tables. 
 
-* 'Summary of Parameters' tells you what parameters is used for this function. if "Intercept" equals 1, it indicates that this stepwise regression includes an intercept, otherwise, if it equals 0, the regression does not include an intercept.
+* Table 'Summary of Parameters' tells you what parameters are used for this function. Especially, except basic information of paramters, it will also indicate 1) if there is any variable included in all models, 2) if a multicollinearity variable will be detected, 3) if "intercept" equals 1, it indicates that this stepwise regression includes an intercept, otherwise, if it equals 0, the regression does not include an intercept.
 
 * 'Variables Type' is the summary detailing the type of all variables.
 
-* "Process of Selection" provides insights into how variables are chosen. In this instance, AIC serves as the criterion, and the last column displays the corresponding AIC values.
+* "Process of Selection" provides insights into how variables are chosen. In this instance, the last column displays the corresponding AIC values which is servesd as the criterion. Remember that variable selection based on AIC involves a trade-off between model fit and complexity, and it's essential to interpret the selected model cautiously.
 
 * "Coefficients of the Selected Variables" presents the coefficients associated with all selected variables.
 
@@ -156,7 +163,7 @@ stepwise(formula = formula,
             metric = "IC(1)")
 ```
 
-### Conduct Cox stepwise regression using the 'bidirection' method for variable selection with 'SL' as the criteria. Output only the top 3 best models.
+### Conduct Cox stepwise regression using the 'bidirection' method for variable selection with 'SL' as the criteria. 
 
 ```{r warning = FALSE}
 formula = Surv(time, status1) ~ . - status 
@@ -169,6 +176,31 @@ stepwise(formula = formula,
          sls = 0.05)
 ```
 
+## Poisson stepwise regression with data CreditCard
+
+### Perform Poisson stepwise regression using the 'forward' method for variable selection with 'AIC' as the criteria for stop rules.
+
+```{r warning = FALSE}
+data(CreditCard, package = 'AER')
+formula  = reports ~ .
+
+stepwise(formula = formula,
+            data = CreditCard,
+            type = "poisson",
+            strategy = "forward",
+            metric = "AIC")
+```
+
+```{r warning = FALSE}
+formula = reports ~ .
+stepwise(formula = formula,
+         data = CreditCard,
+         type = "poisson",
+         strategy = "bidirection",
+         metric = "SL",
+         sle = 0.05,
+         sls = 0.05)
+```
 
 # Session Info
 ```{r sessionInfo, echo = FALSE}

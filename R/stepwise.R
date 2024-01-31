@@ -1,4 +1,4 @@
-#' StepReg: Stepwise Regression Made Simple
+#' stepwise: Stepwise Regression Made Simple
 #' 
 #' Stepwise regression is a common technique used for automatically selecting predictor variable(s) (independent) to determine an optimal model for the prediction of the response variable(s) (dependent). The StepReg package supports four types of models: linear regression, logistic regression, Cox regression and Poisson regression. Meanwhile, multiple model fit scoring methods are implemented.
 #' 

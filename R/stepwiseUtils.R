@@ -322,7 +322,7 @@ getTable1SummaryOfParameters <- function(data, type, x_name, y_name, merged_mult
 									"stay significance level (sls)",
 									"test method",
 									"tolerance of multicollinearity",
-									"Multicollinearity variable",
+									"multicollinearity variable",
 									"intercept"),
 		Value = c(y_name,
 							merged_include,
