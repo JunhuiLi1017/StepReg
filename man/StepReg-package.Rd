@@ -18,13 +18,17 @@ Authors:
   \item Junhui Li \email{junhui.li11@umassmed.edu} (\href{https://orcid.org/0000-0003-3973-1700}{ORCID})
   \item Kai Hu \email{kai.hu@umassmed.edu}
   \item Xiaohua Lu
-  \item Kun Cheng
-  \item Sushmita Bautista Sotelo
-  \item Cesar Bautista
-  \item Michael Lodato
-  \item Robert H Brown
   \item Lihua Julie Zhu
   \item Wenxin Liu
+}
+
+Other contributors:
+\itemize{
+  \item Kun Cheng [contributor]
+  \item Sushmita Nayak [contributor]
+  \item Cesar Bautista Sotelo [contributor]
+  \item Michael Lodato [contributor]
+  \item Robert H Brown [contributor]
 }
 
 }

@@ -22,7 +22,8 @@ License: MIT + file LICENSE
 VignetteBuilder: knitr
 Suggests: 
     knitr,
-    testthat
+    testthat,
+    AER
 Imports:
     dplyr,
     openxlsx,
