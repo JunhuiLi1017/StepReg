@@ -1,16 +1,28 @@
 Package: StepReg
-Title: Stepwise Regression Analysis
 Version: 1.5.0
+Title: Stepwise Regression Analysis
+Authors@R: c(
+    person("Junhui", "Li", , "junhui.li11@umassmed.edu", role = c("cre"),
+           comment = c(ORCID = "0000-0003-3973-1700")),
+    person("Junhui", "Li", , "junhui.li11@umassmed.edu", role = c("aut"),
+    comment = c(ORCID = "0000-0003-3973-1700")),
+    person("Kai", "Hu", , "kai.hu@umassmed.edu", role = c("aut")),
+    person("Xiaohua", "Lu", , role = c("aut")),
+    person("Kun", "Cheng", , role = c("aut")),
+    person("Sushmita", "Bautista Sotelo", , role = c("aut")),
+    person("Cesar", "Bautista", , role = c("aut")),
+    person("Michael", "Lodato", , role = c("aut")),
+    person("Robert", "H Brown", , role = c("aut")),
+    person("Lihua", "Julie Zhu", , role = c("aut")),
+    person("Wenxin", "Liu", , role = c("aut"))
+  )
 Date: 2024-01-27
-Author: Junhui Li, Kai Hu, Xiaohuan Lu, Kun Cheng, Sushmita Nayak, Cesar Bautista Sotelo, Michael Lodato, Robert H Brown, Lihua Julie Zhu, Wenxin Liu
-Maintainer: Junhui Li <junhuili@cau.edu.cn>
-Description: Stepwise regression is a powerful technique for automatically selecting a subset of predictor variables to construct an optimal model for predicting a response variable. This package supports four distinct regression types: linear regression, logistic regression, Cox proportional hazard regression, and Poisson regression. This flexibility empowers users to apply stepwise regression to diverse data types and research questions. The package incorporates widely used selection criteria and stop rules for stepwise regression. Users can choose from forward selection, backward elimination, bidirectional selection, and best subset methods, tailoring the model-building process to their specific needs. 
+Description: The package provides functions to perform Stepwise Regression using various algorithms, e.g., Forward Selection, Backward Elimination, and Bidirectional Elimination. It also supports the Best Subset method. Various types of models are supported such as "linear", "logit", "cox", and "poisson" regression. Users can choose from a wide range of selection criteria (stopping criteria) including AIC, AICc, BIC, HQ, and more.
 License: MIT + file LICENSE
 VignetteBuilder: knitr
 Suggests: 
     knitr,
-    testthat,
-    AER
+    testthat
 Imports:
     dplyr,
     openxlsx,
@@ -20,6 +32,4 @@ Imports:
 Encoding: UTF-8
 RoxygenNote: 7.3.1
 NeedsCompilation: no
-Packaged: 2024-01-13 08:17:50 UTC; junhuili
 Repository: CRAN
-Date/Publication: 2022-01-14 09:22:49 UTC

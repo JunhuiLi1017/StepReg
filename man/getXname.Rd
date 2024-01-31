@@ -15,5 +15,5 @@ getXname(formula, data)
 Extract information of parameters from stepwise regression.
 }
 \author{
-Junhui Li, Kai Hu
+Junhui Li, Kai Hu, Xiaohuan Lu
 }
