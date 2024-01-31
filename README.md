@@ -3,7 +3,7 @@
 - #### An R package for stepwise regression analysis
 ---
 
-![StepReg logo](man/figures/logo.png)
+![StepReg logo](man/figures/logo.png) | width=100
 
 ## Table of Contents
 [1. Introduction](#1-introduction)
