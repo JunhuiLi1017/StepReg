@@ -8,11 +8,11 @@ Authors@R: c(
     comment = c(ORCID = "0000-0003-3973-1700")),
     person("Kai", "Hu", , "kai.hu@umassmed.edu", role = c("aut")),
     person("Xiaohua", "Lu", , role = c("aut")),
-    person("Kun", "Cheng", , role = c("aut")),
-    person("Sushmita", "Bautista Sotelo", , role = c("aut")),
-    person("Cesar", "Bautista", , role = c("aut")),
-    person("Michael", "Lodato", , role = c("aut")),
-    person("Robert", "H Brown", , role = c("aut")),
+    person("Kun", "Cheng", , role = c("ctb")),
+    person("Sushmita", "Nayak", , role = c("ctb")),
+    person("Cesar", "Bautista Sotelo", , role = c("ctb")),
+    person("Michael", "Lodato", , role = c("ctb")),
+    person("Robert", "H Brown", , role = c("ctb")),
     person("Lihua", "Julie Zhu", , role = c("aut")),
     person("Wenxin", "Liu", , role = c("aut"))
   )
