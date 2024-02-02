@@ -1,6 +1,6 @@
-#' stepwise: Stepwise Regression Made Simple
+#' Main wrapper function for stepwise regression
 #' 
-#' Stepwise regression is a common technique used for automatically selecting predictor variable(s) (independent) to determine an optimal model for the prediction of the response variable(s) (dependent). The StepReg package supports four types of models: linear regression, logistic regression, Cox regression and Poisson regression. Meanwhile, multiple model fit scoring methods are implemented.
+#' Select optimal model using various stepwise regression strategies, e.g., Forward Selection, Backward Elimination, Bidirectional Elimination; meanwhile, it also supports Best Subset method. Four types of models are currently implemented: linear regression, logistic regression, Cox regression, and Poisson regression. For selection criteria, a.k.a, stop rule, users can choose from AIC, AICc, BIC, HQ, Significant Level, and more.
 #' 
 #' @param formula (formula) The formula used for model fitting. The formula takes the form of a '~' (tilde) symbol, with the response variable(s) on the left-hand side, and the predictor variable(s) on the right-hand side. The 'lm()' function uses this formula to fit a regression model. A formula can be as simple as 'y ~ x'. For multiple predictors, they must be separated by the '+' (plus) symbol, e.g. 'y ~ x1 + x2'. To include an interaction term between variables, use the ':' (colon) symbol: 'y ~ x1 + x1:x2'. Use the '.' (dot) symbol to indicate that all other variables in the dataset should be included as predictors, e.g. 'y ~ .'. In the case of multiple response variables (multivariate), the formula can be specified as 'cbind(y1, y2) ~ x1 + x2'. By default, an intercept term is always included in the models, to exclude it, include '0' or '- 1' in your formula: 'y ~ 0 + x1', 'y ~ x1 + 0', and 'y ~ x1 - 1'.
 #' 
@@ -70,7 +70,19 @@
 #' 
 #' @author Junhui Li, Kai Hu, Xiaohuan Lu
 #' 
+#' @return A list containing five tables. For multivariate multiple linear stepwise regression, Table 6 will be generated alongside Table 5. Names and descriptions for each table are outlined as follows:
+
+#' \itemize{
+#' \item Table 1. Summary of Parameters: the parameter and its value used in stepwise regression.
+#' \item Table 2. Variables and Type: the variable and its variable type used in dataset.
+#' \item Table 3. Process of Selection: the process for variable selection.
+#' \item Table 4. Selected Varaibles: which variables are selected in optimal models.
+#' \item Table 5 or 6. Summary Model for response: summary information for the optimal models.
+#' }
+
 #' @examples
+#' ## perform multivariate linear stepwise regression with 'bidirection' 
+#' ## strategy and 'AIC' stop rule, excluding intercept.
 #' data(mtcars)
 #' mtcars$yes <- mtcars$wt
 #' formula <- cbind(mpg,drat) ~ . + 0
@@ -79,7 +91,18 @@
 #'          type = "linear",
 #'          strategy = "bidirection",
 #'          metric = "AIC")
-#'          
+#'
+#' ## perform logit stepwise regression with 'forward' strategy and significance
+#' ## level as stop rule.
+#' data(remission)
+#' formula <- remiss ~ .
+#' stepwise(formula = formula,
+#'          data = remission,
+#'          type = "logit",
+#'          strategy = "forward",
+#'          metric = "SL",
+#'          sle=0.05,
+#'          sls=0.05)
 #' @keywords stepwise regression
 #' @import survival
 #' @importFrom utils combn

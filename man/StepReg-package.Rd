@@ -17,7 +17,7 @@ Authors:
 \itemize{
   \item Junhui Li \email{junhui.li11@umassmed.edu} (\href{https://orcid.org/0000-0003-3973-1700}{ORCID})
   \item Kai Hu \email{kai.hu@umassmed.edu}
-  \item Xiaohua Lu
+  \item Xiaohuan Lu
   \item Lihua Julie Zhu
   \item Wenxin Liu
 }

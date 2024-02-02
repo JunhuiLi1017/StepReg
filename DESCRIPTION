@@ -7,7 +7,7 @@ Authors@R: c(
     person("Junhui", "Li", , "junhui.li11@umassmed.edu", role = c("aut"),
     comment = c(ORCID = "0000-0003-3973-1700")),
     person("Kai", "Hu", , "kai.hu@umassmed.edu", role = c("aut")),
-    person("Xiaohua", "Lu", , role = c("aut")),
+    person("Xiaohuan", "Lu", , role = c("aut")),
     person("Kun", "Cheng", , role = c("ctb")),
     person("Sushmita", "Nayak", , role = c("ctb")),
     person("Cesar", "Bautista Sotelo", , role = c("ctb")),

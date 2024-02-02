@@ -1,5 +1,5 @@
 ---
-title: "StepReg: Stepwise Regression make it simple"
+title: "StepReg: Stepwise Regression Analysis"
 author:
 - name: Junhui Li
   affiliation: 
@@ -19,7 +19,7 @@ output:
     toc_float: true
   BiocStyle::pdf_document: default
 abstract: |
-  Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. This package empowers users to conduct linear, logistic, Poisson and Cox proportional hazard stepwise regression, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods.
+  Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. This package empowers users to conduct linear, logistic, Poisson, and Cox proportional hazard stepwise regression, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods.
 
   With StepReg, users have the flexibility to specify effects to be included in all models and engage in multivariate multiple stepwise regression. The package is designed to streamline the modeling process, offering a range of options for effective variable selection, making it a valuable tool for researchers and analysts working with diverse datasets.
 vignette: |
@@ -30,25 +30,36 @@ vignette: |
 
 # Introduction
 
-Here we applied the StepReg package to two well-known datasets, namely the mtcars, remission, lung, and CreditCard to provide clarity on the procedures for performing linear, logistic, Cox, and Poisson stepwise regression.
+Here we applied the StepReg package to four well-known datasets, namely the mtcars, remission, lung, and CreditCard to provide clarity on the procedures for performing linear, logistic, Cox, and Poisson stepwise regression.
 
 Here is a brief introduction for these four datasets.
 
 The mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower, and the number of cylinders.
 
-The remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as treatment type, white blood cell count, and remission status (1 for remission and 0 for non-remission). 
+The remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as cellularity of the marrow clot section, the highest temperature before the start of treatment, and remission status (1 for remission and 0 for non-remission). 
 
 The lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient's age, the type of treatment received, and survival status.
 
 The CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status. 
 
-By applying the package to these datasets, we demonstrated the practical application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, Cox stepwise regression for survival data and Poisson stepwise regression for count data. Through these examples, users can gain insights into how StepReg can be effectively utilized for variable selection in different regression scenarios. Thees datasets, being well-established and diverse in nature, provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications.
+By applying the package to these datasets, we demonstrated the practical application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, Cox stepwise regression for survival data, and Poisson stepwise regression for count data. Through these examples, users can gain insights into how StepReg can be effectively utilized for variable selection in different regression scenarios. These datasets, being well-established and diverse in nature, provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications.
 
 # Examples
 
 ```{r library}
 library(StepReg)
 ```
+A list containing five tables will be returned each time. For multivariate multiple linear stepwise regression, Table 6 will be generated alongside Table 5. Names and descriptions for each table are outlined as follows:
+
+Table 1. Summary of Parameters: the parameter and its value used in stepwise regression.
+
+Table 2. Variables and Type: the variable and its variable type used in dataset.
+
+Table 3. Process of Selection: the process for variable selection.
+
+Table 4. Selected Varaibles: which variables are selected in optimal models.
+
+Table 5 or 6. Summary Model for response: summary information for the optimal models.
 
 ## linear stepwise regression with data mtcar
 
@@ -66,13 +77,15 @@ sForwAIC
 
 From the above result, we can see that stepwise() output a list with 5 tables. 
 
-* Table 'Summary of Parameters' tells you what parameters are used for this function. Especially, except basic information of paramters, it will also indicate 1) if there is any variable included in all models, 2) if a multicollinearity variable will be detected, 3) if "intercept" equals 1, it indicates that this stepwise regression includes an intercept, otherwise, if it equals 0, the regression does not include an intercept.
+* Table 1. Summary of Parameters tells you what parameters and their values are used for this function. Especially, except basic information of paramters, it will also indicate 1) if there is any variable included in all models, 2) if a multicollinearity variable will be detected, 3) if "intercept" equals 1, it indicates that this stepwise regression includes an intercept, otherwise, if it equals 0, the regression does not include an intercept.
 
-* 'Variables Type' is the summary detailing the type of all variables.
+* Table 2. Variables and Type is the summary detailing the type of all variables.
 
-* "Process of Selection" provides insights into how variables are chosen. In this instance, the last column displays the corresponding AIC values which is servesd as the criterion. Remember that variable selection based on AIC involves a trade-off between model fit and complexity, and it's essential to interpret the selected model cautiously.
+* Table 3. Process of Selection provides insights into how variables are chosen. In this instance, the last column displays the corresponding AIC values which is servesd as the criterion. Remember that variable selection based on AIC involves a trade-off between model fit and complexity, and it's essential to interpret the selected model cautiously.
 
-* "Coefficients of the Selected Variables" presents the coefficients associated with all selected variables.
+Table 4. Selected Varaibles indicates which variables are selected in optimal models.
+
+Table 5. Summary Model for mpg presents the coefficients associated with all selected variables.
 
 ### Conduct linear stepwise regression employing the 'bidirection' strategy with 'SL' as stopping criterion, and set the significance level for entry (sle) to 0.15 and the significance level for stay (sls) to 0.15.
 
@@ -119,7 +132,7 @@ stepwise(formula = formula,
 
 ## logistic stepwise regression with data remission
 
-The remission data, taken from Lee (1974), consist of patient characteristics and whether or not cancer remission occurred, and are saved in the data set remission. The variable remiss is the cancer remission indicator variable with a value of 1 for remission and a value of 0 for nonremission.  The other six variables are the risk factors thought to be related to cancer remission.
+The remission data consist of patient characteristics and whether or not cancer remission occurred, and are saved in the data set remission. The variable remiss is the cancer remission indicator variable with a value of 1 for remission and a value of 0 for nonremission. The other six variables are the risk factors thought to be related to cancer remission. For more information, you may see help information of remission.
 
 ### Perform logistic stepwise regression using the 'forward' method for variable selection with 'AIC' as the criteria for stop rules.
 
