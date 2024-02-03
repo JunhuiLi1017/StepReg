@@ -58,13 +58,13 @@ stepwise(
 \item{excel_name}{(NULL|character) The output excel name. If NULL, do not output excel file. Default is NULL.}
 }
 \value{
-A list containing five tables. For multivariate multiple linear stepwise regression, Table 6 will be generated alongside Table 5. Names and descriptions for each table are outlined as follows:
+A list containing five tables will be returned. For multivariate multiple linear stepwise regression, Table 6 will be generated alongside Table 5. Names and descriptions of each table are outlined as follows:
 \itemize{
-\item Table 1. Summary of Parameters: the parameter and its value used in stepwise regression.
-\item Table 2. Variables and Type: the variable and its variable type used in dataset.
-\item Table 3. Process of Selection: the process for variable selection.
-\item Table 4. Selected Varaibles: which variables are selected in optimal models.
-\item Table 5 or 6. Summary Model for response: summary information for the optimal models.
+\item Table 1. Summary of Parameters: This table presents the parameters utilized in stepwise regression along with their default or user-specified values.
+\item Table 2. Variables and Types: This table outlines the variables and their respective types utilized in the dataset.
+\item Table 3. Selection Process: This table details overview of the variable selection process. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
+\item Table 4. Selected Variables: This table identifies the variables that are selected in the optimal models.
+\item Table 5(or 6). Summary Model for Response: This table provides summary information for the optimal models.
 }
 }
 \description{

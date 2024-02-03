@@ -10,7 +10,7 @@
 
 
 
-<meta name="date" content="2024-01-31" />
+<meta name="date" content="2024-02-03" />
 
 <title>StepReg: Stepwise Regression Analysis</title>
 
@@ -1836,12 +1836,11 @@ function toggle_visibility(id1) {
 
 
 <h1 class="title toc-ignore">StepReg: Stepwise Regression Analysis</h1>
-<p class="author-name">Junhui Li<span class="affil-mark">1,2</span>, Kai Hu<span class="affil-mark">1</span>, Xiaohuan Lu<span class="affil-mark">3</span>, Julie Lihua Zhu<span class="affil-mark">1</span> and Wenxin Liu<span class="affil-mark">2</span></p>
-<p class="author-affiliation"><span class="affil-mark">1</span>University of Massachusset Chan medical school, Worcester, USA<br><span class="affil-mark">2</span>China Agricultural University, Beijing, China<br><span class="affil-mark">3</span>Clark University, Worcester, USA</p>
-<h4 class="date">31 January 2024</h4>
+<p class="author-name">Junhui Li<span class="affil-mark">1</span>, Kai Hu<span class="affil-mark">1</span>, Xiaohuan Lu<span class="affil-mark">2</span>, Julie Lihua Zhu<span class="affil-mark">1</span> and Wenxin Liu<span class="affil-mark">3</span></p>
+<p class="author-affiliation"><span class="affil-mark">1</span>University of Massachusset Chan medical school, Worcester, USA<br><span class="affil-mark">2</span>Clark University, Worcester, USA<br><span class="affil-mark">3</span>China Agricultural University, Beijing, China</p>
+<h4 class="date">3 February 2024</h4>
 <h4 class="abstract">Abstract</h4>
-<p>Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. This package empowers users to conduct linear, logistic, Poisson, and Cox proportional hazard stepwise regression, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods.</p>
-<p>With StepReg, users have the flexibility to specify effects to be included in all models and engage in multivariate multiple stepwise regression. The package is designed to streamline the modeling process, offering a range of options for effective variable selection, making it a valuable tool for researchers and analysts working with diverse datasets.</p>
+<p>A tutorial on employing StepReg for stepwise regression analysis with four well-known datasets namely the mtcars, remission, lung, and CreditCard. The guild showcases the utility of StepReg across four well-known datasets, employing it for different regression models such as linear, logistic, Cox proportional hazard, and Poisson regression. The vignette elucidates the stepwise process with distinct parameters, offering users a clear understanding of how to effectively utilize StepReg for exploratory data analysis and model building in various regression scenarios.</p>
 <h4 class="package">Package</h4>
 <p>StepReg 1.5.0</p>
 
@@ -1850,29 +1849,44 @@ function toggle_visibility(id1) {
 
 <div id="introduction" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
-<p>Here we applied the StepReg package to four well-known datasets, namely the mtcars, remission, lung, and CreditCard to provide clarity on the procedures for performing linear, logistic, Cox, and Poisson stepwise regression.</p>
-<p>Here is a brief introduction for these four datasets.</p>
-<p>The mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower, and the number of cylinders.</p>
-<p>The remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as treatment type, white blood cell count, and remission status (1 for remission and 0 for non-remission).</p>
-<p>The lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient’s age, the type of treatment received, and survival status.</p>
-<p>The CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status.</p>
-<p>By applying the package to these datasets, we demonstrated the practical application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, Cox stepwise regression for survival data and Poisson stepwise regression for count data. Through these examples, users can gain insights into how StepReg can be effectively utilized for variable selection in different regression scenarios. Thees datasets, being well-established and diverse in nature, provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications.</p>
+<p>Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. Depending on the nature of the response variable, StepReg facilitates users in conducting linear regression for continuous outcomes, logistic regression for binary outcomes, Cox regression for time-to-event outcomes, and Poisson regression for count outcomes, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods.</p>
+<p>Here, we applied the StepReg package to four well-established and diverse datasets—mtcars, remission, lung, and CreditCard—utilizing distinct parameters across various regression scenarios. These datasets provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications. Through practical demonstrations, we illustrated the application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, Cox stepwise regression for time-to-event outcomes, and Poisson stepwise regression for count outcomes. These examples offer users valuable insights into the effective utilization of StepReg for variable selection in different regression scenarios, providing a comprehensive guide for those seeking proficiency in incorporating StepReg into their analytical toolkit.</p>
+<p>A breif introduction for four datasets is descripted as below,</p>
+<ul>
+<li><p><strong><a href="https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html">mtcars</a></strong>: the mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower, and the number of cylinders.</p></li>
+<li><p><strong><a href="https://online.stat.psu.edu/stat501/book/export/html/1011">remission</a></strong>: the remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as cellularity of the marrow clot section, the highest temperature before the start of treatment, and remission status (1 for remission and 0 for non-remission).</p></li>
+<li><p><strong><a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html">lung</a></strong>: the lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient’s age, the type of treatment received, and survival status.</p></li>
+<li><p><strong><a href="https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html">CreditCard</a></strong>: the CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status.</p></li>
+</ul>
 </div>
-<div id="examples" class="section level1" number="2">
-<h1><span class="header-section-number">2</span> Examples</h1>
-<pre class="r"><code>library(StepReg)</code></pre>
-<div id="linear-stepwise-regression-with-data-mtcar" class="section level2" number="2.1">
-<h2><span class="header-section-number">2.1</span> linear stepwise regression with data mtcar</h2>
-<div id="perform-linear-stepwise-regression-using-the-forward-strategy-for-variable-selection-and-aic-as-the-criteria-for-stop-rules-you-can-follow-the-code-below" class="section level3" number="2.1.1">
-<h3><span class="header-section-number">2.1.1</span> perform linear stepwise regression using the ‘forward’ strategy for variable selection and ‘AIC’ as the criteria for stop rules, you can follow the code below:</h3>
-<pre class="r"><code>data(mtcars)
-formula &lt;- mpg ~ .
-sForwAIC &lt;- stepwise(formula = formula,
-         data = mtcars,
-         type = &quot;linear&quot;,
-         strategy = &quot;forward&quot;,
-         metric = &quot;AIC&quot;)
-sForwAIC</code></pre>
+<div id="stepreg-output" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> StepReg Output</h1>
+<p>A list containing five tables will be returned. For multivariate multiple linear stepwise regression, Table 6 will be generated alongside Table 5. Names and descriptions of each table are outlined as follows:</p>
+<ul>
+<li><p><code>Table 1. Summary of Parameters</code>: This table presents the parameters utilized in stepwise regression along with their default or user-specified values.</p></li>
+<li><p><code>Table 2. Variables and Types</code>: This table outlines the variables and their respective types utilized in the dataset.</p></li>
+<li><p><code>Table 3. Selection Process</code>: This table details overview of the variable selection process. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.</p></li>
+<li><p><code>Table 4. Selected Variables</code>: This table identifies the variables that are selected in the optimal models.</p></li>
+<li><p><code>Table 5(or 6). Summary Model for Response</code>: This table provides summary information for the optimal models.</p></li>
+</ul>
+</div>
+<div id="demo" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Demo</h1>
+<p>This section provides 9 examples utilizing distinct parameters across various regression scenarios with the above 4 datasets.</p>
+<div id="linear-stepwise-regression-with-mtcars" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> linear stepwise regression with <strong><a href="https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html">mtcars</a></strong></h2>
+<blockquote>
+<p><strong>Example1</strong>: In this analysis, we used <code>mpg</code> as the response variable, with all other variables serving as predictors, employing a strategy of <code>forward</code> and a metric of <code>AIC</code> for linear stepwise regression.</p>
+</blockquote>
+<pre class="r"><code>    library(StepReg)
+    data(mtcars)
+    formula &lt;- mpg ~ .
+    exam1 &lt;- stepwise(formula = formula,
+                      data = mtcars,
+                      type = &quot;linear&quot;,
+                      strategy = &quot;forward&quot;,
+                      metric = &quot;AIC&quot;)
+    exam1</code></pre>
 <pre><code>## Table 1. Summary of Parameters           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##            Parameter              Value  
@@ -1920,39 +1934,33 @@ sForwAIC</code></pre>
 ## cyl          -0.941616811990739   0.550916381450763   -1.70918281556834  0.0984800974797216     
 ## hp           -0.0180381021431068  0.0118762499454497  -1.51883820448035  0.140015155016129      
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
-<p>From the above result, we can see that stepwise() output a list with 5 tables.</p>
-<ul>
-<li><p>Table ‘Summary of Parameters’ tells you what parameters are used for this function. Especially, except basic information of paramters, it will also indicate 1) if there is any variable included in all models, 2) if a multicollinearity variable will be detected, 3) if “intercept” equals 1, it indicates that this stepwise regression includes an intercept, otherwise, if it equals 0, the regression does not include an intercept.</p></li>
-<li><p>‘Variables Type’ is the summary detailing the type of all variables.</p></li>
-<li><p>“Process of Selection” provides insights into how variables are chosen. In this instance, the last column displays the corresponding AIC values which is servesd as the criterion. Remember that variable selection based on AIC involves a trade-off between model fit and complexity, and it’s essential to interpret the selected model cautiously.</p></li>
-<li><p>“Coefficients of the Selected Variables” presents the coefficients associated with all selected variables.</p></li>
-</ul>
-</div>
-<div id="conduct-linear-stepwise-regression-employing-the-bidirection-strategy-with-sl-as-stopping-criterion-and-set-the-significance-level-for-entry-sle-to-0.15-and-the-significance-level-for-stay-sls-to-0.15." class="section level3" number="2.1.2">
-<h3><span class="header-section-number">2.1.2</span> Conduct linear stepwise regression employing the ‘bidirection’ strategy with ‘SL’ as stopping criterion, and set the significance level for entry (sle) to 0.15 and the significance level for stay (sls) to 0.15.</h3>
-<pre class="r"><code>formula &lt;- mpg ~ .
-sBidiSL &lt;- stepwise(formula = formula,
-         data = mtcars,
-         type = &quot;linear&quot;,
-         strategy = &quot;bidirection&quot;,
-         metric = &quot;SL&quot;,
-         sle = 0.15,
-         sls = 0.15)
-sBidiSL</code></pre>
+<blockquote>
+<p><strong>Example2</strong>: In this illustration, we maintained <code>mpg</code> as the response variable, while designating the other variables as predictors. The analysis involved removing the intercept and enforcing <code>disp</code> in all models. The chosen strategy was <code>bidirectional</code> with <code>SL</code> as the stopping criterion, and the significance levels for entry (<code>sle</code>) and stay (<code>sls</code>) were both set to 0.05.</p>
+</blockquote>
+<pre class="r"><code>    formula &lt;- mpg ~ . + 0
+    exam2 &lt;- stepwise(formula = formula,
+                      data = mtcars,
+                      type = &quot;linear&quot;,
+                      include = &quot;disp&quot;,
+                      strategy = &quot;bidirection&quot;,
+                      metric = &quot;SL&quot;,
+                      sle = 0.05,
+                      sls = 0.05)
+    exam2</code></pre>
 <pre><code>## Table 1. Summary of Parameters               
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##            Parameter                Value    
 ## —————————————————————————————————————————————
 ## response variable               mpg           
-## included variable               NULL          
+## included variable               disp          
 ## strategy                        bidirection   
 ## metric                          SL            
-## entry significance level (sle)  0.15          
-## stay significance level (sls)   0.15          
+## entry significance level (sle)  0.05          
+## stay significance level (sls)   0.05          
 ## test method                     F             
 ## tolerance of multicollinearity  1e-07         
 ## multicollinearity variable                    
-## intercept                       1             
+## intercept                       0             
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## Table 2. Variables and Type                            
@@ -1966,101 +1974,41 @@ sBidiSL</code></pre>
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn           SL          
 ## —————————————————————————————————————————————————————————————————————————————————————————————
-## 0     1                             1   0               1              1                      
-## 1     wt                            2   1               2              1.29395870135053e-10   
-## 2     cyl                           3   2               3              0.00106428178479493    
-## 3     hp                            4   3               4              0.140015155016129      
+## 0     0                             0   0               0              1                      
+## 0     disp                          1   1               1              1.07262569492923e-06   
+## 1     drat                          2   2               2              1.84738100620453e-19   
+## 2     carb                          3   3               3              0.0011318957137231     
+## 3     gear                          4   4               4              0.0207798991702918     
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## Table 4. Selected Varaibles      
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  variable1  variable2  variable3 
-## —————————————————————————————————
-## wt         cyl        hp          
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## Table 4. Selected Varaibles                 
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  variable1  variable2  variable3  variable4 
+## ————————————————————————————————————————————
+## disp       drat       carb       gear        
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## Table 5. Summary Model for mpg                                                                 
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##   Variable         Estimate            Std. Error           t value             Pr(&gt;|t|)       
-## ———————————————————————————————————————————————————————————————————————————————————————————————
-## (Intercept)  38.7517873728655     1.78686402942753    21.6870375891336   4.7993988012846e-19    
-## wt           -3.16697311074858    0.740575879267817   -4.27636546018709  0.000199476497472232   
-## cyl          -0.941616811990739   0.550916381450763   -1.70918281556834  0.0984800974797216     
-## hp           -0.0180381021431068  0.0118762499454497  -1.51883820448035  0.140015155016129      
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
-<p>The output of this time is similar to the last time except that the last column name of ‘Process of Selection’ is SL.</p>
-</div>
-<div id="perform-linear-stepwise-regression-using-the-backward-method-for-variable-selection-employing-sbc-as-the-criteria-for-stop-rules-and-excluding-the-intercept-in-the-stepwise-regression." class="section level3" number="2.1.3">
-<h3><span class="header-section-number">2.1.3</span> Perform linear stepwise regression using the ‘backward’ method for variable selection, employing ‘SBC’ as the criteria for stop rules, and excluding the intercept in the stepwise regression.</h3>
-<pre class="r"><code>formula &lt;- mpg ~ . + 0
-sBackSBC &lt;- stepwise(formula = formula,
-                     data = mtcars,
-                     type = &quot;linear&quot;,
-                     strategy = &quot;backward&quot;,
-                     metric = &quot;SBC&quot;)
-sBackSBC</code></pre>
-<pre><code>## Table 1. Summary of Parameters            
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##            Parameter              Value   
-## ——————————————————————————————————————————
-## response variable               mpg        
-## included variable               NULL       
-## strategy                        backward   
-## metric                          SBC        
-## test method                     F          
-## tolerance of multicollinearity  1e-07      
-## multicollinearity variable                 
-## intercept                       0          
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-## 
-## Table 2. Variables and Type                            
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##   class                     variable                   
-## ———————————————————————————————————————————————————————
-## numeric  mpg cyl disp hp drat wt qsec vs am gear carb   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-## 
-## Table 3. Process of Selection                                                            
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn        SBC        
-## —————————————————————————————————————————————————————————————————————————————————————————
-## 0                                   10  10              10             84.2067855988594   
-## 1                    vs             9   9               9              80.753286502759    
-## 2                    carb           8   8               8              77.4481345907642   
-## 3                    cyl            7   7               7              74.2170762315502   
-## 4                    gear           6   6               6              71.4474257432347   
-## 5                    hp             5   5               5              69.6121723518218   
-## 6                    drat           4   4               4              67.2583479289403   
-## 7                    disp           3   3               3              65.8158985591381   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-## 
-## Table 4. Selected Varaibles      
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  variable1  variable2  variable3 
-## —————————————————————————————————
-## wt         qsec       am          
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-## 
-## Table 5. Summary Model for mpg                                                           
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  Variable      Estimate          Std. Error           t value             Pr(&gt;|t|)       
-## —————————————————————————————————————————————————————————————————————————————————————————
-## wt        -3.18545457405163  0.48275857401392   -6.59844225565175  3.12884395417586e-07   
-## qsec      1.59982255096241   0.102127563736307  15.6649438450637   1.09152213212295e-15   
-## am        4.29951918563878   1.02411470721657   4.19827891870082   0.000232942305441512   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
-<p>Note that 0 is displayed instead of 1 in the ‘Summary of Parameters’ and ‘Selected Variables’ tables.</p>
-</div>
-<div id="conduct-linear-stepwise-regression-using-the-subset-strategy-for-variable-selection-with-aicc-as-the-criteria.-perform-multivariable-multiple-stepwise-regression-with-mpg-and-dra-as-dependent-variables.-additionally-use-cyl-disp-hp-wt-vs-and-am-as-independent-variables-where-wt-is-consistently-included-in-all-models." class="section level3" number="2.1.4">
-<h3><span class="header-section-number">2.1.4</span> Conduct linear stepwise regression using the ‘subset’ strategy for variable selection with ‘AICc’ as the criteria. Perform multivariable multiple stepwise regression with ‘mpg’ and ‘dra’ as dependent variables. Additionally, use ‘cyl’, ‘disp’, ‘hp’, ‘wt’, ‘vs’, and ‘am’ as independent variables, where ‘wt’ is consistently included in all models.</h3>
-<pre class="r"><code>formula &lt;- cbind(mpg,drat) ~ cyl + disp + hp + wt + vs + am
-stepwise(formula = formula,
-        data = mtcars,
-        type = &quot;linear&quot;,
-        include = &#39;wt&#39;,
-        strategy = &quot;subset&quot;,
-        metric = &quot;AICc&quot;,
-        best_n = 3)</code></pre>
+## Table 5. Summary Model for mpg                                                                
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  Variable        Estimate            Std. Error            t value             Pr(&gt;|t|)       
+## ——————————————————————————————————————————————————————————————————————————————————————————————
+## disp      -0.00600141292952612  0.00437669199118952  -1.37122121949802  0.181196593689751      
+## drat      4.52320125494345      1.16051778183166     3.89757169235651   0.000552646500172521   
+## carb      -2.00027553099444     0.433615571551046    -4.61301591139691  7.98471577998972e-05   
+## gear      2.91285904942159      1.18875156426047     2.45035139132179   0.0207798991702918     
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
+<blockquote>
+<p><strong>Example3</strong>: In this multivariable multiple stepwise regression, we employed <code>mpg</code> and <code>drat</code> as response with <code>cyl</code>, <code>disp</code>, <code>hp</code>, <code>wt</code>, <code>vs</code> and <code>am</code> serving as predictors. The variable <code>wt</code> was enforced to be included in all models. The analysis involved the ‘subset’ strategy for variable selection, with ‘AICc’ as the criteria.</p>
+</blockquote>
+<pre class="r"><code>    formula &lt;- cbind(mpg,drat) ~ cyl + disp + hp + wt + vs + am
+    exam3 &lt;- stepwise(formula = formula,
+                      data = mtcars,
+                      type = &quot;linear&quot;,
+                      include = &#39;wt&#39;,
+                      strategy = &quot;subset&quot;,
+                      metric = &quot;AICc&quot;,
+                      best_n = 3)
+    exam3</code></pre>
 <pre><code>## Table 1. Summary of Parameters                    
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##            Parameter                  Value       
@@ -2130,25 +2078,26 @@ stepwise(formula = formula,
 ## am           0.467038681922974    0.164156454783472  2.84508265324694    0.00821005565960176    
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
 </div>
-</div>
-<div id="logistic-stepwise-regression-with-data-remission" class="section level2" number="2.2">
-<h2><span class="header-section-number">2.2</span> logistic stepwise regression with data remission</h2>
-<p>The remission data, taken from Lee (1974), consist of patient characteristics and whether or not cancer remission occurred, and are saved in the data set remission. The variable remiss is the cancer remission indicator variable with a value of 1 for remission and a value of 0 for nonremission. The other six variables are the risk factors thought to be related to cancer remission.</p>
-<div id="perform-logistic-stepwise-regression-using-the-forward-method-for-variable-selection-with-aic-as-the-criteria-for-stop-rules." class="section level3" number="2.2.1">
-<h3><span class="header-section-number">2.2.1</span> Perform logistic stepwise regression using the ‘forward’ method for variable selection with ‘AIC’ as the criteria for stop rules.</h3>
-<pre class="r"><code>data(remission)
-formula &lt;- remiss ~ .
-stepwise(formula = formula,
-         data = remission,
-         type = &quot;logit&quot;,
-         strategy = &quot;forward&quot;,
-         metric = &quot;AIC&quot;)</code></pre>
+<div id="logistic-stepwise-regression-with-remission" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Logistic stepwise regression with <code>remission</code></h2>
+<blockquote>
+<p><strong>Example4</strong>: In this run, we employed <code>remiss</code> as response with the other 6 variables serving as predictors. The variable <code>cell</code> was enforced to be included in all models. The analysis involved the ‘forward’ strategy for variable selection, with ‘SL’ as the criteria, and the significance levels for entry (<code>sle</code>) and stay (<code>sls</code>) were both set to 0.05.</p>
+</blockquote>
+<pre class="r"><code>    data(remission)
+    formula &lt;- remiss ~ .
+    exma4 &lt;- stepwise(formula = formula,
+                      data = remission,
+                      type = &quot;logit&quot;,
+                      include= &quot;cell&quot;,
+                      strategy = &quot;forward&quot;,
+                      metric = &quot;AIC&quot;)
+    exma4</code></pre>
 <pre><code>## Table 1. Summary of Parameters           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##            Parameter              Value  
 ## —————————————————————————————————————————
 ## response variable               remiss    
-## included variable               NULL      
+## included variable               cell      
 ## strategy                        forward   
 ## metric                          AIC       
 ## test method                     Rao       
@@ -2169,34 +2118,39 @@ stepwise(formula = formula,
 ##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn        AIC        
 ## —————————————————————————————————————————————————————————————————————————————————————————
 ## 0     1                             1   1               1              36.3717650879199   
-## 1     li                            2   2               2              30.0729645050923   
+## 0     cell                          1   2               2              35.7917917196118   
+## 1     li                            3   3               3              30.3407188099083   
+## 2     temp                          4   4               4              29.953368109419    
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## Table 4. Selected Varaibles
-## ‗‗‗‗‗‗‗‗‗‗‗
-##  variable1 
-## ———————————
-## li          
-## ‗‗‗‗‗‗‗‗‗‗‗
+## Table 4. Selected Varaibles      
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  variable1  variable2  variable3 
+## —————————————————————————————————
+## cell       li         temp        
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## Table 5. Summary Model for remiss                                                         
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##   Variable        Estimate          Std. Error          z value            Pr(&gt;|z|)       
-## ——————————————————————————————————————————————————————————————————————————————————————————
-## (Intercept)  -3.77714015769881  1.37862405968586  -2.73978981518681  0.00614784861174817   
-## li           2.89726385662888   1.18681962433562  2.44119982280438   0.0146385524077831    
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
-</div>
-<div id="conduct-logistic-stepwise-regression-using-the-subset-method-for-variable-selection-with-sl-as-the-criteria." class="section level3" number="2.2.2">
-<h3><span class="header-section-number">2.2.2</span> Conduct logistic stepwise regression using the ‘subset’ method for variable selection with ‘SL’ as the criteria.</h3>
-<pre class="r"><code>data(remission)
-formula &lt;- remiss ~ .
-stepwise(formula = formula,
-         data = remission,
-         type = &quot;logit&quot;,
-         strategy = &quot;subset&quot;,
-         metric = &quot;SL&quot;,
-         best_n = 3)</code></pre>
+## Table 5. Summary Model for remiss                                                        
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   Variable        Estimate          Std. Error          z value            Pr(&gt;|z|)      
+## —————————————————————————————————————————————————————————————————————————————————————————
+## (Intercept)  67.6339061281107   56.8875473471752  1.18890529267068   0.234476937196249    
+## cell         9.65215222462213   7.75107586200402  1.24526612775618   0.213033942178284    
+## li           3.86710032908392   1.77827772175707  2.17463238827675   0.0296576752212302   
+## temp         -82.0737742795405  61.7123821323401  -1.32994014237752  0.183537993940985    
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
+<blockquote>
+<p><strong>Example5</strong>: In this anslysis, <code>remiss</code> was retained as the response variable, while the other six variables served as predictors. The analysis utilized the <code>subset</code> strategy for variable selection, with <code>AIC</code> as the criterion.</p>
+</blockquote>
+<pre class="r"><code>    data(remission)
+    formula &lt;- remiss ~ .
+    exma5 &lt;- stepwise(formula = formula,
+                      data = remission,
+                      type = &quot;logit&quot;,
+                      strategy = &quot;subset&quot;,
+                      metric = &quot;AIC&quot;,
+                      best_n = 3)
+    exma5</code></pre>
 <pre><code>## Table 1. Summary of Parameters          
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##            Parameter             Value  
@@ -2204,7 +2158,7 @@ stepwise(formula = formula,
 ## response variable               remiss   
 ## included variable               NULL     
 ## strategy                        subset   
-## metric                          SL       
+## metric                          AIC      
 ## test method                     Rao      
 ## tolerance of multicollinearity  1e-07    
 ## multicollinearity variable               
@@ -2220,67 +2174,66 @@ stepwise(formula = formula,
 ## 
 ## Table 3. Process of Selection                                           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  NumberOfVariables         SL                 VariablesInModel          
+##  NumberOfVariables        AIC                 VariablesInModel          
 ## ————————————————————————————————————————————————————————————————————————
-## 2                  7.93109912391465  1  li                               
-## 2                  3.52581053761541  1  blast                            
-## 2                  1.88933825259033  1  cell                             
-## 3                  8.66108166784948  1  cell li                          
-## 3                  8.36482911322912  1  li temp                          
-## 3                  8.17463918794755  1  infil li                         
-## 4                  9.25024541927856  1  cell li temp                     
-## 4                  8.79127825261338  1  smear infil li                   
-## 4                  8.68174276768291  1  cell li blast                    
-## 5                  9.44759197671312  1  smear infil li temp              
-## 5                  9.27906944643618  1  cell smear li temp               
-## 5                  9.26147971975759  1  cell infil li temp               
-## 6                  9.46088500719727  1  cell smear infil li temp         
-## 6                  9.45015507221275  1  smear infil li blast temp        
-## 6                  9.32952313436336  1  cell smear li blast temp         
-## 7                  9.46088923922502  1  cell smear infil li blast temp   
+## 2                  30.0729645050923  1  li                               
+## 2                  34.8205019629019  1  blast                            
+## 2                  35.7917917196118  1  cell                             
+## 3                  30.3407188099083  1  cell li                          
+## 3                  30.6478222686119  1  li temp                          
+## 3                  31.4904839517614  1  infil li                         
+## 4                  29.953368109419   1  cell li temp                     
+## 4                  31.5343469686038  1  li blast temp                    
+## 4                  31.7759437799494  1  infil li temp                    
+## 5                  31.8579906429728  1  cell smear li temp               
+## 5                  31.8691398459254  1  cell infil li temp               
+## 5                  31.9325085686912  1  cell li blast temp               
+## 6                  33.7550450527665  1  cell smear infil li temp         
+## 6                  33.8571463530981  1  cell smear li blast temp         
+## 6                  33.8686584978099  1  cell infil li blast temp         
+## 7                  35.7506522854459  1  cell smear infil li blast temp   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## Table 4. Selected Varaibles                                                  
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  variable1  variable2  variable3  variable4  variable5  variable6  variable7 
-## —————————————————————————————————————————————————————————————————————————————
-## 1          cell       smear      infil      li         blast      temp        
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## Table 4. Selected Varaibles                 
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  variable1  variable2  variable3  variable4 
+## ————————————————————————————————————————————
+## 1          cell       li         temp        
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## Table 5. Summary Model for remiss                                                         
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##   Variable        Estimate          Std. Error          z value             Pr(&gt;|z|)      
-## ——————————————————————————————————————————————————————————————————————————————————————————
-## (Intercept)  58.0384871144701   71.2364334179606  0.814730389068539   0.415226654399395    
-## cell         24.6615438508061   47.8376944382513  0.515525343359495   0.606185964565718    
-## smear        19.2935745808349   57.9500115690838  0.332934783935884   0.739183512053845    
-## infil        -19.6012612370258  61.6814798296488  -0.317781954829235  0.750650339683589    
-## li           3.89596332799396   2.33711543506734  1.66699653322075    0.0955150942220478   
-## blast        0.151092333239208  2.27857061152582  0.0663101386785774  0.947130911494031    
-## temp         -87.4339023538899  67.5735358529564  -1.29390746318427   0.195697386304521    
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
+## Table 5. Summary Model for remiss                                                        
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   Variable        Estimate          Std. Error          z value            Pr(&gt;|z|)      
+## —————————————————————————————————————————————————————————————————————————————————————————
+## (Intercept)  67.6339061281107   56.8875473471752  1.18890529267068   0.234476937196249    
+## cell         9.65215222462213   7.75107586200402  1.24526612775618   0.213033942178284    
+## li           3.86710032908392   1.77827772175707  2.17463238827675   0.0296576752212302   
+## temp         -82.0737742795405  61.7123821323401  -1.32994014237752  0.183537993940985    
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
 </div>
-</div>
-<div id="cox-stepwise-regression-with-data-lung" class="section level2" number="2.3">
-<h2><span class="header-section-number">2.3</span> Cox stepwise regression with data lung</h2>
-<div id="perform-cox-stepwise-regression-using-the-forward-method-for-variable-selection-with-ic1-as-the-criteria-for-stop-rules." class="section level3" number="2.3.1">
-<h3><span class="header-section-number">2.3.1</span> Perform Cox stepwise regression using the ‘forward’ method for variable selection with ‘IC(1)’ as the criteria for stop rules.</h3>
-<pre class="r"><code>lung &lt;- survival::lung
-my.data &lt;- na.omit(lung)
-my.data$status1 &lt;- ifelse(my.data$status == 2,1,0)
-formula  =  Surv(time, status1) ~ . - status 
-
-stepwise(formula = formula,
-            data = my.data,
-            type = &quot;cox&quot;,
-            strategy = &quot;forward&quot;,
-            metric = &quot;IC(1)&quot;)</code></pre>
+<div id="cox-stepwise-regression-with-lung" class="section level2" number="3.3">
+<h2><span class="header-section-number">3.3</span> Cox stepwise regression with <code>lung</code></h2>
+<blockquote>
+<p><strong>Example6</strong>: Cox stepwise regression using the <code>forward</code> method for variable selection with <code>IC(1)</code> as the criteria for stop rules, including variable <code>age</code> in all models.</p>
+</blockquote>
+<pre class="r"><code>    lung &lt;- survival::lung
+    my.data &lt;- na.omit(lung)
+    my.data$status1 &lt;- ifelse(my.data$status == 2,1,0)
+    formula  =  Surv(time, status1) ~ . - status 
+    
+    exma6 &lt;- stepwise(formula = formula,
+                      data = my.data,
+                      type = &quot;cox&quot;,
+                      include = &quot;age&quot;,
+                      strategy = &quot;forward&quot;,
+                      metric = &quot;IC(1)&quot;)
+    exma6</code></pre>
 <pre><code>## Table 1. Summary of Parameters                       
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##            Parameter                    Value        
 ## —————————————————————————————————————————————————————
 ## response variable               Surv(time, status1)   
-## included variable               NULL                  
+## included variable               age                   
 ## strategy                        forward               
 ## metric                          IC(1)                 
 ## test method                     efron                 
@@ -2301,58 +2254,58 @@ stepwise(formula = formula,
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn       IC(1)       
 ## —————————————————————————————————————————————————————————————————————————————————————————
-## 1     ph.ecog                       1   1               1              1004.82485042      
-## 2     sex                           2   2               2              998.751396664802   
-## 3     inst                          3   3               3              996.306462601088   
-## 4     wt.loss                       4   4               4              993.697932944162   
-## 5     ph.karno                      5   5               5              990.792621133919   
-## 6     pat.karno                     6   6               6              989.742173541071   
-## 7     age                           7   7               7              989.5365169151     
+## 0     age                           1   1               1              1013.71004248687   
+## 1     ph.ecog                       2   2               2              1005.03577133648   
+## 2     sex                           3   3               3              999.220449574499   
+## 3     inst                          4   4               4              996.745082496922   
+## 4     ph.karno                      5   5               5              993.164700650656   
+## 5     wt.loss                       6   6               6              990.378814285337   
+## 6     pat.karno                     7   7               7              989.5365169151     
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## Table 4. Selected Varaibles                                                  
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  variable1  variable2  variable3  variable4  variable5  variable6  variable7 
 ## —————————————————————————————————————————————————————————————————————————————
-## ph.ecog    sex        inst       wt.loss    ph.karno   pat.karno  age         
+## age        ph.ecog    sex        inst       ph.karno   wt.loss    pat.karno   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## Table 5. Summary Model for Surv(time, status1)                                                                  
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  Variable          coef              exp(coef)           se(coef)               z                Pr(&gt;|z|)       
-## ————————————————————————————————————————————————————————————————————————————————————————————————————————————————
-## ph.ecog    0.907317172186787    2.47766645634186   0.238503963744317   3.80420164907388   0.000142262259259765   
-## sex        -0.5668681013351     0.56729938352366   0.200032540541155   -2.83387942682491  0.0045986679410844     
-## inst       -0.0303746283354971  0.970082045244345  0.0131043742343093  -2.3178999464142   0.020454759369153      
-## wt.loss    -0.0167121591832758  0.983426714247836  0.0079119389785738  -2.11227099052883  0.0346632125632794     
-## ph.karno   0.026580081421336    1.02693648250202   0.0116170285677177  2.28802755079718   0.02213591674028       
-## pat.karno  -0.0108962907298638  0.98916285881416   0.00799900477152    -1.36220580448451  0.173132944510343      
-## age        0.0127911717927875   1.01287332875159   0.0117657197510269  1.08715591255444   0.276967911173407      
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
-</div>
-<div id="conduct-cox-stepwise-regression-using-the-bidirection-method-for-variable-selection-with-sl-as-the-criteria." class="section level3" number="2.3.2">
-<h3><span class="header-section-number">2.3.2</span> Conduct Cox stepwise regression using the ‘bidirection’ method for variable selection with ‘SL’ as the criteria.</h3>
-<pre class="r"><code>formula = Surv(time, status1) ~ . - status 
-stepwise(formula = formula,
-         data = my.data,
-         type = &quot;cox&quot;,
-         strategy = &quot;bidirection&quot;,
-         metric = &quot;SL&quot;,
-         sle = 0.05,
-         sls = 0.05)</code></pre>
+## Table 5. Summary Model for Surv(time, status1)                                                                   
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  Variable          coef              exp(coef)           se(coef)                z                Pr(&gt;|z|)       
+## —————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+## age        0.0127911717927875   1.01287332875159   0.0117657197510269   1.08715591255444   0.276967911173407      
+## ph.ecog    0.907317172186787    2.47766645634186   0.238503963744317    3.80420164907388   0.000142262259259764   
+## sex        -0.566868101335099   0.56729938352366   0.200032540541155    -2.83387942682491  0.00459866794108441    
+## inst       -0.0303746283354971  0.970082045244345  0.0131043742343092   -2.3178999464142   0.0204547593691531     
+## ph.karno   0.026580081421336    1.02693648250202   0.0116170285677177   2.28802755079718   0.0221359167402799     
+## wt.loss    -0.0167121591832758  0.983426714247836  0.00791193897857379  -2.11227099052884  0.0346632125632795     
+## pat.karno  -0.0108962907298638  0.98916285881416   0.00799900477152     -1.36220580448451  0.173132944510343      
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
+<blockquote>
+<p><strong>Example7</strong>: Cox stepwise regression using the <code>backward</code> method for variable selection with <code>SL</code> as the criterion. The significance levels for stay (<code>sls</code>) were both set to 0.05.</p>
+</blockquote>
+<pre class="r"><code>    formula = Surv(time, status1) ~ . - status 
+    exma7 &lt;- stepwise(formula = formula,
+                      data = my.data,
+                      type = &quot;cox&quot;,
+                      strategy = &quot;backward&quot;,
+                      metric = &quot;SL&quot;,
+                      sls = 0.05)
+    exma7</code></pre>
 <pre><code>## Table 1. Summary of Parameters                       
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##            Parameter                    Value        
 ## —————————————————————————————————————————————————————
 ## response variable               Surv(time, status1)   
 ## included variable               NULL                  
-## strategy                        bidirection           
+## strategy                        backward              
 ## metric                          SL                    
-## entry significance level (sle)  0.05                  
 ## stay significance level (sls)   0.05                  
 ## test method                     efron                 
 ## tolerance of multicollinearity  1e-07                 
 ## multicollinearity variable                            
+## intercept                       0                     
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## Table 2. Variables and Type                                          
@@ -2363,42 +2316,49 @@ stepwise(formula = formula,
 ## numeric    inst age sex ph.ecog ph.karno pat.karno meal.cal wt.loss   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
-## Table 3. Process of Selection                                                                
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn           SL          
-## —————————————————————————————————————————————————————————————————————————————————————————————
-## 1     ph.ecog                       1   1               1              0.000427327554231382   
-## 2     sex                           2   2               2              0.00782343055675471    
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## Table 3. Process of Selection                                                              
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn          SL         
+## ———————————————————————————————————————————————————————————————————————————————————————————
+## 0                                   8   8               8              1                    
+## 1                    meal.cal       7   7               7              0.992244442233114    
+## 2                    age            6   6               6              0.276967911173407    
+## 3                    pat.karno      5   5               5              0.150201287416114    
+## 4                    ph.karno       4   4               4              0.0554707154521576   
+## 5                    wt.loss        3   3               3              0.0652481881858785   
+## 6                    inst           2   2               2              0.0670860630827791   
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## Table 4. Selected Varaibles
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  variable1  variable2 
 ## ——————————————————————
-## ph.ecog    sex         
+## sex        ph.ecog     
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## Table 5. Summary Model for Surv(time, status1)                                                               
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##  Variable         coef             exp(coef)          se(coef)               z                Pr(&gt;|z|)       
 ## —————————————————————————————————————————————————————————————————————————————————————————————————————————————
-## ph.ecog   0.48251852871466    1.62014966165472   0.132315991621882  3.6467136194206    0.000265615670889066   
-## sex       -0.510099064468472  0.600436093983396  0.196899845516193  -2.59065243617228  0.00957941855627088    
+## sex       -0.510099064468472  0.600436093983396  0.196899845516193  -2.59065243617229  0.00957941855627087    
+## ph.ecog   0.48251852871466    1.62014966165472   0.132315991621882  3.6467136194206    0.000265615670889065   
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
 </div>
-</div>
-<div id="poisson-stepwise-regression-with-data-creditcard" class="section level2" number="2.4">
-<h2><span class="header-section-number">2.4</span> Poisson stepwise regression with data CreditCard</h2>
-<div id="perform-poisson-stepwise-regression-using-the-forward-method-for-variable-selection-with-aic-as-the-criteria-for-stop-rules." class="section level3" number="2.4.1">
-<h3><span class="header-section-number">2.4.1</span> Perform Poisson stepwise regression using the ‘forward’ method for variable selection with ‘AIC’ as the criteria for stop rules.</h3>
-<pre class="r"><code>data(CreditCard, package = &#39;AER&#39;)
-formula  = reports ~ .
-
-stepwise(formula = formula,
-            data = CreditCard,
-            type = &quot;poisson&quot;,
-            strategy = &quot;forward&quot;,
-            metric = &quot;AIC&quot;)</code></pre>
+<div id="poisson-stepwise-regression-with-creditcard" class="section level2" number="3.4">
+<h2><span class="header-section-number">3.4</span> Poisson stepwise regression with <code>CreditCard</code></h2>
+<blockquote>
+<p><strong>Example8</strong>: In this exmaples, We designated <code>reports</code> as the response variable, with the remaining variables serving as predictors. The analysis employed the <code>forward</code> method for variable selection, utilizing <code>SL</code> as the criterion for stop rules, and the significance levels for entry (<code>sle</code>) waw set to be 0.05.</p>
+</blockquote>
+<pre class="r"><code>    data(CreditCard, package = &#39;AER&#39;)
+    formula  = reports ~ .
+    
+    exma8 &lt;- stepwise(formula = formula,
+                      data = CreditCard,
+                      type = &quot;poisson&quot;,
+                      strategy = &quot;forward&quot;,
+                      metric = &quot;SL&quot;,
+                      sle=0.05)
+    exma8</code></pre>
 <pre><code>## Table 1. Summary of Parameters           
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ##            Parameter              Value  
@@ -2406,76 +2366,13 @@ stepwise(formula = formula,
 ## response variable               reports   
 ## included variable               NULL      
 ## strategy                        forward   
-## metric                          AIC       
+## metric                          SL        
+## entry significance level (sle)  0.05      
 ## test method                     Rao       
 ## tolerance of multicollinearity  1e-07     
 ## multicollinearity variable                
 ## intercept                       1         
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-## 
-## Table 2. Variables and Type                                                        
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##   class                                   variable                                 
-## ———————————————————————————————————————————————————————————————————————————————————
-## factor   card owner selfemp                                                         
-## numeric  reports age income share expenditure dependents months majorcards active   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-## 
-## Table 3. Process of Selection                                                            
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn        AIC        
-## —————————————————————————————————————————————————————————————————————————————————————————
-## 0     1                             1   1               1              2998.96727451496   
-## 1     card                          2   2               2              2162.54380348632   
-## 2     active                        3   3               3              1972.36790229148   
-## 3     expenditure                   4   4               4              1964.20751098534   
-## 4     months                        5   5               5              1957.29845463846   
-## 5     owner                         6   6               6              1945.91316602911   
-## 6     majorcards                    7   7               7              1940.66269545213   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-## 
-## Table 4. Selected Varaibles                                          
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##  variable1  variable2   variable3   variable4  variable5  variable6  
-## —————————————————————————————————————————————————————————————————————
-## card       active     expenditure  months     owner      majorcards   
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-## 
-## Table 5. Summary Model for reports                                                                 
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##   Variable          Estimate             Std. Error            z value             Pr(&gt;|z|)        
-## ———————————————————————————————————————————————————————————————————————————————————————————————————
-## (Intercept)  -0.298643659038297    0.109685399601467     -2.7227293707585   0.00647450714191624     
-## cardyes      -2.70352225795467     0.117195939295856     -23.0683953232351  9.61653770781882e-118   
-## active       0.0654296707660895    0.00399754905523789   16.367446618412    3.26632926223479e-60    
-## expenditure  0.000672431213470284  0.000177638845762774  3.78538382515879   0.00015347151873607     
-## months       0.00212461501050368   0.000530320086460442  4.00628802254911   6.16804294228691e-05    
-## owneryes     -0.343769864333074    0.0926480304376423    -3.71049295607479  0.000206856052610907    
-## majorcards   0.274039347897117     0.104512901787067     2.62206237901079   0.00873994324369934     
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
-<pre class="r"><code>formula = reports ~ .
-stepwise(formula = formula,
-         data = CreditCard,
-         type = &quot;poisson&quot;,
-         strategy = &quot;bidirection&quot;,
-         metric = &quot;SL&quot;,
-         sle = 0.05,
-         sls = 0.05)</code></pre>
-<pre><code>## Table 1. Summary of Parameters               
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
-##            Parameter                Value    
-## —————————————————————————————————————————————
-## response variable               reports       
-## included variable               NULL          
-## strategy                        bidirection   
-## metric                          SL            
-## entry significance level (sle)  0.05          
-## stay significance level (sls)   0.05          
-## test method                     Rao           
-## tolerance of multicollinearity  1e-07         
-## multicollinearity variable                    
-## intercept                       1             
-## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
 ## 
 ## Table 2. Variables and Type                                                        
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
@@ -2517,11 +2414,76 @@ stepwise(formula = formula,
 ## owneryes     -0.343769864333074    0.0926480304376423    -3.71049295607479  0.000206856052610907    
 ## majorcards   0.274039347897117     0.104512901787067     2.62206237901079   0.00873994324369934     
 ## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
+<blockquote>
+<p><strong>Example9</strong>: <code>reports</code> variable was maintained as the response variable, and the remaining variables were set as predictors. The variables <code>card</code> and <code>months</code> were enforced to be included in all models. Poisson stepwise regression using the <code>bidirection</code> method for variable selection with <code>IC(3/2)</code> as the criterion for stop rules.</p>
+</blockquote>
+<pre class="r"><code>    formula = reports ~ .
+    exma9 &lt;- stepwise(formula = formula,
+                      data = CreditCard,
+                      type = &quot;poisson&quot;,
+                      include=c(&quot;card&quot;,&quot;months&quot;),
+                      strategy = &quot;bidirection&quot;,
+                      metric = &quot;IC(3/2)&quot;)
+    exma9</code></pre>
+<pre><code>## Table 1. Summary of Parameters               
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##            Parameter                Value    
+## —————————————————————————————————————————————
+## response variable               reports       
+## included variable               card months   
+## strategy                        bidirection   
+## metric                          IC(3/2)       
+## test method                     Rao           
+## tolerance of multicollinearity  1e-07         
+## multicollinearity variable                    
+## intercept                       1             
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## 
+## Table 2. Variables and Type                                                        
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   class                                   variable                                 
+## ———————————————————————————————————————————————————————————————————————————————————
+## factor   card owner selfemp                                                         
+## numeric  reports age income share expenditure dependents months majorcards active   
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## 
+## Table 3. Process of Selection                                                            
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  Step  EnteredEffect  RemovedEffect  DF  NumberEffectIn  NumberParmsIn      IC(3/2)      
+## —————————————————————————————————————————————————————————————————————————————————————————
+## 0     1                             1   1               1              2998.46727451496   
+## 0     card months                   2   3               3              2153.23072693751   
+## 1     active                        4   4               4              1963.56167073775   
+## 2     owner                         5   5               5              1952.16998343778   
+## 3     expenditure                   6   6               6              1942.91316602911   
+## 4     majorcards                    7   7               7              1937.16269545213   
+## 5     income                        8   8               8              1937.02611660997   
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## 
+## Table 4. Selected Varaibles                                                     
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##  variable1  variable2  variable3  variable4   variable5   variable6   variable7 
+## ————————————————————————————————————————————————————————————————————————————————
+## card       months     active     owner      expenditure  majorcards  income      
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+## 
+## Table 5. Summary Model for reports                                                                 
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗
+##   Variable          Estimate             Std. Error            z value             Pr(&gt;|z|)        
+## ———————————————————————————————————————————————————————————————————————————————————————————————————
+## (Intercept)  -0.370064654071274    0.122569709425332     -3.01921784596147  0.00253428230748225     
+## cardyes      -2.69192183928203     0.117368471922898     -22.935646985763   2.04939317764651e-116   
+## months       0.00202983041537344   0.000534807209066601  3.79544325686279   0.000147379901803215    
+## active       0.064733432332392     0.00402555478259611   16.0806238713375   3.48848117936579e-58    
+## owneryes     -0.368861130713364    0.0948758378946128    -3.88783001972632  0.000101144415795061    
+## expenditure  0.000598437222203224  0.000185715652467925  3.22233055884496   0.00127152347189399     
+## majorcards   0.257131033787657     0.105294602110372     2.44201534204124   0.0146055259166053      
+## income       0.0328317155222304    0.0253062467170453    1.29737593604176   0.194501868167292       
+## ‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗‗</code></pre>
 </div>
 </div>
-</div>
-<div id="session-info" class="section level1" number="3">
-<h1><span class="header-section-number">3</span> Session Info</h1>
+<div id="session-info" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Session Info</h1>
 <pre><code>## R version 4.1.3 (2022-03-10)
 ## Platform: x86_64-apple-darwin17.0 (64-bit)
 ## Running under: macOS Big Sur/Monterey 10.16

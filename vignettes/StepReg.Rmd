@@ -4,7 +4,6 @@ author:
 - name: Junhui Li
   affiliation: 
   - University of Massachusset Chan medical school, Worcester, USA
-  - China Agricultural University, Beijing, China
 - name: Kai Hu
   affiliation: University of Massachusset Chan medical school, Worcester, USA
 - name: Xiaohuan Lu
@@ -19,9 +18,8 @@ output:
     toc_float: true
   BiocStyle::pdf_document: default
 abstract: |
-  Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. This package empowers users to conduct linear, logistic, Poisson, and Cox proportional hazard stepwise regression, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods.
+  A tutorial on employing StepReg for stepwise regression analysis with four well-known datasets namely the mtcars, remission, lung, and CreditCard. The guild showcases the utility of StepReg across four well-known datasets, employing it for different regression models such as linear, logistic, Cox proportional hazard, and Poisson regression. The vignette elucidates the stepwise process with distinct parameters, offering users a clear understanding of how to effectively utilize StepReg for exploratory data analysis and model building in various regression scenarios.
 
-  With StepReg, users have the flexibility to specify effects to be included in all models and engage in multivariate multiple stepwise regression. The package is designed to streamline the modeling process, offering a range of options for effective variable selection, making it a valuable tool for researchers and analysts working with diverse datasets.
 vignette: |
   %\VignetteIndexEntry{StepReg: Stepwise Regression made it simple}
   %\VignetteEngine{knitr::rmarkdown}
@@ -30,189 +28,175 @@ vignette: |
 
 # Introduction
 
-Here we applied the StepReg package to four well-known datasets, namely the mtcars, remission, lung, and CreditCard to provide clarity on the procedures for performing linear, logistic, Cox, and Poisson stepwise regression.
+Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. Depending on the nature of the response variable, StepReg facilitates users in conducting linear regression for continuous outcomes, logistic regression for binary outcomes, Cox regression for time-to-event outcomes, and Poisson regression for count outcomes, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods. 
 
-Here is a brief introduction for these four datasets.
+Here, we applied the StepReg package to four well-established and diverse datasets—mtcars, remission, lung, and CreditCard—utilizing distinct parameters across various regression scenarios. These datasets provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications. Through practical demonstrations, we illustrated the application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, Cox stepwise regression for time-to-event outcomes, and Poisson stepwise regression for count outcomes. These examples offer users valuable insights into the effective utilization of StepReg for variable selection in different regression scenarios, providing a comprehensive guide for those seeking proficiency in incorporating StepReg into their analytical toolkit.
 
-The mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower, and the number of cylinders.
+A breif introduction for four datasets is descripted as below,
 
-The remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as cellularity of the marrow clot section, the highest temperature before the start of treatment, and remission status (1 for remission and 0 for non-remission). 
+* **[mtcars](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html)**: the mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower, and the number of cylinders.
 
-The lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient's age, the type of treatment received, and survival status.
+* **[remission](https://online.stat.psu.edu/stat501/book/export/html/1011)**: the remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as cellularity of the marrow clot section, the highest temperature before the start of treatment, and remission status (1 for remission and 0 for non-remission). 
 
-The CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status. 
+* **[lung](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html)**: the lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient's age, the type of treatment received, and survival status.
 
-By applying the package to these datasets, we demonstrated the practical application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, Cox stepwise regression for survival data, and Poisson stepwise regression for count data. Through these examples, users can gain insights into how StepReg can be effectively utilized for variable selection in different regression scenarios. These datasets, being well-established and diverse in nature, provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications.
+* **[CreditCard](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html)**: the CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status. 
 
-# Examples
+# StepReg Output
 
-```{r library}
-library(StepReg)
-```
-A list containing five tables will be returned each time. For multivariate multiple linear stepwise regression, Table 6 will be generated alongside Table 5. Names and descriptions for each table are outlined as follows:
+A list containing five tables will be returned. For multivariate multiple linear stepwise regression, Table 6 will be generated alongside Table 5. Names and descriptions of each table are outlined as follows:
 
-Table 1. Summary of Parameters: the parameter and its value used in stepwise regression.
+* `Table 1. Summary of Parameters`: This table presents the parameters utilized in stepwise regression along with their default or user-specified values.
 
-Table 2. Variables and Type: the variable and its variable type used in dataset.
+* `Table 2. Variables and Types`: This table outlines the variables and their respective types utilized in the dataset.
 
-Table 3. Process of Selection: the process for variable selection.
+* `Table 3. Selection Process`: This table details overview of the variable selection process. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
 
-Table 4. Selected Varaibles: which variables are selected in optimal models.
+* `Table 4. Selected Variables`: This table identifies the variables that are selected in the optimal models.
 
-Table 5 or 6. Summary Model for response: summary information for the optimal models.
+* `Table 5(or 6). Summary Model for Response`: This table provides summary information for the optimal models.
 
-## linear stepwise regression with data mtcar
 
-### perform linear stepwise regression using the 'forward' strategy for variable selection and 'AIC' as the criteria for stop rules, you can follow the code below:
-```{r}
-data(mtcars)
-formula <- mpg ~ .
-sForwAIC <- stepwise(formula = formula,
-         data = mtcars,
-         type = "linear",
-         strategy = "forward",
-         metric = "AIC")
-sForwAIC
-```
+# Demo
 
-From the above result, we can see that stepwise() output a list with 5 tables. 
+This section provides 9 examples utilizing distinct parameters across various regression scenarios with the above 4 datasets.
 
-* Table 1. Summary of Parameters tells you what parameters and their values are used for this function. Especially, except basic information of paramters, it will also indicate 1) if there is any variable included in all models, 2) if a multicollinearity variable will be detected, 3) if "intercept" equals 1, it indicates that this stepwise regression includes an intercept, otherwise, if it equals 0, the regression does not include an intercept.
+## linear stepwise regression with **[mtcars](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html)**
 
-* Table 2. Variables and Type is the summary detailing the type of all variables.
-
-* Table 3. Process of Selection provides insights into how variables are chosen. In this instance, the last column displays the corresponding AIC values which is servesd as the criterion. Remember that variable selection based on AIC involves a trade-off between model fit and complexity, and it's essential to interpret the selected model cautiously.
-
-Table 4. Selected Varaibles indicates which variables are selected in optimal models.
-
-Table 5. Summary Model for mpg presents the coefficients associated with all selected variables.
-
-### Conduct linear stepwise regression employing the 'bidirection' strategy with 'SL' as stopping criterion, and set the significance level for entry (sle) to 0.15 and the significance level for stay (sls) to 0.15.
+> **Example1**: In this analysis, we used `mpg` as the response variable, with all other variables serving as predictors, employing a strategy of `forward` and a metric of `AIC` for linear stepwise regression.
 
 ```{r}
-formula <- mpg ~ .
-sBidiSL <- stepwise(formula = formula,
-         data = mtcars,
-         type = "linear",
-         strategy = "bidirection",
-         metric = "SL",
-         sle = 0.15,
-         sls = 0.15)
-sBidiSL
+    library(StepReg)
+    data(mtcars)
+    formula <- mpg ~ .
+    exam1 <- stepwise(formula = formula,
+                      data = mtcars,
+                      type = "linear",
+                      strategy = "forward",
+                      metric = "AIC")
+    exam1
 ```
 
-The output of this time is similar to the last time except that the last column name of 'Process of Selection' is SL.
-
-### Perform linear stepwise regression using the 'backward' method for variable selection, employing 'SBC' as the criteria for stop rules, and excluding the intercept in the stepwise regression.
+> **Example2**: In this illustration, we maintained `mpg` as the response variable, while designating the other variables as predictors. The analysis involved removing the intercept and enforcing `disp` in all models. The chosen strategy was `bidirectional` with `SL` as the stopping criterion, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05.
 
 ```{r}
-formula <- mpg ~ . + 0
-sBackSBC <- stepwise(formula = formula,
-                     data = mtcars,
-                     type = "linear",
-                     strategy = "backward",
-                     metric = "SBC")
-sBackSBC
+    formula <- mpg ~ . + 0
+    exam2 <- stepwise(formula = formula,
+                      data = mtcars,
+                      type = "linear",
+                      include = "disp",
+                      strategy = "bidirection",
+                      metric = "SL",
+                      sle = 0.05,
+                      sls = 0.05)
+    exam2
 ```
 
-Note that 0 is displayed instead of 1 in the 'Summary of Parameters' and 'Selected Variables' tables.
+> **Example3**: In this multivariable multiple stepwise regression, we employed `mpg` and `drat` as response with  `cyl`, `disp`, `hp`, `wt`, `vs` and `am` serving as predictors. The variable `wt` was enforced to be included in all models. The analysis involved the 'subset' strategy for variable selection, with 'AICc' as the criteria. 
 
-### Conduct linear stepwise regression using the 'subset' strategy for variable selection with 'AICc' as the criteria. Perform multivariable multiple stepwise regression with 'mpg' and 'dra' as dependent variables. Additionally, use 'cyl', 'disp', 'hp', 'wt', 'vs', and 'am' as independent variables, where 'wt' is consistently included in all models.
- 
 ```{r}
-formula <- cbind(mpg,drat) ~ cyl + disp + hp + wt + vs + am
-stepwise(formula = formula,
-        data = mtcars,
-        type = "linear",
-        include = 'wt',
-        strategy = "subset",
-        metric = "AICc",
-        best_n = 3)
+    formula <- cbind(mpg,drat) ~ cyl + disp + hp + wt + vs + am
+    exam3 <- stepwise(formula = formula,
+                      data = mtcars,
+                      type = "linear",
+                      include = 'wt',
+                      strategy = "subset",
+                      metric = "AICc",
+                      best_n = 3)
+    exam3
 ```
 
-## logistic stepwise regression with data remission
+## Logistic stepwise regression with `remission`
 
-The remission data consist of patient characteristics and whether or not cancer remission occurred, and are saved in the data set remission. The variable remiss is the cancer remission indicator variable with a value of 1 for remission and a value of 0 for nonremission. The other six variables are the risk factors thought to be related to cancer remission. For more information, you may see help information of remission.
-
-### Perform logistic stepwise regression using the 'forward' method for variable selection with 'AIC' as the criteria for stop rules.
+> **Example4**: In this run, we employed `remiss` as response with the other 6 variables serving as predictors. The variable `cell` was enforced to be included in all models. The analysis involved the 'forward' strategy for variable selection, with 'SL' as the criteria, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05.
 
 ```{r warning = FALSE}
-data(remission)
-formula <- remiss ~ .
-stepwise(formula = formula,
-         data = remission,
-         type = "logit",
-         strategy = "forward",
-         metric = "AIC")
+    data(remission)
+    formula <- remiss ~ .
+    exma4 <- stepwise(formula = formula,
+                      data = remission,
+                      type = "logit",
+                      include= "cell",
+                      strategy = "forward",
+                      metric = "AIC")
+    exma4
 ```
 
-### Conduct logistic stepwise regression using the 'subset' method for variable selection with 'SL' as the criteria.
+> **Example5**: In this anslysis, `remiss` was retained as the response variable, while the other six variables served as predictors. The analysis utilized the `subset` strategy for variable selection, with `AIC` as the criterion.
 
 ```{r warning = FALSE}
-data(remission)
-formula <- remiss ~ .
-stepwise(formula = formula,
-         data = remission,
-         type = "logit",
-         strategy = "subset",
-         metric = "SL",
-         best_n = 3)
+    data(remission)
+    formula <- remiss ~ .
+    exma5 <- stepwise(formula = formula,
+                      data = remission,
+                      type = "logit",
+                      strategy = "subset",
+                      metric = "AIC",
+                      best_n = 3)
+    exma5
 ```
 
-## Cox stepwise regression with data lung
+## Cox stepwise regression with `lung`
 
-### Perform Cox stepwise regression using the 'forward' method for variable selection with 'IC(1)' as the criteria for stop rules.
+> **Example6**: Cox stepwise regression using the `forward` method for variable selection with `IC(1)` as the criteria for stop rules, including variable `age` in all models.
 
 ```{r warning = FALSE}
-lung <- survival::lung
-my.data <- na.omit(lung)
-my.data$status1 <- ifelse(my.data$status == 2,1,0)
-formula  =  Surv(time, status1) ~ . - status 
-
-stepwise(formula = formula,
-            data = my.data,
-            type = "cox",
-            strategy = "forward",
-            metric = "IC(1)")
+    lung <- survival::lung
+    my.data <- na.omit(lung)
+    my.data$status1 <- ifelse(my.data$status == 2,1,0)
+    formula  =  Surv(time, status1) ~ . - status 
+    
+    exma6 <- stepwise(formula = formula,
+                      data = my.data,
+                      type = "cox",
+                      include = "age",
+                      strategy = "forward",
+                      metric = "IC(1)")
+    exma6
 ```
 
-### Conduct Cox stepwise regression using the 'bidirection' method for variable selection with 'SL' as the criteria. 
+> **Example7**: Cox stepwise regression using the `backward` method for variable selection with `SL` as the criterion. The significance levels for stay (`sls`) were both set to 0.05.
+
 
 ```{r warning = FALSE}
-formula = Surv(time, status1) ~ . - status 
-stepwise(formula = formula,
-         data = my.data,
-         type = "cox",
-         strategy = "bidirection",
-         metric = "SL",
-         sle = 0.05,
-         sls = 0.05)
+    formula = Surv(time, status1) ~ . - status 
+    exma7 <- stepwise(formula = formula,
+                      data = my.data,
+                      type = "cox",
+                      strategy = "backward",
+                      metric = "SL",
+                      sls = 0.05)
+    exma7
 ```
 
-## Poisson stepwise regression with data CreditCard
+## Poisson stepwise regression with `CreditCard`
 
-### Perform Poisson stepwise regression using the 'forward' method for variable selection with 'AIC' as the criteria for stop rules.
+> **Example8**: In this exmaples, We designated `reports` as the response variable, with the remaining variables serving as predictors. The analysis employed the `forward` method for variable selection, utilizing `SL` as the criterion for stop rules, and the significance levels for entry (`sle`) waw set to be 0.05.
 
 ```{r warning = FALSE}
-data(CreditCard, package = 'AER')
-formula  = reports ~ .
-
-stepwise(formula = formula,
-            data = CreditCard,
-            type = "poisson",
-            strategy = "forward",
-            metric = "AIC")
+    data(CreditCard, package = 'AER')
+    formula  = reports ~ .
+    
+    exma8 <- stepwise(formula = formula,
+                      data = CreditCard,
+                      type = "poisson",
+                      strategy = "forward",
+                      metric = "SL",
+                      sle=0.05)
+    exma8
 ```
 
+> **Example9**: `reports` variable was maintained as the response variable, and the remaining variables were set as predictors. The variables `card` and `months` were enforced to be included in all models. Poisson stepwise regression using the `bidirection` method for variable selection with `IC(3/2)` as the criterion for stop rules.
+
 ```{r warning = FALSE}
-formula = reports ~ .
-stepwise(formula = formula,
-         data = CreditCard,
-         type = "poisson",
-         strategy = "bidirection",
-         metric = "SL",
-         sle = 0.05,
-         sls = 0.05)
+    formula = reports ~ .
+    exma9 <- stepwise(formula = formula,
+                      data = CreditCard,
+                      type = "poisson",
+                      include=c("card","months"),
+                      strategy = "bidirection",
+                      metric = "IC(3/2)")
+    exma9
 ```
 
 # Session Info
