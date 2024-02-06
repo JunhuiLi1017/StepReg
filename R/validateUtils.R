@@ -89,7 +89,7 @@ validateUtils <- function(formula,
 	    x_name_orig <- getXname(formula, data)
 	    y_name <- getYname(formula, data)
 	    intercept <- getIntercept(formula, data, type = type) # char type
-	    merged_include <- getMergedInclude(include)
+	    merged_include <- getMergedVar(include)
 	    model_raw <- getModel(data, type = type, intercept = intercept, x_name_orig, y_name, weight = weight, method = test_method_cox)
 	    if(model_raw$rank >= nrow(data)) {
 	      stop("The 'metric' can not be 'CP' or 'BIC' when variable number is greater than the number of observation.")

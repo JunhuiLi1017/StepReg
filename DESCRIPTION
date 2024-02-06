@@ -26,6 +26,8 @@ Suggests:
     AER
 Imports:
     dplyr,
+    ggplot2,
+    ggrepel,
     openxlsx,
     purrr,
     stringr,

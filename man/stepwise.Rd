@@ -15,8 +15,7 @@ stepwise(
   sle = 0.15,
   sls = 0.15,
   test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
-  test_method_logit = c("Rao", "LRT"),
-  test_method_poisson = c("Rao", "LRT"),
+  test_method_glm = c("Rao", "LRT"),
   test_method_cox = c("efron", "breslow", "exact"),
   tolerance = 1e-07,
   weight = NULL,
@@ -43,9 +42,7 @@ stepwise(
 
 \item{test_method_linear}{(character) Test method for multivariate linear regression analysis, choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'. Default is 'Pillai'. For univariate regression, 'F-test' will be used.}
 
-\item{test_method_logit}{(character) Test method for univariate logit regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy = 'subset'.}
-
-\item{test_method_poisson}{(character) Test method for univariate poisson regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy = 'subset'.}
+\item{test_method_glm}{(character) Test method for univariate logit or Poisson regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy = 'subset'.}
 
 \item{test_method_cox}{(character) Test method for cox regression analysis, choose from 'efron', 'breslow', 'exact'. Default is 'efron'.}
 
@@ -61,10 +58,9 @@ stepwise(
 A list containing five tables will be returned. For multivariate multiple linear stepwise regression, Table 6 will be generated alongside Table 5. Names and descriptions of each table are outlined as follows:
 \itemize{
 \item Table 1. Summary of Parameters: This table presents the parameters utilized in stepwise regression along with their default or user-specified values.
-\item Table 2. Variables and Types: This table outlines the variables and their respective types utilized in the dataset.
-\item Table 3. Selection Process: This table details overview of the variable selection process. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
-\item Table 4. Selected Variables: This table identifies the variables that are selected in the optimal models.
-\item Table 5(or 6). Summary Model for Response: This table provides summary information for the optimal models.
+\item Table 2. Type of Variables: This table outlines the variables and their respective types utilized in the dataset.
+\item Series of Table 3. Selection Process under X: This table details overview of the variable selection process under criteria information X. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
+\item Series of Table 4. Summary Model for Response under X: This table provides parameter estimates for the optimal models under information criteria X.
 }
 }
 \description{
@@ -81,6 +77,14 @@ stepwise(formula = formula,
          type = "linear",
          strategy = "bidirection",
          metric = "AIC")
+## perform linear stepwise regression with 'bidirection' strategy and 
+## "AIC","SBC","SL","AICc","BIC","HQ"and "HQc" stop rule..
+formula <- mpg ~ . + 1
+stepwise(formula = formula,
+         data = mtcars,
+         type = "linear",
+         strategy = "bidirection",
+         metric = c("AIC","SBC","SL","AICc","BIC","HQ","HQc"))
 
 ## perform logit stepwise regression with 'forward' strategy and significance
 ## level as stop rule.

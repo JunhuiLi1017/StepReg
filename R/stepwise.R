@@ -68,13 +68,12 @@
 #' 
 #' @author Junhui Li, Kai Hu, Xiaohuan Lu
 #' 
-#' @return A list containing five tables will be returned. For multivariate multiple linear stepwise regression, Table 6 will be generated alongside Table 5. Names and descriptions of each table are outlined as follows:
+#' @return A list containing multiple tables will be returned. Names and descriptions of each table are outlined as follows:
 #' \itemize{
 #' \item Table 1. Summary of Parameters: This table presents the parameters utilized in stepwise regression along with their default or user-specified values.
-#' \item Table 2. Variables and Types: This table outlines the variables and their respective types utilized in the dataset.
-#' \item Table 3. Selection Process: This table details overview of the variable selection process. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
-#' \item Table 4. Selected Variables: This table identifies the variables that are selected in the optimal models.
-#' \item Table 5(or 6). Summary Model for Response: This table provides summary information for the optimal models.
+#' \item Table 2. Type of Variables: This table outlines the variables and their respective types utilized in the dataset.
+#' \item Table names prefixed with Table. Selection Process under X: This table details overview of the variable selection process under criteria information X. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
+#' \item Tabel names prefixed with Table. Parameter Estimates: This table provides parameter estimates for the optimal models under information criteria X.
 #' }
 
 #' @examples
@@ -88,8 +87,9 @@
 #'          type = "linear",
 #'          strategy = "bidirection",
 #'          metric = "AIC")
-#'
-#' formula <- cbind(mpg,drat) ~ . + 0
+#' ## perform linear stepwise regression with 'bidirection' strategy and 
+#' ## "AIC","SBC","SL","AICc","BIC","HQ"and "HQc" stop rule..
+#' formula <- mpg ~ . + 1
 #' stepwise(formula = formula,
 #'          data = mtcars,
 #'          type = "linear",
@@ -188,7 +188,7 @@ stepwise <- function(formula,
   }
   np <- length(table3_process_table_metric)
   for(n in 1:np) {
-    result[[paste0("Process of Selection under ",names(table3_process_table_metric)[n],collapse="")]] <- table3_process_table_metric[[n]]
+    result[[paste0("Selection Process under ",names(table3_process_table_metric)[n],collapse="")]] <- table3_process_table_metric[[n]]
   }
   
   ##table5
@@ -196,7 +196,7 @@ stepwise <- function(formula,
   for(met in metric){
     table5_coef_model <- table5_coef_model_metric[[met]]
     for(i in names(table5_coef_model)) {
-      result[[paste0("Summary Model for ", i, " under ",met,sep=" ")]] <- table5_coef_model[[i]]
+      result[[paste0("Parameter Estimates for ", i, " under ",met,sep=" ")]] <- table5_coef_model[[i]]
     }
   }
   
@@ -206,3 +206,4 @@ stepwise <- function(formula,
   class(result) <- c("StepReg", "list")
   return(result)
 }
+

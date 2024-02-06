@@ -2,6 +2,7 @@
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @importFrom stats deviance df.residual
+#' @importFrom stats deviance df.residual formula model.frame
+#' 
 ## usethis namespace: end
 NULL

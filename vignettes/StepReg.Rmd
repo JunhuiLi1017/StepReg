@@ -44,26 +44,24 @@ A breif introduction for four datasets is descripted as below,
 
 # StepReg Output
 
-A list containing five tables will be returned. For multivariate multiple linear stepwise regression, Table 6 will be generated alongside Table 5. Names and descriptions of each table are outlined as follows:
+A list containing multiple tables will be returned. Names and descriptions of each table are outlined as follows:
 
 * `Table 1. Summary of Parameters`: This table presents the parameters utilized in stepwise regression along with their default or user-specified values.
 
 * `Table 2. Variables and Types`: This table outlines the variables and their respective types utilized in the dataset.
 
-* `Table 3. Selection Process`: This table details overview of the variable selection process. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
+* `Table names prefixed with Table. Selection Process`: This table details overview of the variable selection process. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
 
-* `Table 4. Selected Variables`: This table identifies the variables that are selected in the optimal models.
-
-* `Table 5(or 6). Summary Model for Response`: This table provides summary information for the optimal models.
+* `Tabel names prefixed with Table. Parameter Estimates`: This table provides summary information for the optimal models.
 
 
 # Demo
 
 This section provides 9 examples utilizing distinct parameters across various regression scenarios with the above 4 datasets.
 
-## linear stepwise regression with **[mtcars](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html)**
+## linear stepwise regression with `mtcars`
 
-> **Example1**: In this analysis, we used `mpg` as the response variable, with all other variables serving as predictors, employing a strategy of `forward` and a metric of `AIC` for linear stepwise regression.
+> **Example1**: In this analysis, we used `mpg` as the response variable, with all other variables serving as predictors, employing a strategy of `forward` and a metric of `AIC` for linear stepwise regression. The analysis involved enforcing `disp` and `cyl` to be included in all models. 
 
 ```{r}
     library(StepReg)
@@ -72,27 +70,39 @@ This section provides 9 examples utilizing distinct parameters across various re
     exam1 <- stepwise(formula = formula,
                       data = mtcars,
                       type = "linear",
+                      include = c("disp","cyl"),
                       strategy = "forward",
                       metric = "AIC")
     exam1
 ```
 
-> **Example2**: In this illustration, we maintained `mpg` as the response variable, while designating the other variables as predictors. The analysis involved removing the intercept and enforcing `disp` in all models. The chosen strategy was `bidirectional` with `SL` as the stopping criterion, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05.
+> Visulization of the selection process using information criteron `AIC`.
+
+```{r plot_exam1, warning=FALSE}
+    plot(exam1)
+```
+
+> **Example2**: In this illustration, we maintained `mpg` as the response variable, while designating the other variables as predictors. The chosen strategy was `bidirectional` with `AIC`, `AICc`, `BIC`,`HQ`, `HQc`, `SBC`, and `SL` as the stopping criterion, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05 parallelly. The analysis involved removing `intercept` from the model. The specific characteristics of the data and the goals of the analysis in each subject area require users to choose different stepwise regression method and selection criteria. Users can compare all metics through the output list or the plots.
 
 ```{r}
     formula <- mpg ~ . + 0
     exam2 <- stepwise(formula = formula,
                       data = mtcars,
                       type = "linear",
-                      include = "disp",
                       strategy = "bidirection",
-                      metric = "SL",
+                      metric = c("AIC","SBC","SL","AICc","BIC","HQ","HQc"),
                       sle = 0.05,
                       sls = 0.05)
     exam2
 ```
 
-> **Example3**: In this multivariable multiple stepwise regression, we employed `mpg` and `drat` as response with  `cyl`, `disp`, `hp`, `wt`, `vs` and `am` serving as predictors. The variable `wt` was enforced to be included in all models. The analysis involved the 'subset' strategy for variable selection, with 'AICc' as the criteria. 
+> Visulization of the selection process using `bidirection` strategy under information criteron `AIC`, `AICc`, `BIC`,`HQ`, `HQc`, `SBC`, and `SL` with `sle`=0.05 and `sls`=0.05.
+
+```{r plot_exam2, warning=FALSE}
+    plot(exam2)
+```
+
+> **Example3**: In this multivariable multiple stepwise regression, we employed `mpg` and `drat` as response with  `cyl`, `disp`, `hp`, `wt`, `vs` and `am` serving as predictors. The variable `wt` was enforced to be included in all models. The analysis involved the `subset` strategy for variable selection, with `AIC` and `AICc` as the criteria individually. 
 
 ```{r}
     formula <- cbind(mpg,drat) ~ cyl + disp + hp + wt + vs + am
@@ -101,14 +111,20 @@ This section provides 9 examples utilizing distinct parameters across various re
                       type = "linear",
                       include = 'wt',
                       strategy = "subset",
-                      metric = "AICc",
+                      metric = c("AIC","AICc"),
                       best_n = 3)
     exam3
 ```
 
+> Visulization of the selection process using `subset` strategy under information criteron `AIC` and `AICc`.
+
+```{r plot_exam3, warning=FALSE}
+    plot(exam3)
+```
+
 ## Logistic stepwise regression with `remission`
 
-> **Example4**: In this run, we employed `remiss` as response with the other 6 variables serving as predictors. The variable `cell` was enforced to be included in all models. The analysis involved the 'forward' strategy for variable selection, with 'SL' as the criteria, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05.
+> **Example4**: In this run, we employed `remiss` as response with the other 6 variables serving as predictors. The variable `cell` was enforced to be included in all models. The analysis involved the `forward` strategy for variable selection, with `AIC` and `SL` as the criteria parallelly, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05.
 
 ```{r warning = FALSE}
     data(remission)
@@ -118,11 +134,19 @@ This section provides 9 examples utilizing distinct parameters across various re
                       type = "logit",
                       include= "cell",
                       strategy = "forward",
-                      metric = "AIC")
+                      metric = c("AIC","SL"),
+                      sle = 0.05,
+                      sls = 0.05)
     exma4
 ```
 
-> **Example5**: In this anslysis, `remiss` was retained as the response variable, while the other six variables served as predictors. The analysis utilized the `subset` strategy for variable selection, with `AIC` as the criterion.
+> Visulization of the selection process using `forward` strategy under information criteron `AIC` and `SL`.
+
+```{r plot_exam4, warning=FALSE}
+    plot(exma4)
+```
+
+> **Example5**: In this anslysis, `remiss` was retained as the response variable, while the other six variables served as predictors. The analysis utilized the `subset` strategy for variable selection, with `AIC` and `SL` as the criterion parallelly.
 
 ```{r warning = FALSE}
     data(remission)
@@ -131,14 +155,20 @@ This section provides 9 examples utilizing distinct parameters across various re
                       data = remission,
                       type = "logit",
                       strategy = "subset",
-                      metric = "AIC",
+                      metric = c("AIC","SL"),
                       best_n = 3)
     exma5
 ```
 
+> Visulization of the selection process using `subset` strategy under information criteron `AIC` and `SL`.
+
+```{r plot_exam5, warning=FALSE}
+    plot(exma5)
+```
+
 ## Cox stepwise regression with `lung`
 
-> **Example6**: Cox stepwise regression used the `forward` method for variable selection with `IC(1)` as the criteria for stop rules, including variable `age` in all models.
+> **Example6**: Cox stepwise regression used the `forward` method for variable selection with `IC(1)` and `SL` as the criteria for stop rules parallelly, including variable `age` in all models. The significance levels for enter (`sle`) was set to 0.05.
 
 ```{r warning = FALSE}
     lung <- survival::lung
@@ -151,11 +181,18 @@ This section provides 9 examples utilizing distinct parameters across various re
                       type = "cox",
                       include = "age",
                       strategy = "forward",
-                      metric = "IC(1)")
+                      metric = c("IC(1)","SL"),
+                      sle = 0.05)
     exma6
 ```
 
-> **Example7**: Cox stepwise regression used the `backward` method for variable selection with `SL` as the criterion. The significance levels for stay (`sls`) were both set to 0.05.
+> Visulization of the selection process using `forward` strategy under information criteron `IC(1)` and `SL`.
+
+```{r plot_exam6, warning=FALSE}
+    plot(exma6)
+```
+
+> **Example7**: Cox stepwise regression used the `backward` method for variable selection with `SL` and `AIC` as the criterion. The significance levels for staying (`sls`) was set to 0.05.
 
 
 ```{r warning = FALSE}
@@ -164,14 +201,20 @@ This section provides 9 examples utilizing distinct parameters across various re
                       data = my.data,
                       type = "cox",
                       strategy = "backward",
-                      metric = "SL",
+                      metric = c("SL","AIC"),
                       sls = 0.05)
     exma7
 ```
 
+> Visulization of the selection process using `backward` strategy under information criteron `AIC` and `SL`.
+
+```{r plot_exam7, warning=FALSE}
+    plot(exma7)
+```
+
 ## Poisson stepwise regression with `CreditCard`
 
-> **Example8**: In this exmaples, We designated `reports` as the response variable, with the remaining variables serving as predictors. The analysis employed the `forward` method for variable selection, utilizing `SL` as the criterion for stop rules, and the significance levels for entry (`sle`) waw set to be 0.05.
+> **Example8**: In this exmaples, We designated `reports` as the response variable, with the remaining variables serving as predictors. The analysis employed the `forward` method for variable selection, utilizing `SL` and `IC(3/2)` as the criterion for stop rules, and the significance levels for entry (`sle`) was set to be 0.05.
 
 ```{r warning = FALSE}
     data(CreditCard, package = 'AER')
@@ -181,12 +224,18 @@ This section provides 9 examples utilizing distinct parameters across various re
                       data = CreditCard,
                       type = "poisson",
                       strategy = "forward",
-                      metric = "SL",
+                      metric = c("SL","IC(3/2)"),
                       sle=0.05)
     exma8
 ```
 
-> **Example9**: `reports` variable was maintained as the response variable, and the remaining variables were set as predictors. The variables `card` and `months` were enforced to be included in all models. Poisson stepwise regression was performed using the `bidirection` method for variable selection with `IC(3/2)` as the criterion for stop rules.
+> Visulization of the selection process using `forward` strategy under information criteron `IC(3/2)` and `SL`.
+
+```{r plot_exam8, warning=FALSE}
+    plot(exma8)
+```
+
+> **Example9**: `reports` variable was maintained as the response variable, and the remaining variables were set as predictors. The variables `card` and `months` were enforced to be included in all models. Poisson stepwise regression was performed using the `bidirection` method for variable selection with `IC(3/2)` and `AIC` as the criterion for stop rules parrallelly.
 
 ```{r warning = FALSE}
     formula = reports ~ .
@@ -195,8 +244,15 @@ This section provides 9 examples utilizing distinct parameters across various re
                       type = "poisson",
                       include=c("card","months"),
                       strategy = "bidirection",
-                      metric = "IC(3/2)")
+                      metric = c("IC(3/2)","AIC")
+                      )
     exma9
+```
+
+> Visulization of the selection process using `bidirection` strategy under information criteron `IC(3/2)` and `AIC`.
+
+```{r plot_exam9, warning=FALSE}
+    plot(exma9)
 ```
 
 # Session Info
