@@ -12,13 +12,13 @@ validateUtils <- function(formula,
                           sls = 0.15,
                           sigma_value,
                           test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
-                          test_method_logit = c("Rao", "LRT"),
-                          test_method_poisson = c("Rao", "LRT"),
+                          test_method_glm = c("Rao", "LRT"),
                           test_method_cox = c("efron", "breslow", "exact"),
 													tolerance = 10e-7,
 													weight = NULL,
                           best_n = Inf,
-													excel_name = NULL) {
+													excel_name = NULL,
+													n_y) {
 	## check required parameters
 	if(missing(data)) { 
 		stop("'data' parameter is missing.") 
@@ -82,17 +82,32 @@ validateUtils <- function(formula,
 	cox_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	
 	if(type == "linear") {
-		if(!metric %in% linear_metric) {
+		if(any(!metric %in% linear_metric)) {
 			stop("for type 'linear': 'metric' must be from one of the c('", paste0(linear_metric, collapse = "','"),"').")
 		}
-		if(strategy == "subset" & metric == "SL") {
+	  if(any(metric %in% c("BIC","CP"))){
+	    x_name_orig <- getXname(formula, data)
+	    y_name <- getYname(formula, data)
+	    intercept <- getIntercept(formula, data, type = type) # char type
+	    merged_include <- getMergedInclude(include)
+	    model_raw <- getModel(data, type = type, intercept = intercept, x_name_orig, y_name, weight = weight, method = test_method_cox)
+	    if(model_raw$rank >= nrow(data)) {
+	      stop("The 'metric' can not be 'CP' or 'BIC' when variable number is greater than the number of observation.")
+	    }
+	  }
+	  if(n_y > 1) {
+	    if(any(metric %in% c("BIC", "CP", "Rsq", "adjRsq"))) {
+	      stop("The 'metric' can not be 'BIC', 'CP', 'Rsq' or 'adjRsq' when using multivariate multiple regression!")
+	    }
+	  }
+		if(strategy == "subset" & any(metric == "SL")) {
 			stop("metric = 'SL' is not allowed when strategy = 'subset'")
 		}
-	  if(metric == "CP" & sigma_value == 0) {
+	  if(any(metric == "CP") & sigma_value == 0) {
 	    stop("metric = 'CP' is not allowed when Estimate of pure error variance from fitting the full model(sigma_value) is 0")
 	  }
 	}else if(type == "logit") {
-		if(!metric %in% logit_metric) {
+		if(any(!metric %in% logit_metric)) {
 			stop("for type 'logit': 'metric' must be from one of the c('", paste0(logit_metric, collapse = "','"),"').")
 		}
 	  
@@ -112,11 +127,11 @@ validateUtils <- function(formula,
 	    }
 	  )
 	}else if(type == 'cox') {
-		if(!metric %in% cox_metric) {
+		if(any(!metric %in% cox_metric)) {
 			stop("for type 'cox': 'metric' must be from one of the c('", paste0(cox_metric, collapse = "','"),"').")
 		}
 	}else if(type == "poisson") {
-	  if(!metric %in% poisson_metric) {
+	  if(any(!metric %in% poisson_metric)) {
 	    stop("for type 'poisson': 'metric' must be from one of the c('", paste0(poisson_metric, collapse = "','"),"').")
 	  }
 	}

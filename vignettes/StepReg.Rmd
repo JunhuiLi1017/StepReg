@@ -138,7 +138,7 @@ This section provides 9 examples utilizing distinct parameters across various re
 
 ## Cox stepwise regression with `lung`
 
-> **Example6**: Cox stepwise regression using the `forward` method for variable selection with `IC(1)` as the criteria for stop rules, including variable `age` in all models.
+> **Example6**: Cox stepwise regression used the `forward` method for variable selection with `IC(1)` as the criteria for stop rules, including variable `age` in all models.
 
 ```{r warning = FALSE}
     lung <- survival::lung
@@ -155,7 +155,7 @@ This section provides 9 examples utilizing distinct parameters across various re
     exma6
 ```
 
-> **Example7**: Cox stepwise regression using the `backward` method for variable selection with `SL` as the criterion. The significance levels for stay (`sls`) were both set to 0.05.
+> **Example7**: Cox stepwise regression used the `backward` method for variable selection with `SL` as the criterion. The significance levels for stay (`sls`) were both set to 0.05.
 
 
 ```{r warning = FALSE}
@@ -186,7 +186,7 @@ This section provides 9 examples utilizing distinct parameters across various re
     exma8
 ```
 
-> **Example9**: `reports` variable was maintained as the response variable, and the remaining variables were set as predictors. The variables `card` and `months` were enforced to be included in all models. Poisson stepwise regression using the `bidirection` method for variable selection with `IC(3/2)` as the criterion for stop rules.
+> **Example9**: `reports` variable was maintained as the response variable, and the remaining variables were set as predictors. The variables `card` and `months` were enforced to be included in all models. Poisson stepwise regression was performed using the `bidirection` method for variable selection with `IC(3/2)` as the criterion for stop rules.
 
 ```{r warning = FALSE}
     formula = reports ~ .
