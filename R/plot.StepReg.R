@@ -69,7 +69,8 @@ plot.StepReg <- function(x, ...){
         group = .data$IC_type) + 
     geom_point(aes(color = .data$IC_type)) + 
     geom_label_repel(label.size = 0.05,
-                     aes(color = .data$IC_type)) +
+                     aes(color = .data$IC_type),
+                     show.legend = FALSE) +
     xlab("Variable Number") +
     theme_minimal()
   
