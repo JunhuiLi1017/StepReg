@@ -4,7 +4,7 @@
 # @author Kai Hu, Junhui Li
 validateUtils <- function(formula,
                           data,
-                          type = c("linear", "logit", "poisson","cox"),
+                          type = c("linear", "logit", "poisson", "cox", "Gamma"),
                           include = NULL,
                           strategy = c("forward", "backward", "bidirectional", "subset"),
                           metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
@@ -79,6 +79,7 @@ validateUtils <- function(formula,
 	linear_metric <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC")
 	logit_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	poisson_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
+	Gamma_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	cox_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	
 	if(type == "linear") {
@@ -133,6 +134,10 @@ validateUtils <- function(formula,
 	}else if(type == "poisson") {
 	  if(any(!metric %in% poisson_metric)) {
 	    stop("for type 'poisson': 'metric' must be from one of the c('", paste0(poisson_metric, collapse = "','"),"').")
+	  }
+	}else if(type == "Gamma") {
+	  if(any(!metric %in% Gamma_metric)) {
+	    stop("for type 'Gamma': 'metric' must be from one of the c('", paste0(Gamma_metric, collapse = "','"),"').")
 	  }
 	}
 	## check 'tolerance'

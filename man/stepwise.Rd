@@ -7,7 +7,7 @@
 stepwise(
   formula,
   data,
-  type = c("linear", "logit", "cox", "poisson"),
+  type = c("linear", "logit", "cox", "poisson", "gamma"),
   include = NULL,
   strategy = c("forward", "backward", "bidirection", "subset"),
   metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC",
@@ -28,7 +28,7 @@ stepwise(
 
 \item{data}{(data.frame) A dataset consisting of predictor variable(s) and response variable(s).}
 
-\item{type}{(character) The stepwise regression type. Choose from 'linear', 'logit', 'poisson', and 'cox'. Default is 'linear'.}
+\item{type}{(character) The stepwise regression type. Choose from 'linear', 'logit', 'poisson', 'cox', and 'gamma'. Default is 'linear'.}
 
 \item{include}{(NULL|character) A character vector specifying predictor variables that will always stay in the model. A subset of the predictors in the dataset.}
 
@@ -42,7 +42,7 @@ stepwise(
 
 \item{test_method_linear}{(character) Test method for multivariate linear regression analysis, choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'. Default is 'Pillai'. For univariate regression, 'F-test' will be used.}
 
-\item{test_method_glm}{(character) Test method for univariate logit or Poisson regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy = 'subset'.}
+\item{test_method_glm}{(character) Test method for univariate logit, Poisson, or Gamma regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy = 'subset'.}
 
 \item{test_method_cox}{(character) Test method for cox regression analysis, choose from 'efron', 'breslow', 'exact'. Default is 'efron'.}
 
@@ -55,16 +55,16 @@ stepwise(
 \item{excel_name}{(NULL|character) The output excel name. If NULL, do not output excel file. Default is NULL.}
 }
 \value{
-A list containing five tables will be returned. For multivariate multiple linear stepwise regression, Table 6 will be generated alongside Table 5. Names and descriptions of each table are outlined as follows:
+A list containing multiple tables will be returned. Names and descriptions of each table are outlined as follows:
 \itemize{
 \item Table 1. Summary of Parameters: This table presents the parameters utilized in stepwise regression along with their default or user-specified values.
 \item Table 2. Type of Variables: This table outlines the variables and their respective types utilized in the dataset.
-\item Series of Table 3. Selection Process under X: This table details overview of the variable selection process under criteria information X. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
-\item Series of Table 4. Summary Model for Response under X: This table provides parameter estimates for the optimal models under information criteria X.
+\item Table names prefixed with Table. Selection Process under X: This table details overview of the variable selection process under criteria information X. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
+\item Tabel names prefixed with Table. Parameter Estimates: This table provides parameter estimates for the optimal models under information criteria X.
 }
 }
 \description{
-Select optimal model using various stepwise regression strategies, e.g., Forward Selection, Backward Elimination, Bidirectional Elimination; meanwhile, it also supports Best Subset method. Four types of models are currently implemented: linear regression, logistic regression, Cox regression, and Poisson regression. For selection criteria, a.k.a, stop rule, users can choose from AIC, AICc, BIC, HQ, Significant Level, and more.
+Select optimal model using various stepwise regression strategies, e.g., Forward Selection, Backward Elimination, Bidirectional Elimination; meanwhile, it also supports Best Subset method. Four types of models are currently implemented: linear regression, logistic regression, Cox regression, Poisson, and Gamma regression. For selection criteria, a.k.a, stop rule, users can choose from AIC, AICc, BIC, HQ, Significant Level, and more.
 }
 \examples{
 ## perform multivariate linear stepwise regression with 'bidirection' 

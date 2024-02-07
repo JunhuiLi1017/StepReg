@@ -52,6 +52,8 @@ getModel <- function(data, type, intercept, x_name, y_name, weight, method = c("
 		model_raw <- glm(formula_raw, data = data, weights = weight, family = "binomial")
 	}else if(type == "poisson") {
 	  model_raw <- glm(formula_raw, data = data, weights = weight, family = "poisson")
+	}else if(type == "Gamma") {
+	  model_raw <- glm(formula_raw, data = data, weights = weight, family = "Gamma")
 	}else if(type == 'cox') {
 	  ## "method" is only used for cox regression
 	  method <- match.arg(method)
@@ -98,7 +100,7 @@ getTestMethod <- function(data, model_raw, type, metric, n_y, test_method_linear
 	  }else{
 	    test_method <- test_method_linear
 	  }
-	}else if(type == "logit" | type == "poisson") {
+	}else if(type == "logit" | type == "poisson" | type == "Gamma") {
 	  test_method <- test_method_glm
 	}else if(type == "cox") {
 	  test_method <- test_method_cox
@@ -115,11 +117,11 @@ getTestMethod <- function(data, model_raw, type, metric, n_y, test_method_linear
 # 
 # @param fit Object of linear model or general linear model
 # 
-# @param type "linear", "cox", "logit", or "poisson": to calculate information criteria value; for "linear", the "Least Square" method will be used; for others, "Maximum Likelyhood" method will be used.
+# @param type "linear", "cox", "logit", "poisson" and "Gamma": to calculate information criteria value; for "linear", the "Least Square" method will be used; for others, "Maximum Likelyhood" method will be used.
 # 
 # @param sigma_value Sigma value for calculation of 'BIC' and 'CP'
 
-getModelFitStat <- function(metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SBC", "IC(3/2)", "IC(1)"), fit, type = c("linear", "logit", "poisson", "cox"), sigma_value) {
+getModelFitStat <- function(metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SBC", "IC(3/2)", "IC(1)"), fit, type = c("linear", "logit", "poisson", "cox", "Gamma"), sigma_value) {
 	# "LeastSquare" is for linear; "Likelihood" is for cox and logit; cox and logit are essentially the same except for sample size calculation.
 	if (type == "linear") {
 		resMatrix <- as.matrix(fit$residuals)
@@ -154,12 +156,12 @@ getModelFitStat <- function(metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", 
 		}else if(metric == "SBC") {
 			PIC <- n*log(SSE/n)+log(n)*p*nY
 		}
-	} else if (type %in% c("logit", "poisson", "cox")) {
+	} else if (type %in% c("logit", "poisson", "cox", "Gamma")) {
 		ll <- logLik(fit)[1]
 		k <- attr(logLik(fit), "df")
 		if (type == "cox") {
 			n <- fit$nevent
-		} else if (type == "logit" | type == "poisson") {
+		} else if (type == "logit" | type == "poisson"| type == "Gamma") {
 			n <- nrow(fit$data)
 		}
 		if(metric == "IC(1)") {
@@ -199,6 +201,10 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
         fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "poisson")
         f_pic_vec <- getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x_fit, type = type, test_method = "Rao")
         pic_set <- f_pic_vec[1]
+      }else if(type == "Gamma") {
+        fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "Gamma")
+        f_pic_vec <- getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x_fit, type = type, test_method = "Rao")
+        pic_set <- f_pic_vec[1]
       }else if(type == "cox") {
         pic_set <- x_fit$score
       }
@@ -233,6 +239,10 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		    pic_set <- f_pic_vec[1, ]
 		  }else if(type == "poisson") {
 		    fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "poisson")
+		    f_pic_vec <- sapply(x_fit_list, function(x) {getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x, type = type, test_method = "Rao")})
+		    pic_set <- f_pic_vec[1, ]
+		  }else if(type == "Gamma") {
+		    fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "Gamma")
 		    f_pic_vec <- sapply(x_fit_list, function(x) {getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x, type = type, test_method = "Rao")})
 		    pic_set <- f_pic_vec[1, ]
 		  }else if(type == "cox") {
@@ -363,7 +373,7 @@ getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced,
     }else{
       stattype <- 'F'
     }
-  } else if (type == "logit" | type == "poisson") {
+  } else if (type == "logit" | type == "poisson" | type == "Gamma") {
     if(add_or_remove == "add") {
       if(test_method == "Rao") {
         stattype <- "Rao"
@@ -487,9 +497,7 @@ getInitStepModelStat <- function(fit_intercept, fit_fm, type, strategy, metric, 
 getNumberEffect <- function(fit, type) {
   if(type == "linear") {
     vec <- c(length(attr(fit$terms, "term.labels")), fit$rank)
-  }else if(type == "logit") {
-    vec <- c(fit$rank, fit$rank)
-  }else if(type == "poisson") {
+  }else if(type == "logit" | type == "poisson" | type == "Gamma") {
     vec <- c(fit$rank, fit$rank)
   }else if(type == "cox") {
     vec <- c(attr(logLik(fit), "df"), attr(logLik(fit), "df"))
