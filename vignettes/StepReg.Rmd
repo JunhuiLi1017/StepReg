@@ -26,11 +26,99 @@ vignette: |
   %\VignetteEncoding{UTF-8}
 ---
 
-# Introduction
 
+```{r}
+devtools::load_all("~/GitHub/StepReg")
+```
+
+
+# Introduction
 Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. Depending on the nature of the response variable, StepReg facilitates users in conducting linear regression for continuous outcomes, logistic regression for binary outcomes, Cox regression for time-to-event outcomes, and Poisson regression for count outcomes, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods. 
 
 Here, we applied the StepReg package to four well-established and diverse datasets—mtcars, remission, lung, and CreditCard—utilizing distinct parameters across various regression scenarios. These datasets provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications. Through practical demonstrations, we illustrated the application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, Cox stepwise regression for time-to-event outcomes, and Poisson stepwise regression for count outcomes. These examples offer users valuable insights into the effective utilization of StepReg for variable selection in different regression scenarios, providing a comprehensive guide for those seeking proficiency in incorporating StepReg into their analytical toolkit.
+
+# Features implemented in StepReg package
+## Regression categories
+**StepReg** supports multiple regressions, including _linear_, _logit_, _cox_, _poisson_, and _gamma_ regressions. These methods primarily vary by the type of response variable (refer to the table below). Additional regression techniques can be incorporated upon user request.
+```{r, echo = FALSE}
+library(knitr)
+
+Regression <- c("linear", "logit", "cox", "poisson", "gamma")
+Reponse <- c("continuous", "binary", "time-to-event", "count", "time-series")
+df <- data.frame(Regression, Reponse)
+
+kable(df, caption = 'Common regression categories')
+```
+
+## Model selection
+Model selection aims to identify the subset of independent variables that provide the best predictive performance for the response variable. Both stepwise regression and best subsets approaches are implemented in StepReg. For stepwise regression, there are mainly three methods: _Forward Selection_, _Backward Elimination_, _Bidirectional Elimination_.
+
+### Forward Selection
+In forward selection, the algorithm starts with an empty model (no predictors) and adds in variables one by one. Each step tests the addition of every possible predictor by calculating a pre-selected model fit score. Add the variable (if any) whose inclusion leads to the most statistically significant fit improvement. Repeat this process until more predictors no longer lead to a statistically better fit.
+
+### Backward Elimination
+In backward elimination, the algorithm starts with a full model (all predictors) and deletes variables one by one. Each step test the deletion of every possible predictor by calculating a pre-selected model fit score. Delete the variable (if any) whose loss leads to the most statistically significant fit improvement. Repeat this process until less predictors no longer lead to a statistically better fit.
+
+### Bidirectional Elimination
+Bidirectional elimination is essentially a forward selection procedure combined with backward elimination at each iteration. Each iteration starts with a forward selection step that adds in predictors, followed by a round of backward elimination that removes predictors. Repeat this process until no more predictors are added or excluded.
+
+### Best Subsets
+Stepwise algorithms add or delete one predictor at a time and output a single model without evaluating all candidates. Therefore, it is a relatively simple procedure that only produces one model. In contrast, the _Best Subsets_ algorithm calculates all possible models and output the best-fitting models with one predictor, two predictors, etc., for users to choose from.
+
+## Selection criterion
+The _selection criterion_ is another name for the aforementioned _model fit score_. It is a means of evaluating a model's quality by estimating its predictive performance. The following selection criteria have been implemented in StepReg:
+```{r, echo = FALSE}
+library(knitr)
+
+Criterion <- c("AIC", "BIC", "AICc", "HQ", "HQc", "SBC", "IC(1)", "IC(3/2)", "SL", "Rsq", "adjRsq", "CP")
+linear <-    c("❌",    ✔️ ❌",  "✓",   "❌",   "✓",     "❌",       "✓",  "❌",   "✓",      "❌",  "✓")
+logit <-     c("❌",    "✓",     "❌",  "✓",   "❌",   "✓",     "❌",       "✓",  "❌",   "✓",      "❌",  "✓")
+poission <-  c("❌",    "✓",     "❌",  "✓",   "❌",   "✓",     "❌",       "✓",  "❌",   "✓",      "❌",  "✓")
+gamma <-     c("❌",    "✓",     "❌",  "✓",   "❌",   "✓",     "❌",       "✓",  "❌",   "✓",      "❌",  "✓")
+
+df <- data.frame(Criterion, linear, logit, poission, gamma)
+
+kable(df, caption = 'Common regression categories')
+```
+
+
+
+
+library(kableExtra)
+formula = "$AIC = n \\ln\\left(\\frac{SSE}{n}\\right) + 2p + n + 2$"
+
+table
+
+For details on each criterion, see below:
+
+Table2:
+Criterion Definition Formula Note
+AIC (linear)
+AIC (cox)
+
+- For linear regression:
+  - AIC: Akaike information criterion
+  - AICc: sample-size adjusted AIC
+  - BIC: Bayesian information criterion
+  - Mallows's Cp
+  - HQ: Hannan-Quinn information criterion
+  - HQc: Corrected Hannan and Quinn information criterion, reference see [here](https://www.jstatsoft.org/article/view/v007i12)
+  - Rsq: R-squared
+  - adjRsq: adjusted Rseq
+  - SBC: Schwarz information criterion
+  - SL (Pvalue, based on F-test or Approximate F-test): Significance level
+- For logistic, Poisson and cox regression
+  - AIC: Akaike information criterion
+  - AICc: sample-size adjusted AIC
+  - HQ: Hannan-Quinn information criterion
+  - HQc: Corrected Hannan and Quinn information criterion, reference see [here](https://www.jstatsoft.org/article/view/v007i12)
+  - IC(3/2): 
+  - IC(1): 
+  - SBC: Schwarz information criterion
+  - SL (Pvalue): Significance level(logistic and Poisson: score and LRT test for forward, wald test for backward; Cox: LRT test for forward, wald test for backward)
+
+## Multicollinearity
+
 
 A breif introduction for four datasets is descripted as below,
 
