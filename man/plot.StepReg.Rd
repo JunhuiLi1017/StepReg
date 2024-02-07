@@ -9,11 +9,22 @@
 \arguments{
 \item{x}{StepReg object}
 
-\item{...}{further paramters}
+\item{...}{Not used}
 }
 \value{
-formatted dataframe
+plot
 }
 \description{
-print.StepReg prints to console the from an object of class StepReg
+plot.StepReg visualizes the variable selection procedure using a StepReg object
+}
+\examples{
+data(mtcars)
+mtcars$yes <- mtcars$wt
+formula <- mpg ~ . + 0
+p <- stepwise(formula = formula,
+              data = mtcars,
+              type = "linear",
+              strategy = "bidirection",
+              metric = c("AIC", "BIC"))
+plot(p)
 }

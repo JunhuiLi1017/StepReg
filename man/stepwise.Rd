@@ -7,7 +7,7 @@
 stepwise(
   formula,
   data,
-  type = c("linear", "logit", "cox", "poisson", "gamma"),
+  type = c("linear", "logit", "cox", "poisson", "Gamma"),
   include = NULL,
   strategy = c("forward", "backward", "bidirection", "subset"),
   metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC",
@@ -28,7 +28,7 @@ stepwise(
 
 \item{data}{(data.frame) A dataset consisting of predictor variable(s) and response variable(s).}
 
-\item{type}{(character) The stepwise regression type. Choose from 'linear', 'logit', 'poisson', 'cox', and 'gamma'. Default is 'linear'.}
+\item{type}{(character) The stepwise regression type. Choose from 'linear', 'logit', 'poisson', 'cox', and 'Gamma'. Default is 'linear'.}
 
 \item{include}{(NULL|character) A character vector specifying predictor variables that will always stay in the model. A subset of the predictors in the dataset.}
 
