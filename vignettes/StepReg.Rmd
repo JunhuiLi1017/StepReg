@@ -13,6 +13,10 @@ author:
 - name: Wenxin Liu
   affiliation: China Agricultural University, Beijing, China
 package: StepReg
+bibliography: bibliography.bib
+fontsize: 11pt
+nocite: '@*'
+link-citations: true
 output:
   BiocStyle::html_document:
     toc_float: true
@@ -26,20 +30,18 @@ vignette: |
   %\VignetteEncoding{UTF-8}
 ---
 
-
-```{r}
-devtools::load_all("~/GitHub/StepReg")
-```
-
-
 # Introduction
-Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. Depending on the nature of the response variable, StepReg facilitates users in conducting linear regression for continuous outcomes, logistic regression for binary outcomes, Cox regression for time-to-event outcomes, and Poisson regression for count outcomes, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods. 
 
-Here, we applied the StepReg package to four well-established and diverse datasets—mtcars, remission, lung, and CreditCard—utilizing distinct parameters across various regression scenarios. These datasets provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications. Through practical demonstrations, we illustrated the application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, Cox stepwise regression for time-to-event outcomes, and Poisson stepwise regression for count outcomes. These examples offer users valuable insights into the effective utilization of StepReg for variable selection in different regression scenarios, providing a comprehensive guide for those seeking proficiency in incorporating StepReg into their analytical toolkit.
+Stepwise regression is a widely employed data-mining technique aimed at identifying a valuable subset of predictors for utilization in a multiple regression model. To facilitate this process, we have developed the R package StepReg. Depending on the nature of the response variable, StepReg facilitates users in conducting linear regression for continuous outcomes, logistic regression for binary outcomes, Cox regression for time-to-event outcomes, and Poisson regression for count outcomes, incorporating popular selection criteria. It provides a versatile set of stop rules available in forward selection, backward elimination, both-direction, and best subset methods.
+
+Here, we applied the StepReg package to four well-established and diverse datasets---mtcars, remission, lung, and CreditCard---utilizing distinct parameters across various regression scenarios. These datasets provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications. Through practical demonstrations, we illustrated the application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, Cox stepwise regression for time-to-event outcomes, and Poisson stepwise regression for count outcomes. These examples offer users valuable insights into the effective utilization of StepReg for variable selection in different regression scenarios, providing a comprehensive guide for those seeking proficiency in incorporating StepReg into their analytical toolkit.
 
 # Features implemented in StepReg package
+
 ## Regression categories
-**StepReg** supports multiple regressions, including _linear_, _logit_, _cox_, _poisson_, and _gamma_ regressions. These methods primarily vary by the type of response variable (refer to the table below). Additional regression techniques can be incorporated upon user request.
+
+**StepReg** supports multiple regressions, including *linear*, *logit*, *cox*, *poisson*, and *gamma* regressions. These methods primarily vary by the type of response variable (refer to the table below). Additional regression techniques can be incorporated upon user request.
+
 ```{r, echo = FALSE}
 library(knitr)
 
@@ -51,97 +53,168 @@ kable(df, caption = 'Common regression categories')
 ```
 
 ## Model selection
-Model selection aims to identify the subset of independent variables that provide the best predictive performance for the response variable. Both stepwise regression and best subsets approaches are implemented in StepReg. For stepwise regression, there are mainly three methods: _Forward Selection_, _Backward Elimination_, _Bidirectional Elimination_.
+
+Model selection aims to identify the subset of independent variables that provide the best predictive performance for the response variable. Both stepwise regression and best subsets approaches are implemented in StepReg. For stepwise regression, there are mainly three methods: *Forward Selection*, *Backward Elimination*, *Bidirectional Elimination*.
 
 ### Forward Selection
+
 In forward selection, the algorithm starts with an empty model (no predictors) and adds in variables one by one. Each step tests the addition of every possible predictor by calculating a pre-selected model fit score. Add the variable (if any) whose inclusion leads to the most statistically significant fit improvement. Repeat this process until more predictors no longer lead to a statistically better fit.
 
 ### Backward Elimination
+
 In backward elimination, the algorithm starts with a full model (all predictors) and deletes variables one by one. Each step test the deletion of every possible predictor by calculating a pre-selected model fit score. Delete the variable (if any) whose loss leads to the most statistically significant fit improvement. Repeat this process until less predictors no longer lead to a statistically better fit.
 
 ### Bidirectional Elimination
+
 Bidirectional elimination is essentially a forward selection procedure combined with backward elimination at each iteration. Each iteration starts with a forward selection step that adds in predictors, followed by a round of backward elimination that removes predictors. Repeat this process until no more predictors are added or excluded.
 
 ### Best Subsets
-Stepwise algorithms add or delete one predictor at a time and output a single model without evaluating all candidates. Therefore, it is a relatively simple procedure that only produces one model. In contrast, the _Best Subsets_ algorithm calculates all possible models and output the best-fitting models with one predictor, two predictors, etc., for users to choose from.
+
+Stepwise algorithms add or delete one predictor at a time and output a single model without evaluating all candidates. Therefore, it is a relatively simple procedure that only produces one model. In contrast, the *Best Subsets* algorithm calculates all possible models and output the best-fitting models with one predictor, two predictors, etc., for users to choose from.
 
 ## Selection criterion
-The _selection criterion_ is another name for the aforementioned _model fit score_. It is a means of evaluating a model's quality by estimating its predictive performance. The following selection criteria have been implemented in StepReg:
+
+The *selection criterion* is another name for the aforementioned *model fit score*. It is a means of evaluating a model's quality by estimating its predictive performance. The following selection criteria have been implemented in StepReg:
+
 ```{r, echo = FALSE}
 library(knitr)
 
-Criterion <- c("AIC", "BIC", "AICc", "HQ", "HQc", "SBC", "IC(1)", "IC(3/2)", "SL", "Rsq", "adjRsq", "CP")
-linear <-    c("❌",    ✔️ ❌",  "✓",   "❌",   "✓",     "❌",       "✓",  "❌",   "✓",      "❌",  "✓")
-logit <-     c("❌",    "✓",     "❌",  "✓",   "❌",   "✓",     "❌",       "✓",  "❌",   "✓",      "❌",  "✓")
-poission <-  c("❌",    "✓",     "❌",  "✓",   "❌",   "✓",     "❌",       "✓",  "❌",   "✓",      "❌",  "✓")
-gamma <-     c("❌",    "✓",     "❌",  "✓",   "❌",   "✓",     "❌",       "✓",  "❌",   "✓",      "❌",  "✓")
+Criterion <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc",  "IC(1)", "IC(3/2)", "SL", "SBC", "Rsq", "adjRsq")
+Linear <-    c("✓",    "✓",    "✓",   "✓",  "✓",  "✓",    "",      "",        "✓",   "✓",  "✓",   "✓")
+Logit <-     c("✓",    "✓",    " ",   " ",  "✓",  "✓",    "✓",      "✓",      "✓",   "✓",  " ",   " ")
+Cox <-       c("✓",    "✓",    " ",   " ",  "✓",  "✓",    "✓",      "✓",      "✓",   "✓",  " ",   " ")
+Poisson <-   c("✓",    "✓",    " ",   " ",  "✓",  "✓",    "✓",      "✓",      "✓",   "✓",  " ",   " ")
+Gamma <-     c("✓",    "✓",    " ",   " ",  "✓",  "✓",    "✓",      "✓",      "✓",   "✓",  " ",   " ")
 
-df <- data.frame(Criterion, linear, logit, poission, gamma)
+df <- data.frame(Criterion, Linear, Logit, Cox, Poisson, Gamma)
 
-kable(df, caption = 'Common regression categories')
+kable(df, caption = 'Availability of Information Criterion for Regression')
+```
+
+For details on each criterion, see below: [@Benjamini1995]
+
+```{r, echo = FALSE}
+library(kableExtra)
+Criterion <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc",  "IC(1)", "IC(3/2)", "SL", "SBC", "Rsq", "adjRsq")
+Difination <- c("Akaike’s information criterion",
+                "sample-size adjusted AIC",
+                "Sawa Bayesian information criterion",
+                "Mallows’ Cp statistic",
+                "Hannan and Quinn information criterion",
+                "Corrected Hannan and Quinn information criterion",
+                "Information Criterion with Penalty Coefficient Set to 1",
+                "Information Criterion with Penalty Coefficient Set to 3/2",
+                "Significance Level(pvalue)",
+                "Schwarz information criterion",
+                "R-squared",
+                "adjusted Rsq")
+Formula_Linear_univariate <- c("$n\\ln\\left(\\frac{SSE}{n}\\right) + 2p + n + 2$\n[@Benjamini1995]",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{n(n+p)}{n-p-2}$",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + 2(p+2)o - 2o^2, \\quad o = \\frac{n\\sigma^2}{SSE}$",
+                              "$\\frac{SSE}{\\sigma^2} + 2p - n$",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{2p \\ln(\\ln(n))}{n}$",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{2p \\ln(\\ln(n))}{n-p-2}$",
+                              "currently not available",
+                              "currently not available",
+                              "\\textit{F test}",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + p \\ln(n)$",
+                              " ",
+                              " ")
+
+Formula_Linear_multivariate <- c("$\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{2pq + q(q+1)}{n}$",
+                              "$\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{q(n+p)}{n-p-q-1}$",
+                              "",
+                              "",
+                              "$\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{2pq\\ln(\\ln(n))}{n}$",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{2p \\ln(\\ln(n))}{n-p-2}$",
+                              "currently not available",
+                              "currently not available",
+                              "\\textit{Approximate F test}",
+                              "$\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{p \\ln(n)}{n}$",
+                              " ",
+                              " ")
+Formula_Logit_Cox_Poisson_Gamma <- c("$-2{LL} + 2p$",
+                              "$-2{LL} + \\frac{n(n+p)}{n-p-2}$",
+                              "",
+                              "",
+                              "$-2{LL} + \\frac{2p\\ln(\\ln(n))}{n}$",
+                              "$-2{LL} + \\frac{2p \\ln(\\ln(n))}{n-p-2}$",
+                              "$-2{LL} + p$",
+                              "$-2{LL} + \\frac{3}{2}p$",
+                              "logistic and Poisson: score and LRT test for forward, wald test for backward; Cox: LRT test for forward, wald test for backward",
+                              "$-2{LL} + p\\ln(n)$",
+                              "NA",
+                              "NA")
+df <- data.frame(Criterion, Difination, Formula_Linear_univariate, Formula_Linear_multivariate,Formula_Logit_Cox_Poisson_Gamma)
+kable_styling(kable(df, format = "html", align='l', booktabs=TRUE, escape = F, caption = 'Abbreviation, Definition, and Formula of the Information Criterion') %>%
+                footnote(
+                   number=c("
+${n}$: Sample Size; 
+${p}$: Number of parameters including the intercept;
+${k}$:	Number of independent variables in the full model;
+${q}$:	Number of dependent variables;
+$\\sigma^2$:	Estimate of pure error variance from fitting the full model, which is the average of sigma value when it is for multivariate multiple regression;
+${df}$:	Degree of freedom;
+${SST}$:	Total sum of squares corrected for the mean for the dependent variable, which is a numeric and matrix for univariate regression and multivariate regression correspondingly;
+${SSE}$:	Error sum of squares, which is a numeric and matrix for univariate regression and multivariate regression correspondingly;
+${LL}$:	The natural logarithm of likelihood;
+${I}$:	The identity of matrix of size (${q} x {q}$);
+${SSEdet}$:	The determinant of matrix SSE;
+${SSTdet}$:	The determinant of matrix SST;
+${| |}$:	The absolute value;
+$\\ln()$:	The natural logarithm;
+"),
+                   footnote_as_chunk=TRUE, 
+                   escape=FALSE))
 ```
 
 
+Table2: Criterion Definition Formula Note AIC (linear) AIC (cox)
 
-
-library(kableExtra)
-formula = "$AIC = n \\ln\\left(\\frac{SSE}{n}\\right) + 2p + n + 2$"
-
-table
-
-For details on each criterion, see below:
-
-Table2:
-Criterion Definition Formula Note
-AIC (linear)
-AIC (cox)
-
-- For linear regression:
-  - AIC: Akaike information criterion
-  - AICc: sample-size adjusted AIC
-  - BIC: Bayesian information criterion
-  - Mallows's Cp
-  - HQ: Hannan-Quinn information criterion
-  - HQc: Corrected Hannan and Quinn information criterion, reference see [here](https://www.jstatsoft.org/article/view/v007i12)
-  - Rsq: R-squared
-  - adjRsq: adjusted Rseq
-  - SBC: Schwarz information criterion
-  - SL (Pvalue, based on F-test or Approximate F-test): Significance level
-- For logistic, Poisson and cox regression
-  - AIC: Akaike information criterion
-  - AICc: sample-size adjusted AIC
-  - HQ: Hannan-Quinn information criterion
-  - HQc: Corrected Hannan and Quinn information criterion, reference see [here](https://www.jstatsoft.org/article/view/v007i12)
-  - IC(3/2): 
-  - IC(1): 
-  - SBC: Schwarz information criterion
-  - SL (Pvalue): Significance level(logistic and Poisson: score and LRT test for forward, wald test for backward; Cox: LRT test for forward, wald test for backward)
+-   For linear regression:
+    -   AIC: Akaike information criterion
+    -   AICc: sample-size adjusted AIC
+    -   BIC: Bayesian information criterion
+    -   Mallows's Cp
+    -   HQ: Hannan-Quinn information criterion
+    -   HQc: Corrected Hannan and Quinn information criterion, reference see [here](https://www.jstatsoft.org/article/view/v007i12)
+    -   Rsq: R-squared
+    -   adjRsq: adjusted Rseq
+    -   SBC: Schwarz information criterion
+    -   SL (Pvalue, based on F-test or Approximate F-test): Significance level
+-   For logistic, Poisson and cox regression
+    -   AIC: Akaike information criterion
+    -   AICc: sample-size adjusted AIC
+    -   HQ: Hannan-Quinn information criterion
+    -   HQc: Corrected Hannan and Quinn information criterion, reference see [here](https://www.jstatsoft.org/article/view/v007i12)
+    -   IC(3/2):
+    -   IC(1):
+    -   SBC: Schwarz information criterion
+    -   SL (Pvalue): Significance level(logistic and Poisson: score and LRT test for forward, wald test for backward; Cox: LRT test for forward, wald test for backward)
 
 ## Multicollinearity
 
-
 A breif introduction for four datasets is descripted as below,
 
-* **[mtcars](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html)**: the mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower, and the number of cylinders.
+-   [**mtcars**](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html): the mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower, and the number of cylinders.
 
-* **[remission](https://online.stat.psu.edu/stat501/book/export/html/1011)**: the remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as cellularity of the marrow clot section, the highest temperature before the start of treatment, and remission status (1 for remission and 0 for non-remission). 
+-   [**remission**](https://online.stat.psu.edu/stat501/book/export/html/1011): the remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as cellularity of the marrow clot section, the highest temperature before the start of treatment, and remission status (1 for remission and 0 for non-remission).
 
-* **[lung](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html)**: the lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient's age, the type of treatment received, and survival status.
+-   [**lung**](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html): the lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient's age, the type of treatment received, and survival status.
 
-* **[CreditCard](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html)**: the CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status. 
+-   [**CreditCard**](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html): the CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status.
 
 # StepReg Output
 
 A list containing multiple tables will be returned. Names and descriptions of each table are outlined as follows:
 
-* `Table 1. Summary of Parameters`: This table presents the parameters utilized in stepwise regression along with their default or user-specified values.
+-   `Table 1. Summary of Parameters`: This table presents the parameters utilized in stepwise regression along with their default or user-specified values.
 
-* `Table 2. Variables and Types`: This table outlines the variables and their respective types utilized in the dataset.
+-   `Table 2. Variables and Types`: This table outlines the variables and their respective types utilized in the dataset.
 
-* `Table names prefixed with Table. Selection Process`: This table details overview of the variable selection process. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
+-   `Table names prefixed with Table. Selection Process`: This table details overview of the variable selection process. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
 
-* `Tabel names prefixed with Table. Parameter Estimates`: This table provides summary information for the optimal models.
-
+-   `Tabel names prefixed with Table. Parameter Estimates`: This table provides summary information for the optimal models.
 
 # Demo
 
@@ -149,7 +222,7 @@ This section provides 9 examples utilizing distinct parameters across various re
 
 ## linear stepwise regression with `mtcars`
 
-> **Example1**: In this analysis, we used `mpg` as the response variable, with all other variables serving as predictors, employing a strategy of `forward` and a metric of `AIC` for linear stepwise regression. The analysis involved enforcing `disp` and `cyl` to be included in all models. 
+> **Example1**: In this analysis, we used `mpg` as the response variable, with all other variables serving as predictors, employing a strategy of `forward` and a metric of `AIC` for linear stepwise regression. The analysis involved enforcing `disp` and `cyl` to be included in all models.
 
 ```{r}
     library(StepReg)
@@ -190,7 +263,7 @@ This section provides 9 examples utilizing distinct parameters across various re
     plot(exam2)
 ```
 
-> **Example3**: In this multivariable multiple stepwise regression, we employed `mpg` and `drat` as response with  `cyl`, `disp`, `hp`, `wt`, `vs` and `am` serving as predictors. The variable `wt` was enforced to be included in all models. The analysis involved the `subset` strategy for variable selection, with `AIC` and `AICc` as the criteria individually. 
+> **Example3**: In this multivariable multiple stepwise regression, we employed `mpg` and `drat` as response with `cyl`, `disp`, `hp`, `wt`, `vs` and `am` serving as predictors. The variable `wt` was enforced to be included in all models. The analysis involved the `subset` strategy for variable selection, with `AIC` and `AICc` as the criteria individually.
 
 ```{r}
     formula <- cbind(mpg,drat) ~ cyl + disp + hp + wt + vs + am
@@ -282,7 +355,6 @@ This section provides 9 examples utilizing distinct parameters across various re
 
 > **Example7**: Cox stepwise regression used the `backward` method for variable selection with `SL` and `AIC` as the criterion. The significance levels for staying (`sls`) was set to 0.05.
 
-
 ```{r warning = FALSE}
     formula = Surv(time, status1) ~ . - status 
     exma7 <- stepwise(formula = formula,
@@ -344,6 +416,7 @@ This section provides 9 examples utilizing distinct parameters across various re
 ```
 
 # Session Info
+
 ```{r sessionInfo, echo = FALSE}
 sessionInfo()
 ```

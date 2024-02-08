@@ -23,7 +23,8 @@ VignetteBuilder: knitr
 Suggests: 
     knitr,
     testthat,
-    AER
+    AER,
+    kableExtra
 Imports:
     dplyr,
     ggplot2,
