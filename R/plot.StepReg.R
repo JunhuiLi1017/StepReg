@@ -88,10 +88,3 @@ plot.StepReg <- function(x, ...){
   }
   print(p)
 }
-
-
-
-
-
-
-

@@ -80,7 +80,7 @@ The *selection criterion* is another name for the aforementioned *model fit scor
 library(knitr)
 
 Criterion <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc",  "IC(1)", "IC(3/2)", "SL", "SBC", "Rsq", "adjRsq")
-Linear <-    c("✓",    "✓",    "✓",   "✓",  "✓",  "✓",    "",      "",        "✓",   "✓",  "✓",   "✓")
+Linear <-    c("✓",    "✓",    "✓",   "✓",  "✓",  "✓",    "✓",     "✓",        "✓",   "✓",  "✓",   "✓")
 Logit <-     c("✓",    "✓",    " ",   " ",  "✓",  "✓",    "✓",      "✓",      "✓",   "✓",  " ",   " ")
 Cox <-       c("✓",    "✓",    " ",   " ",  "✓",  "✓",    "✓",      "✓",      "✓",   "✓",  " ",   " ")
 Poisson <-   c("✓",    "✓",    " ",   " ",  "✓",  "✓",    "✓",      "✓",      "✓",   "✓",  " ",   " ")
@@ -114,8 +114,8 @@ Formula_Linear_univariate <- c("$n\\ln\\left(\\frac{SSE}{n}\\right) + 2p + n + 2
                               "$\\frac{SSE}{\\sigma^2} + 2p - n$ [@Mallows_1973; @Hocking_1976]",
                               "$n \\ln\\left(\\frac{SSE}{n}\\right) + 2p \\ln(\\ln(n))$ [@Hannan_Quinn_1979]",
                               "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{2pn \\ln(\\ln(n))}{n-p-2}$ [@McQuarrie_Tsai_1998]",
-                              "to be added",
-                              "to be added",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + p$ [@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{3}{2}p$ [@Smith_Spiegelhalter_1980]",
                               "$\\textit{F test}$",
                               "$n \\ln\\left(\\frac{SSE}{n}\\right) + p \\ln(n)$ [@Schwarz_1978; @Judge_1985]",
                               "$1 - \\frac{SSE}{SST}$",
@@ -127,8 +127,8 @@ Formula_Linear_multivariate <- c("$n\\ln(|\\text{SSE}_{\\text{det}}|) + 2pq + q(
                               "[@Sparks_1985]",
                               "$n\\ln(|\\text{SSE}_{\\text{det}}|) + 2pq\\ln(\\ln(n))$ [@Hannan_Quinn_1979; @McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
                               "$n\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{2pqnln(\\ln(n))}{n-p-q-1}$ [@McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
-                              "to be added",
-                              "to be added",
+                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + pq$ [@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
+                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{3}{2}pq$ [@Smith_Spiegelhalter_1980]",
                               "$\\textit{Approximate F test}$",
                               "$n\\ln(|\\text{SSE}_{\\text{det}}|) + p \\ln(n)$ [@Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002]",
                               "to be added",
@@ -139,8 +139,8 @@ Formula_Logit_Cox_Poisson_Gamma <- c("$-2{LL} + 2p$  [@Darlington_1968; @Judge_1
                               "",
                               "$-2{LL} + 2p\\ln(\\ln(n))$",
                               "$-2{LL} + \\frac{2pn \\ln(\\ln(n))}{n-p-2}$",
-                              "$-2{LL} + p$",
-                              "$-2{LL} + \\frac{3}{2}p$",
+                              "$-2{LL} + p$ [@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
+                              "$-2{LL} + \\frac{3}{2}p$ [@Smith_Spiegelhalter_1980]",
                               "logistic,Poisson, and Gamma: score and LRT test for forward, wald test for backward; Cox: LRT test for forward, wald test for backward",
                               "$-2{LL} + p\\ln(n)$",
                               "not available",

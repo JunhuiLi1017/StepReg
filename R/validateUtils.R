@@ -76,10 +76,10 @@ validateUtils <- function(formula,
 	}
 	
 	## check 'metric' and 'test_method' according to 'type'
-	linear_metric <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC")
-	logit_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
-	poisson_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
-	Gamma_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
+	linear_metric <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)")
+	glm_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
+	#poisson_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
+	#Gamma_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	cox_metric <- c("SL", "AIC", "AICc", "SBC", "HQ", "HQc", "IC(3/2)", "IC(1)")
 	
 	if(type == "linear") {
@@ -107,16 +107,20 @@ validateUtils <- function(formula,
 	  if(any(metric == "CP") & sigma_value == 0) {
 	    stop("metric = 'CP' is not allowed when Estimate of pure error variance from fitting the full model(sigma_value) is 0")
 	  }
-	}else if(type == "logit") {
-		if(any(!metric %in% logit_metric)) {
-			stop("for type 'logit': 'metric' must be from one of the c('", paste0(logit_metric, collapse = "','"),"').")
+	}else if(type == "logit" | type == "poisson" | type == "Gamma") {
+		if(any(!metric %in% glm_metric)) {
+			stop("for type ",type,": 'metric' must be from one of the c('", paste0(glm_metric, collapse = "','"),"').")
 		}
-	  
+	  if(type == 'logit') {
+	    type_glm <- "binomial"
+	  }else {
+	    type_glm <- type
+	  }
 	  # check if Y separates X completely, if so, stop
 	  # ref: https://stats.oarc.ucla.edu/other/mult-pkg/faq/general/faqwhat-is-complete-or-quasi-complete-separation-in-logistic-regression-and-what-are-some-strategies-to-deal-with-the-issue/
 	  tryCatch(                
 	    expr = {                      
-	      glm(formula, data = data, family = "binomial")
+	      glm(formula, data = data, family = type)
 	    },
 	    error = function(e) {          
 	      print("There was an error message.")
@@ -131,14 +135,6 @@ validateUtils <- function(formula,
 		if(any(!metric %in% cox_metric)) {
 			stop("for type 'cox': 'metric' must be from one of the c('", paste0(cox_metric, collapse = "','"),"').")
 		}
-	}else if(type == "poisson") {
-	  if(any(!metric %in% poisson_metric)) {
-	    stop("for type 'poisson': 'metric' must be from one of the c('", paste0(poisson_metric, collapse = "','"),"').")
-	  }
-	}else if(type == "Gamma") {
-	  if(any(!metric %in% Gamma_metric)) {
-	    stop("for type 'Gamma': 'metric' must be from one of the c('", paste0(Gamma_metric, collapse = "','"),"').")
-	  }
 	}
 	## check 'tolerance'
 	if(!is.numeric(tolerance)) {

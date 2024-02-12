@@ -4,14 +4,14 @@
 
 getXname <- function(formula, data) {
 	term_form <- terms(formula, data = data)
-	vars <- as.character(attr(term_form, "variables"))[-1]
+	vars <- as.character(attr(term_form, "variables"))[ - 1]
 	x_name <- attr(term_form, "term.labels")
 	return(x_name)
 }
 
 getYname <- function(formula, data) {
 	term_form <- terms(formula, data = data)
-	vars <- as.character(attr(term_form, "variables"))[-1]
+	vars <- as.character(attr(term_form, "variables"))[ - 1]
 	y_name <- vars[attr(term_form, "response")]
 	return(y_name)
 }
@@ -84,7 +84,7 @@ getMulticolX <- function(data, x_name, tolerance) {
 	rank0 <- qrx_list$rank
 	pivot0 <- qrx_list$pivot
 	if(rank0 < length(pivot0)) {
-		multico_x <- colnames(qrx_list$qr)[pivot0[(rank0 + 1) : length(pivot0)]]
+		multico_x <- colnames(qrx_list$qr)[pivot0[(rank0  +  1) : length(pivot0)]]
 	}else{
 		multico_x <- "NULL"
 	}
@@ -108,7 +108,7 @@ getTestMethod <- function(data, model_raw, type, metric, n_y, test_method_linear
 	return(test_method)
 }
 
-# For "subset", "forward", "backward", "bi-directional": each model needs to calculate PIC. 
+# For "subset", "forward", "backward", "bi - directional": each model needs to calculate PIC. 
 # Fit Model Statistics
 #
 # Fit Model Statistics with least square or likelihood method to return an information criteria value 
@@ -130,32 +130,36 @@ getModelFitStat <- function(metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", 
 		p <- fit$rank
 		n <- nrow(resMatrix)
 		#yName <- rownames(attr(fit$terms, "factors"))[1]
-		vars <- as.character(attr(fit$terms, "variables"))[-1]
+		vars <- as.character(attr(fit$terms, "variables"))[ - 1]
 		yName <- vars[attr(fit$terms, "response")]
 		Y <- as.matrix(fit$model[, yName])
 		nY <- ncol(Y)
 		if(metric == "AIC") {
-			PIC <- n*log(SSE/n)+2*p*nY+nY*(nY+1)+n
+			PIC <- n*log(SSE/n) + 2*p*nY + nY*(nY + 1) + n
 		}else if(metric == "AICc") {
-			PIC <- n*log(SSE/n)+n*(n+p)*nY/(n-p-nY-1)
+			PIC <- n*log(SSE/n) + n*(n + p)*nY/(n - p - nY - 1)
 		}else if(metric == "CP") {
-			PIC <- SSE/sigma_value+2*p-n
+			PIC <- SSE/sigma_value + 2*p - n
 		}else if(metric == "HQ") {
-			#PIC <- n*log(SSE/n)+2*log(log(n))*p*nY/n
-			PIC <- n*log(SSE/n)+2*log(log(n))*p*nY
+			#PIC <- n*log(SSE/n) + 2*log(log(n))*p*nY/n
+			PIC <- n*log(SSE/n) + 2*log(log(n))*p*nY
 		}else if(metric == "HQc") {
-			#PIC <- n*log(SSE*SSE/n)+2*log(log(n))*p*nY/(n-p-nY-1)
-			PIC <- n*log(SSE/n)+2*log(log(n))*p*nY*n/(n-p-nY-1)
+			#PIC <- n*log(SSE*SSE/n) + 2*log(log(n))*p*nY/(n - p - nY - 1)
+			PIC <- n*log(SSE/n) + 2*log(log(n))*p*nY*n/(n - p - nY - 1)
+		}else if(metric == "IC(1)") {
+		  PIC <- n*log(SSE/n) + p*nY + nY*(nY + 1) + n
+		}else if(metric == "IC(3/2)") {
+		  PIC <- n*log(SSE/n) + 1.5*p*nY + nY*(nY + 1) + n
 		}else if(metric == "BIC") {
-			PIC <- n*log(SSE/n)+2*(2+p)*(n*sigma_value/SSE)-2*(n*sigma_value/SSE)*(n*sigma_value/SSE)
+			PIC <- n*log(SSE/n) + 2*(2 + p)*(n*sigma_value/SSE) - 2*(n*sigma_value/SSE)*(n*sigma_value/SSE)
 		}else if(metric == "Rsq") {
-			#PIC <- 1-(SSE/SST)
+			#PIC <- 1 - (SSE/SST)
 			PIC <- summary(fit)$r.squared
 		}else if(metric == "adjRsq") {
-			#PIC <- 1-(SSE/SST)*(n-1)/(n-p)
+			#PIC <- 1 - (SSE/SST)*(n - 1)/(n - p)
 			PIC <- summary(fit)$adj.r.squared
 		}else if(metric == "SBC") {
-			PIC <- n*log(SSE/n)+log(n)*p*nY
+			PIC <- n*log(SSE/n) + log(n)*p*nY
 		}
 	} else if (type %in% c("logit", "poisson", "cox", "Gamma")) {
 		ll <- logLik(fit)[1]
@@ -166,19 +170,20 @@ getModelFitStat <- function(metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", 
 			n <- nrow(fit$data)
 		}
 		if(metric == "IC(1)") {
-			PIC <- -2*ll+k
+			PIC <- -2*ll + p
 		}else if(metric == "IC(3/2)") {
-			PIC <- -2*ll+1.5*k
+			PIC <- -2*ll + 1.5*p
 		}else if(metric == "SBC") {
-			PIC <- -2*ll+k*log(n)
+			PIC <- -2*ll + p*log(n)
 		}else if(metric == "AICc") {
-			PIC <- -2*ll+2*k*(k+1)/(n-k-1)
+			#PIC <- -2*ll + 2*p*(p + 1)/(n - p - 1)
+			PIC <- -2*ll + n*(n + p)/(n - p - 2)
 		}else if(metric == "AIC") {
-			PIC <- -2*ll+2*k
+			PIC <- -2*ll + 2*p
 		}else if(metric == "HQ") {
-			PIC <- -2*ll+2*k*log(log(n))
+			PIC <- -2*ll + 2*p*log(log(n))
 		}else if(metric == "HQc") {
-			PIC <- -2*ll+2*k*n*log(log(n))/(n-k-2)
+			PIC <- -2*ll + 2*p*n*log(log(n))/(n - p - 2)
 		}
 	}
 	return(PIC)
@@ -212,7 +217,7 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
     }else{
       pic_set <- getModelFitStat(metric, x_fit, type, sigma_value)
     }
-    initial_process_table[1, 1:3] <- c(as.numeric(intercept)+length(include), pic_set, paste(intercept, include, sep = " "))
+    initial_process_table[1, 1:3] <- c(as.numeric(intercept) + length(include), pic_set, paste(intercept, include, sep = " "))
   }
   return(initial_process_table)
 }
@@ -223,7 +228,7 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		com_table <- as.data.frame(combn(x_notin_model, nv))
 		n_test <- ncol(com_table)
 		com_var <- apply(com_table, 2, paste, collapse = " ")
-		sub_process_table <- matrix(rep(c(nv+length(include)+as.numeric(intercept), NA), each = n_test), n_test, 2)
+		sub_process_table <- matrix(rep(c(nv + length(include) + as.numeric(intercept), NA), each = n_test), n_test, 2)
 		com_var_df <- cbind(paste(intercept, include, sep = " "), data.frame(com_var))
 		com_var_set <- apply(com_var_df, 1, paste, collapse = " ")
 		sub_process_table <- data.frame(sub_process_table, c(com_var_set))
@@ -330,22 +335,22 @@ getTable1SummaryOfParameters <- function(data, type, x_name, y_name, merged_mult
 	)
 	if(type == 'cox') {
 	  # "intercept" is not relevant
-	  table_1_summary_of_parameters <- table_1_summary_of_parameters[-9, ]
+	  table_1_summary_of_parameters <- table_1_summary_of_parameters[ - 9, ]
 	}
 	# get rid of unrelevant variables from table 1:
 	if(any(metric %in% "SL")) {
 		if(strategy == "forward") {
 			# "sls" is not relevant
-			table_1_summary_of_parameters <- table_1_summary_of_parameters[-5, ]
+			table_1_summary_of_parameters <- table_1_summary_of_parameters[ - 5, ]
 		}else if(strategy == "backward") {
 			# "sle" is not relevant
-			table_1_summary_of_parameters <- table_1_summary_of_parameters[-4, ]
+			table_1_summary_of_parameters <- table_1_summary_of_parameters[ - 4, ]
 		}else if(strategy == "subset") {
 			# "sle" and "sls" are not relevant
-			table_1_summary_of_parameters <- table_1_summary_of_parameters[-c(4:5), ]
+			table_1_summary_of_parameters <- table_1_summary_of_parameters[ - c(4:5), ]
 		}
 	}else if(!any(metric %in% "SL") & type != 'cox'){
-		table_1_summary_of_parameters <- table_1_summary_of_parameters[-c(4:6), ]
+		table_1_summary_of_parameters <- table_1_summary_of_parameters[ - c(4:6), ]
 	}
 	return(table_1_summary_of_parameters)
 }
@@ -364,12 +369,12 @@ getTable2TypeOfVariables <- function(model) {
   return(as.data.frame(table2_class_table))
 }
 
-#note1: test_method_linear should be 'F' for univariate and c(“Pillai”, “Wilks”, “Hotelling-Lawley”, “Roy”) for multivariates
+#note1: test_method_linear should be 'F' for univariate and c(“Pillai”, “Wilks”, “Hotelling - Lawley”, “Roy”) for multivariates
 #getAnovaStat(fit_reduced = x_fit_list[[1]], fit_full = fit_x_in_model, type = type, test_method = test_method)
 getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced, fit_full, type, test_method) {
   if (type == "linear") {
     ptype <- 'Pr(>F)'
-    if(test_method %in% c("Pillai", "Wilks", "Hotelling-Lawley", "Roy")) {
+    if(test_method %in% c("Pillai", "Wilks", "Hotelling - Lawley", "Roy")) {
       stattype <- 'approx F'
     }else{
       stattype <- 'F'
@@ -428,7 +433,7 @@ getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced,
     pic_set <- stat_table[, ptype]
     names(pic_set) <- rownames(stat_table)
     if(intercept == "1" & length(xlevels) == 0) {
-      pic_set <- pic_set[-1]
+      pic_set <- pic_set[ - 1]
     }
     #maxPVar <- rownames(stat_table)[which.max(pic_set)]
     maxPVar <- names(which.max(pic_set))
@@ -445,8 +450,8 @@ getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced,
 }
 
 ## get pic based on model fit, it needs fit_reduced and fit_full for SL and only fit_formula for other metrics
-## used in stepwise in step0: SL:0, 1, inf  non-SL:
-## fit_fm<-fit_intercept
+## used in stepwise in step0: SL:0, 1, inf  non - SL:
+## fit_fm<- fit_intercept
 getInitStepModelStat <- function(fit_intercept, fit_fm, type, strategy, metric, intercept, include, test_method, sigma_value) {
   if(metric == "SL") {
     if(!is.null(include)) {
@@ -543,7 +548,7 @@ getInitialStepwise <- function(data, type, strategy, metric, intercept, include,
       fit_include <- getModel(data = data, type = type, intercept = intercept, x_name = include, y_name = y_name, weight = weight, method = test_method)
       pic <- getInitStepModelStat(fit_intercept = fit_intercept, fit_fm = fit_include, type = type, strategy = strategy, metric = metric, intercept = intercept, include = include, test_method = test_method, sigma_value)
       num_eff_para_in <- getNumberEffect(fit = fit_include, type = type)
-      sub_init_process_table[1, ] <- c("", paste0(include, collapse = " "), "", anova(fit_include, fit_intercept)[2, 'Df'], num_eff_para_in[-1], pic)
+      sub_init_process_table[1, ] <- c("", paste0(include, collapse = " "), "", anova(fit_include, fit_intercept)[2, 'Df'], num_eff_para_in[ - 1], pic)
       process_table <- rbind(process_table, sub_init_process_table)
     }
   }
@@ -679,14 +684,14 @@ updateXinModel <- function(add_or_remove, indicator, best_candidate_model, type,
     if(add_or_remove == "add") {
       x_in_model <- append(x_in_model, minmax_var)
       x_notin_model <- setdiff(x_notin_model, minmax_var)
-      sub_init_process_table[1, ] <- c(as.numeric(process_table[nrow(process_table), 1])+1, minmax_var, "", getNumberEffect(fit = best_candidate_model, type), pic)
+      sub_init_process_table[1, ] <- c(as.numeric(process_table[nrow(process_table), 1]) + 1, minmax_var, "", getNumberEffect(fit = best_candidate_model, type), pic)
     }else{
       x_notin_model <- append(x_notin_model, minmax_var)
       x_in_model <- setdiff(x_in_model, minmax_var)
-      sub_init_process_table[1, ] <- c(as.numeric(process_table[nrow(process_table), 1])+1, "", minmax_var, getNumberEffect(fit = best_candidate_model, type), pic)
+      sub_init_process_table[1, ] <- c(as.numeric(process_table[nrow(process_table), 1]) + 1, "", minmax_var, getNumberEffect(fit = best_candidate_model, type), pic)
     }
     process_table <- rbind(process_table, sub_init_process_table)
-    #process_table[nrow(process_table), 1] <- as.numeric(process_table[1, nrow(process_table)-1]) + 1
+    #process_table[nrow(process_table), 1] <- as.numeric(process_table[1, nrow(process_table) - 1])  +  1
   }else{
     BREAK <- TRUE
   }
@@ -725,12 +730,12 @@ getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, 
     #       x1(stop here)
     # x1
     if(nrow(process_table)>1) {
-      last2_step <- process_table[nrow(process_table)-1, ]
+      last2_step <- process_table[nrow(process_table) - 1, ]
       last1_step <- process_table[nrow(process_table), ]
       if(last2_step[, 2] != "" & last2_step[, 2] == last1_step[, 3]) {
         break
       }else if(last2_step[, 3] == last1_step[, 2] & last1_step[, 2] != "") {
-        process_table <- process_table[-nrow(process_table), ]
+        process_table <- process_table[ - nrow(process_table), ]
         break
       }
     }
@@ -757,7 +762,7 @@ getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, 
   }
   
   if(type == "cox" && strategy != "backward") {
-    process_table <- process_table[-1, ]
+    process_table <- process_table[ - 1, ]
   }
   return(list("process_table" = process_table, "x_in_model" = x_in_model))
 }
