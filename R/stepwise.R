@@ -203,7 +203,7 @@ stepwise <- function(formula,
   if(!is.null(excel_name)) {
     write.xlsx(x = result,  file = paste0(excel_name, ".xlsx"))
   }
-  class(result) <- c("StepReg", "list")
+  class(result) <- c("StepReg", "list", strategy)
   return(result)
 }
 

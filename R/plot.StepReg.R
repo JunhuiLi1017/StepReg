@@ -29,12 +29,20 @@
 
 plot.StepReg <- function(x, ...){
   process_table <- x[which(str_starts(names(x), "Selection Process"))]
-  
   # Combine tables if multiple of them:
   plot_data <- NULL
-  for (i in 1:length(process_table)){
-    sub_table <- process_table[[i]]
-    if (ncol(sub_table) > 4){ # stepwise, otherwise best_subset, more robust way is to use table attribute to decide
+  if ("subset" %in% class(x)){
+    for (i in 1:length(process_table)){
+      for (i in 1:length(process_table)){
+        sub_table <- process_table[[i]]
+        sub_plot_data <- cbind(sub_table, colnames(sub_table)[2])
+        colnames(sub_plot_data) <- c("Step", "IC", "Variable", "IC_type")
+        plot_data <- rbind(plot_data, sub_plot_data)
+      }
+    }
+  } else{
+    for (i in 1:length(process_table)){
+      sub_table <- process_table[[i]]
       var_plus <- var_minus <- NULL
       var_sym <- rep(NA, nrow(sub_table))
       if ("EnteredEffect" %in% colnames(sub_table)){
@@ -51,13 +59,9 @@ plot.StepReg <- function(x, ...){
       IC <- sub_table[, c(1, ic_index)]
       colnames(IC) <- NULL
       sub_plot_data <- data.frame(IC, var_sym, colnames(sub_table)[ic_index])
-    } else{
-      sub_plot_data <- cbind(sub_table, colnames(sub_table)[2])
-      colnames(sub_plot_data) <- c("Step", "IC", "Variable", "IC_type")
+      plot_data <- rbind(plot_data, sub_plot_data)
     }
-    plot_data <- rbind(plot_data, sub_plot_data)
   }
-  
   colnames(plot_data) <- c("Step", "IC", "Variable", "IC_type")
   plot_data$Step <- as.factor(as.numeric(plot_data$Step))
   plot_data$IC <- as.numeric(plot_data$IC)

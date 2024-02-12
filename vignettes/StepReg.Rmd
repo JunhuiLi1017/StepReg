@@ -91,13 +91,13 @@ df <- data.frame(Criterion, Linear, Logit, Cox, Poisson, Gamma)
 kable(df, caption = 'Availability of Information Criterion for Regression')
 ```
 
-For details on each criterion, see below: [@Benjamini1995]
+For details on each criterion, see below:
 
 ```{r, echo = FALSE}
 library(kableExtra)
 Criterion <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc",  "IC(1)", "IC(3/2)", "SL", "SBC", "Rsq", "adjRsq")
 Difination <- c("Akaike’s information criterion",
-                "sample-size adjusted AIC",
+                "Corrected Akaike’s information criterion",
                 "Sawa Bayesian information criterion",
                 "Mallows’ Cp statistic",
                 "Hannan and Quinn information criterion",
@@ -106,103 +106,83 @@ Difination <- c("Akaike’s information criterion",
                 "Information Criterion with Penalty Coefficient Set to 3/2",
                 "Significance Level(pvalue)",
                 "Schwarz information criterion",
-                "R-squared",
-                "adjusted Rsq")
-Formula_Linear_univariate <- c("$n\\ln\\left(\\frac{SSE}{n}\\right) + 2p + n + 2$\n[@Benjamini1995]",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{n(n+p)}{n-p-2}$",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + 2(p+2)o - 2o^2, \\quad o = \\frac{n\\sigma^2}{SSE}$",
-                              "$\\frac{SSE}{\\sigma^2} + 2p - n$",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{2p \\ln(\\ln(n))}{n}$",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{2p \\ln(\\ln(n))}{n-p-2}$",
-                              "currently not available",
-                              "currently not available",
-                              "\\textit{F test}",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + p \\ln(n)$",
-                              " ",
-                              " ")
+                "R-square statistic",
+                "Adjusted R-square statistic")
+Formula_Linear_univariate <- c("$n\\ln\\left(\\frac{SSE}{n}\\right) + 2p + n + 2$ [@Hurvich_Tsai_1989]",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{n(n+p)}{n-p-2}$ [@Hurvich_Tsai_1989]",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + 2(p+2)o - 2o^2, \\quad o = \\frac{n\\sigma^2}{SSE}$ [@Sawa_1978; @Judge_1985]",
+                              "$\\frac{SSE}{\\sigma^2} + 2p - n$ [@Mallows_1973; @Hocking_1976]",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + 2p \\ln(\\ln(n))$ [@Hannan_Quinn_1979]",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{2pn \\ln(\\ln(n))}{n-p-2}$ [@McQuarrie_Tsai_1998]",
+                              "to be added",
+                              "to be added",
+                              "$\\textit{F test}$",
+                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + p \\ln(n)$ [@Schwarz_1978; @Judge_1985]",
+                              "$1 - \\frac{SSE}{SST}$",
+                              "$1 - \\frac{(n-1)(1-R^2)}{n-p}$ [@Darlington_1968; @Judge_1985]")
 
-Formula_Linear_multivariate <- c("$\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{2pq + q(q+1)}{n}$",
-                              "$\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{q(n+p)}{n-p-q-1}$",
+Formula_Linear_multivariate <- c("$n\\ln(|\\text{SSE}_{\\text{det}}|) + 2pq + q(q+1)$ [@Hurvich_Tsai_1989; @Al-Subaihi_2002]",
+                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{nq(n+p)}{n-p-q-1}$ [@Hurvich_Tsai_1989; @Bedrick_Tsai_1994]",
+                              "",
+                              "[@Sparks_1985]",
+                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + 2pq\\ln(\\ln(n))$ [@Hannan_Quinn_1979; @McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
+                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{2pqnln(\\ln(n))}{n-p-q-1}$ [@McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
+                              "to be added",
+                              "to be added",
+                              "$\\textit{Approximate F test}$",
+                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + p \\ln(n)$ [@Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002]",
+                              "to be added",
+                              "$1 - \\frac{(n-1)(1-R^2)}{n-p}$ [@Darlington_1968; @Judge_1985]")
+Formula_Logit_Cox_Poisson_Gamma <- c("$-2{LL} + 2p$  [@Darlington_1968; @Judge_1985]",
+                              "$-2{LL} + \\frac{n(n+p)}{n-p-2}$ [@Hurvich_Tsai_1989]",
                               "",
                               "",
-                              "$\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{2pq\\ln(\\ln(n))}{n}$",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{2p \\ln(\\ln(n))}{n-p-2}$",
-                              "currently not available",
-                              "currently not available",
-                              "\\textit{Approximate F test}",
-                              "$\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{p \\ln(n)}{n}$",
-                              " ",
-                              " ")
-Formula_Logit_Cox_Poisson_Gamma <- c("$-2{LL} + 2p$",
-                              "$-2{LL} + \\frac{n(n+p)}{n-p-2}$",
-                              "",
-                              "",
-                              "$-2{LL} + \\frac{2p\\ln(\\ln(n))}{n}$",
-                              "$-2{LL} + \\frac{2p \\ln(\\ln(n))}{n-p-2}$",
+                              "$-2{LL} + 2p\\ln(\\ln(n))$",
+                              "$-2{LL} + \\frac{2pn \\ln(\\ln(n))}{n-p-2}$",
                               "$-2{LL} + p$",
                               "$-2{LL} + \\frac{3}{2}p$",
-                              "logistic and Poisson: score and LRT test for forward, wald test for backward; Cox: LRT test for forward, wald test for backward",
+                              "logistic,Poisson, and Gamma: score and LRT test for forward, wald test for backward; Cox: LRT test for forward, wald test for backward",
                               "$-2{LL} + p\\ln(n)$",
-                              "NA",
-                              "NA")
+                              "not available",
+                              "not available")
 df <- data.frame(Criterion, Difination, Formula_Linear_univariate, Formula_Linear_multivariate,Formula_Logit_Cox_Poisson_Gamma)
 kable_styling(kable(df, format = "html", align='l', booktabs=TRUE, escape = F, caption = 'Abbreviation, Definition, and Formula of the Information Criterion') %>%
                 footnote(
                    number=c("
 ${n}$: Sample Size; 
 ${p}$: Number of parameters including the intercept;
-${k}$:	Number of independent variables in the full model;
-${q}$:	Number of dependent variables;
-$\\sigma^2$:	Estimate of pure error variance from fitting the full model, which is the average of sigma value when it is for multivariate multiple regression;
+${k}$: Number of independent variables in the full model;
+${q}$: Number of dependent variables;
+$\\sigma^2$: Estimate of pure error variance from fitting the full model, which is the average of sigma value when it is for multivariate multiple regression;
 ${df}$:	Degree of freedom;
-${SST}$:	Total sum of squares corrected for the mean for the dependent variable, which is a numeric and matrix for univariate regression and multivariate regression correspondingly;
-${SSE}$:	Error sum of squares, which is a numeric and matrix for univariate regression and multivariate regression correspondingly;
+${SST}$: Total sum of squares corrected for the mean for the dependent variable, which is a numeric and matrix for univariate regression and multivariate regression correspondingly;
+${SSE}$: Error sum of squares, which is a numeric and matrix for univariate regression and multivariate regression correspondingly;
 ${LL}$:	The natural logarithm of likelihood;
-${I}$:	The identity of matrix of size (${q} x {q}$);
-${SSEdet}$:	The determinant of matrix SSE;
-${SSTdet}$:	The determinant of matrix SST;
-${| |}$:	The absolute value;
-$\\ln()$:	The natural logarithm;
+${I}$: The identity of matrix of size (${q} x {q}$);
+${SSEdet}$: The determinant of matrix ${SSE}$;
+${SSTdet}$: The determinant of matrix ${SST}$;
+${| |}$: The absolute value;
+$\\ln()$: The natural logarithm;
 "),
                    footnote_as_chunk=TRUE, 
                    escape=FALSE))
 ```
 
+There is some inconsistency in the literature on the precise definitions for the AIC and AICC statistics. In the context of linear regression, several different versions of the formulas for AIC and AICC appear in the statistics literature. The following formulas for AIC [@Darlington_1968; @Judge_1985] and AICC [@McQuarrie_Tsai_1998]:
 
-Table2: Criterion Definition Formula Note AIC (linear) AIC (cox)
+AIC=$n\ln\left(\frac{SSE}{n}\right) + 2p$
 
--   For linear regression:
-    -   AIC: Akaike information criterion
-    -   AICc: sample-size adjusted AIC
-    -   BIC: Bayesian information criterion
-    -   Mallows's Cp
-    -   HQ: Hannan-Quinn information criterion
-    -   HQc: Corrected Hannan and Quinn information criterion, reference see [here](https://www.jstatsoft.org/article/view/v007i12)
-    -   Rsq: R-squared
-    -   adjRsq: adjusted Rseq
-    -   SBC: Schwarz information criterion
-    -   SL (Pvalue, based on F-test or Approximate F-test): Significance level
--   For logistic, Poisson and cox regression
-    -   AIC: Akaike information criterion
-    -   AICc: sample-size adjusted AIC
-    -   HQ: Hannan-Quinn information criterion
-    -   HQc: Corrected Hannan and Quinn information criterion, reference see [here](https://www.jstatsoft.org/article/view/v007i12)
-    -   IC(3/2):
-    -   IC(1):
-    -   SBC: Schwarz information criterion
-    -   SL (Pvalue): Significance level(logistic and Poisson: score and LRT test for forward, wald test for backward; Cox: LRT test for forward, wald test for backward)
+AICc=$\ln\left(\frac{SSE}{n}\right) + 1 + \frac{2(p+1)}{n-p-2}$
+
+The definitions of AIC and AICC found in [@Hurvich_Tsai_1989]:
+
+AIC=$n\ln\left(\frac{SSE}{n}\right) + 2p + n + 2$
+
+AICc=$n\ln\left(\frac{SSE}{n}\right) + \frac{n(p+n)}{n-p-2}$
+
+However, for a fixed number of observations, these different versions differ by additive and positive multiplicative constants.
 
 ## Multicollinearity
-
-A breif introduction for four datasets is descripted as below,
-
--   [**mtcars**](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html): the mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower, and the number of cylinders.
-
--   [**remission**](https://online.stat.psu.edu/stat501/book/export/html/1011): the remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as cellularity of the marrow clot section, the highest temperature before the start of treatment, and remission status (1 for remission and 0 for non-remission).
-
--   [**lung**](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html): the lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient's age, the type of treatment received, and survival status.
-
--   [**CreditCard**](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html): the CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status.
 
 # StepReg Output
 
@@ -217,6 +197,16 @@ A list containing multiple tables will be returned. Names and descriptions of ea
 -   `Tabel names prefixed with Table. Parameter Estimates`: This table provides summary information for the optimal models.
 
 # Demo
+
+A breif introduction for four datasets is descripted as below,
+
+-   [**mtcars**](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html): the mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower, and the number of cylinders.
+
+-   [**remission**](https://online.stat.psu.edu/stat501/book/export/html/1011): the remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as cellularity of the marrow clot section, the highest temperature before the start of treatment, and remission status (1 for remission and 0 for non-remission).
+
+-   [**lung**](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html): the lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient's age, the type of treatment received, and survival status.
+
+-   [**CreditCard**](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html): the CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status.
 
 This section provides 9 examples utilizing distinct parameters across various regression scenarios with the above 4 datasets.
 

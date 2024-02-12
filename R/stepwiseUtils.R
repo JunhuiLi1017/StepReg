@@ -141,10 +141,11 @@ getModelFitStat <- function(metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", 
 		}else if(metric == "CP") {
 			PIC <- SSE/sigma_value+2*p-n
 		}else if(metric == "HQ") {
-			PIC <- n*log(SSE/n)+2*log(log(n))*p*nY/n
+			#PIC <- n*log(SSE/n)+2*log(log(n))*p*nY/n
+			PIC <- n*log(SSE/n)+2*log(log(n))*p*nY
 		}else if(metric == "HQc") {
 			#PIC <- n*log(SSE*SSE/n)+2*log(log(n))*p*nY/(n-p-nY-1)
-			PIC <- n*log(SSE/n)+2*log(log(n))*p*nY/(n-p-nY-1)
+			PIC <- n*log(SSE/n)+2*log(log(n))*p*nY*n/(n-p-nY-1)
 		}else if(metric == "BIC") {
 			PIC <- n*log(SSE/n)+2*(2+p)*(n*sigma_value/SSE)-2*(n*sigma_value/SSE)*(n*sigma_value/SSE)
 		}else if(metric == "Rsq") {
@@ -158,7 +159,7 @@ getModelFitStat <- function(metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", 
 		}
 	} else if (type %in% c("logit", "poisson", "cox", "Gamma")) {
 		ll <- logLik(fit)[1]
-		k <- attr(logLik(fit), "df")
+		p <- attr(logLik(fit), "df")
 		if (type == "cox") {
 			n <- fit$nevent
 		} else if (type == "logit" | type == "poisson"| type == "Gamma") {
@@ -175,9 +176,9 @@ getModelFitStat <- function(metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", 
 		}else if(metric == "AIC") {
 			PIC <- -2*ll+2*k
 		}else if(metric == "HQ") {
-			PIC <- -2*ll+2*k*log(log(n))/n
+			PIC <- -2*ll+2*k*log(log(n))
 		}else if(metric == "HQc") {
-			PIC <- -2*ll+2*k*log(log(n))/(n-k-2)
+			PIC <- -2*ll+2*k*n*log(log(n))/(n-k-2)
 		}
 	}
 	return(PIC)
