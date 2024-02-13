@@ -208,19 +208,11 @@ kable_styling(kable(data.frame(Table,Meanings),format = "html", align='l', escap
 
 # Demo
 
-A breif introduction for four datasets is descripted as below,
-
--   [**mtcars**](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html): the mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower, and the number of cylinders.
-
--   [**remission**](https://online.stat.psu.edu/stat501/book/export/html/1011): the remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. The dataset includes variables such as cellularity of the marrow clot section, the highest temperature before the start of treatment, and remission status (1 for remission and 0 for non-remission).
-
--   [**lung**](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html): the lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient's age, the type of treatment received, and survival status.
-
--   [**CreditCard**](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html): the CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status.
-
-This section provides 9 examples utilizing distinct parameters across various regression scenarios with the above 4 datasets.
+In this section, we provided some examples using distinct parameters across various regression scenarios with the 4 datasets, a.k.a. mtcars, remission, lung, and CreditCard.
 
 ## linear stepwise regression with _mtcars_
+
+-   [**mtcars**](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html): the mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower(hp), and the number of cylinders(cyl). For more information, please ```?mtcars```
 
 > **Example1**:  
 >
@@ -319,6 +311,9 @@ This section provides 9 examples utilizing distinct parameters across various re
 
 ## Logistic stepwise regression with `remission`
 
+-   [**remission**](https://online.stat.psu.edu/stat501/book/export/html/1011): the remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. With 27 observations and 7 variables, the dataset includes variables such as remission status (1 for remission and 0 for non-remission), cellularity of the marrow clot section(cell), and the highest temperature before the start of treatment(temp). For more information, please ```?StepReg::remission```
+
+
 > **Example4**: 
 >
 > type of regression: `logit`
@@ -383,6 +378,8 @@ This section provides 9 examples utilizing distinct parameters across various re
 ```
 
 ## Cox stepwise regression with `lung`
+
+-   [**lung**](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html): the lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient's age, the type of treatment received, and survival status. For more information, please ```?survival::lung```
 
 > **Example6**: 
 >
@@ -450,6 +447,8 @@ This section provides 9 examples utilizing distinct parameters across various re
 ```
 
 ## Poisson stepwise regression with `CreditCard`
+
+-   [**CreditCard**](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html): the CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status. For more information, please ```?AER::CreditCard```
 
 > **Example8**: 
 >
