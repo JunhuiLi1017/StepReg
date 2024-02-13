@@ -436,6 +436,7 @@ getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced,
       pic_set <- pic_set[ - 1]
     }
     #maxPVar <- rownames(stat_table)[which.max(pic_set)]
+    pic_set <- pic_set[!names(pic_set) %in% include]
     maxPVar <- names(which.max(pic_set))
     statistics <- stat_table[maxPVar, stattype]
     pic <- stat_table[maxPVar, ptype]

@@ -68,12 +68,12 @@
 #' 
 #' @author Junhui Li, Kai Hu, Xiaohuan Lu
 #' 
-#' @return A list containing multiple tables will be returned. Names and descriptions of each table are outlined as follows:
+#' @return A list containing multiple tables will be returned.
 #' \itemize{
-#' \item Table 1. Summary of Parameters: This table presents the parameters utilized in stepwise regression along with their default or user-specified values.
-#' \item Table 2. Type of Variables: This table outlines the variables and their respective types utilized in the dataset.
-#' \item Table names prefixed with Table. Selection Process under X: This table details overview of the variable selection process under criteria information X. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
-#' \item Tabel names prefixed with Table. Parameter Estimates: This table provides parameter estimates for the optimal models under information criteria X.
+#' \item Summary of Parameters: The parameters utilized in stepwise regression along with their default or user-specified values.
+#' \item Type of Variables: The variables and their respective types in the dataset.
+#' \item Selection Process under IC: The detailed overview of the variable selection process under information criteria IC. Variables are selected based on information criteria rules. For AIC, AICc, BIC, Cp, HQ, HQc, IC(1), IC(3/2) and SBC, the lower value of information criteria, the better of model fit. For Rsq or adjRsq, higher values indicate a better model fit.
+#' \item Parameter Estimates: The parameter estimates for the optimal models under information criteria IC.
 #' }
 
 #' @examples

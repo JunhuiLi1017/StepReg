@@ -56,47 +56,60 @@ kable(df, caption = 'Common regression categories')
 
 Model selection aims to identify the subset of independent variables that provide the best predictive performance for the response variable. Both stepwise regression and best subsets approaches are implemented in StepReg. For stepwise regression, there are mainly three methods: *Forward Selection*, *Backward Elimination*, *Bidirectional Elimination*.
 
-### Forward Selection
+```{r, echo = FALSE}
+library(knitr)
 
-In forward selection, the algorithm starts with an empty model (no predictors) and adds in variables one by one. Each step tests the addition of every possible predictor by calculating a pre-selected model fit score. Add the variable (if any) whose inclusion leads to the most statistically significant fit improvement. Repeat this process until more predictors no longer lead to a statistically better fit.
+Model_Selection <- c("Forward Selection", "Backward Elimination", "Bidirectional Elimination", "Best Subsets")
+Definition <- c("In forward selection, the algorithm starts with an empty model (no predictors) and adds in variables one by one. Each step tests the addition of every possible predictor by calculating a pre-selected model fit score. Add the variable (if any) whose inclusion leads to the most statistically significant fit improvement. Repeat this process until more predictors no longer lead to a statistically better fit.",
+                "In backward elimination, the algorithm starts with a full model (all predictors) and deletes variables one by one. Each step test the deletion of every possible predictor by calculating a pre-selected model fit score. Delete the variable (if any) whose loss leads to the most statistically significant fit improvement. Repeat this process until less predictors no longer lead to a statistically better fit.",
+                "Bidirectional elimination is essentially a forward selection procedure combined with backward elimination at each iteration. Each iteration starts with a forward selection step that adds in predictors, followed by a round of backward elimination that removes predictors. Repeat this process until no more predictors are added or excluded.",
+                "Stepwise algorithms add or delete one predictor at a time and output a single model without evaluating all candidates. Therefore, it is a relatively simple procedure that only produces one model. In contrast, the *Best Subsets* algorithm calculates all possible models and output the best-fitting models with one predictor, two predictors, etc., for users to choose from.")
+df <- data.frame(Model_Selection, Definition)
 
-### Backward Elimination
-
-In backward elimination, the algorithm starts with a full model (all predictors) and deletes variables one by one. Each step test the deletion of every possible predictor by calculating a pre-selected model fit score. Delete the variable (if any) whose loss leads to the most statistically significant fit improvement. Repeat this process until less predictors no longer lead to a statistically better fit.
-
-### Bidirectional Elimination
-
-Bidirectional elimination is essentially a forward selection procedure combined with backward elimination at each iteration. Each iteration starts with a forward selection step that adds in predictors, followed by a round of backward elimination that removes predictors. Repeat this process until no more predictors are added or excluded.
-
-### Best Subsets
-
-Stepwise algorithms add or delete one predictor at a time and output a single model without evaluating all candidates. Therefore, it is a relatively simple procedure that only produces one model. In contrast, the *Best Subsets* algorithm calculates all possible models and output the best-fitting models with one predictor, two predictors, etc., for users to choose from.
+kable(df, caption = 'Model selection method')
+```
 
 ## Selection criterion
 
 The *selection criterion* is another name for the aforementioned *model fit score*. It is a means of evaluating a model's quality by estimating its predictive performance. The following selection criteria have been implemented in StepReg:
 
-```{r, echo = FALSE}
-library(knitr)
-
-Criterion <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc",  "IC(1)", "IC(3/2)", "SL", "SBC", "Rsq", "adjRsq")
-Linear <-    c("✓",    "✓",    "✓",   "✓",  "✓",  "✓",    "✓",     "✓",        "✓",   "✓",  "✓",   "✓")
-Logit <-     c("✓",    "✓",    " ",   " ",  "✓",  "✓",    "✓",      "✓",      "✓",   "✓",  " ",   " ")
-Cox <-       c("✓",    "✓",    " ",   " ",  "✓",  "✓",    "✓",      "✓",      "✓",   "✓",  " ",   " ")
-Poisson <-   c("✓",    "✓",    " ",   " ",  "✓",  "✓",    "✓",      "✓",      "✓",   "✓",  " ",   " ")
-Gamma <-     c("✓",    "✓",    " ",   " ",  "✓",  "✓",    "✓",      "✓",      "✓",   "✓",  " ",   " ")
-
-df <- data.frame(Criterion, Linear, Logit, Cox, Poisson, Gamma)
-
-kable(df, caption = 'Availability of Information Criterion for Regression')
-```
-
-For details on each criterion, see below:
+To ensure formula consistency between *univariate(UMR)* and *multivariate(MMR)* multiple linear regression, additional additive and positive multiplicative constants were incorporated into the formulas of multivariate linear regression.
 
 ```{r, echo = FALSE}
 library(kableExtra)
-Criterion <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc",  "IC(1)", "IC(3/2)", "SL", "SBC", "Rsq", "adjRsq")
-Difination <- c("Akaike’s information criterion",
+Statistic <- c(
+"${n}$",
+"${p}$",
+"${q}$",
+"$\\sigma^2$",
+"${SST}$",
+"${SSE}$",
+"${LL}$",
+"$\\text{SSE}_{\\text{det}}$",
+"$\\text{SST}_{\\text{det}}$",
+"${| |}$",
+"$\\ln()$")
+
+Meanings <- c(
+"Sample Size",
+"Number of parameters including the intercept",
+"Number of dependent variables",
+"Estimate of pure error variance from fitting the full model, which is the average of sigma value when it is for multivariate multiple regression",
+"Total sum of squares corrected for the mean for the dependent variable, which is a numeric value for UMR and a matrix for multivariate regression",
+"Error sum of squares, which is a numeric value for UMR and a matrix for multivariate regression",
+"The natural logarithm of likelihood",
+"The determinant of matrix ${SSE}$",
+"The determinant of matrix ${SST}$",
+"The absolute value",
+"The natural logarithm")
+
+kable_styling(kable(data.frame(Statistic,Meanings),format = "html", align='l', escape = F, caption = 'Statistics in Information Criterion'))
+```
+
+```{r, echo = FALSE}
+library(kableExtra)
+Abbreviation <- c("AIC", "AICc", "BIC", "CP", "HQ", "HQc",  "IC(1)", "IC(3/2)", "SL", "SBC", "Rsq", "adjRsq")
+Definition <- c("Akaike’s information criterion",
                 "Corrected Akaike’s information criterion",
                 "Sawa Bayesian information criterion",
                 "Mallows’ Cp statistic",
@@ -108,93 +121,90 @@ Difination <- c("Akaike’s information criterion",
                 "Schwarz information criterion",
                 "R-square statistic",
                 "Adjusted R-square statistic")
-Formula_Linear_univariate <- c("$n\\ln\\left(\\frac{SSE}{n}\\right) + 2p + n + 2$ [@Hurvich_Tsai_1989]",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{n(n+p)}{n-p-2}$ [@Hurvich_Tsai_1989]",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + 2(p+2)o - 2o^2, \\quad o = \\frac{n\\sigma^2}{SSE}$ [@Sawa_1978; @Judge_1985]",
-                              "$\\frac{SSE}{\\sigma^2} + 2p - n$ [@Mallows_1973; @Hocking_1976]",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + 2p \\ln(\\ln(n))$ [@Hannan_Quinn_1979]",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{2pn \\ln(\\ln(n))}{n-p-2}$ [@McQuarrie_Tsai_1998]",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + p$ [@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + \\frac{3}{2}p$ [@Smith_Spiegelhalter_1980]",
-                              "$\\textit{F test}$",
-                              "$n \\ln\\left(\\frac{SSE}{n}\\right) + p \\ln(n)$ [@Schwarz_1978; @Judge_1985]",
-                              "$1 - \\frac{SSE}{SST}$",
-                              "$1 - \\frac{(n-1)(1-R^2)}{n-p}$ [@Darlington_1968; @Judge_1985]")
 
-Formula_Linear_multivariate <- c("$n\\ln(|\\text{SSE}_{\\text{det}}|) + 2pq + q(q+1)$ [@Hurvich_Tsai_1989; @Al-Subaihi_2002]",
-                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{nq(n+p)}{n-p-q-1}$ [@Hurvich_Tsai_1989; @Bedrick_Tsai_1994]",
-                              "",
-                              "[@Sparks_1985]",
-                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + 2pq\\ln(\\ln(n))$ [@Hannan_Quinn_1979; @McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
-                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{2pqnln(\\ln(n))}{n-p-q-1}$ [@McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
-                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + pq$ [@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
-                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + \\frac{3}{2}pq$ [@Smith_Spiegelhalter_1980]",
-                              "$\\textit{Approximate F test}$",
-                              "$n\\ln(|\\text{SSE}_{\\text{det}}|) + p \\ln(n)$ [@Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002]",
-                              "to be added",
-                              "$1 - \\frac{(n-1)(1-R^2)}{n-p}$ [@Darlington_1968; @Judge_1985]")
-Formula_Logit_Cox_Poisson_Gamma <- c("$-2{LL} + 2p$  [@Darlington_1968; @Judge_1985]",
+Formula_in_Linear <- c("$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + 2pq + n + q(q+1)$ [@Hurvich_Tsai_1989; @Al-Subaihi_2002]",
+                                 "$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + \\frac{nq(n+p)}{n-p-q-1}$ [@Hurvich_Tsai_1989; @Bedrick_Tsai_1994]",
+                                 
+"$n \\ln\\left(\\frac{SSE}{n}\\right) + 2(p+2)o - 2o^2, \\quad o = \\frac{n\\sigma^2}{SSE}$ [@Sawa_1978; @Judge_1985]; not available in StepReg for MMR",
+
+"$\\frac{SSE}{\\sigma^2} + 2p - n$ [@Mallows_1973; @Hocking_1976]; Formula is available but not implemented in StepReg for MMR",
+
+"$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + 2pq\\ln(\\ln(n))$ [@Hannan_Quinn_1979; @McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
+
+"$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + \\frac{2pqnln(\\ln(n))}{n-p-q-1}$ [@McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
+                              "$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + pq$ [@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
+                              "$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + \\frac{3}{2}pq$ [@Smith_Spiegelhalter_1980]",
+
+"$\\textit{F test}$ for UMR and $\\textit{Approximate F test}$ for MMR",
+
+"$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + p \\ln(n)$ [@Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002]",
+
+"$1 - \\frac{SSE}{SST}$;Formula is available but not implemented in StepReg for MMR",
+
+"$1 - \\frac{(n-1)(1-R^2)}{n-p}$ [@Darlington_1968; @Judge_1985] Formula is available but not implemented in StepReg for MMR")
+
+Formula_in_Logit_Cox_Poisson_Gamma <- c("$-2{LL} + 2p$  [@Darlington_1968; @Judge_1985]",
                               "$-2{LL} + \\frac{n(n+p)}{n-p-2}$ [@Hurvich_Tsai_1989]",
-                              "",
-                              "",
-                              "$-2{LL} + 2p\\ln(\\ln(n))$",
-                              "$-2{LL} + \\frac{2pn \\ln(\\ln(n))}{n-p-2}$",
+                              "not available",
+                              "not available",
+                              "$-2{LL} + 2p\\ln(\\ln(n))$ [@Hannan_Quinn_1979]",
+                              "$-2{LL} + \\frac{2pn \\ln(\\ln(n))}{n-p-2}$ [@McQuarrie_Tsai_1998]",
                               "$-2{LL} + p$ [@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
                               "$-2{LL} + \\frac{3}{2}p$ [@Smith_Spiegelhalter_1980]",
-                              "logistic,Poisson, and Gamma: score and LRT test for forward, wald test for backward; Cox: LRT test for forward, wald test for backward",
-                              "$-2{LL} + p\\ln(n)$",
+                              "Score Chi-square or LRT test in forward for Logistic, Poisson, and Gamma regresison; LRT test in forward for Cox; wald test in backward for Logistic, Poisson, Gamma, and Cox regression",
+                              "$-2{LL} + p\\ln(n)$ [@Schwarz_1978; @Judge_1985]",
                               "not available",
                               "not available")
-df <- data.frame(Criterion, Difination, Formula_Linear_univariate, Formula_Linear_multivariate,Formula_Logit_Cox_Poisson_Gamma)
-kable_styling(kable(df, format = "html", align='l', booktabs=TRUE, escape = F, caption = 'Abbreviation, Definition, and Formula of the Information Criterion') %>%
-                footnote(
-                   number=c("
-${n}$: Sample Size; 
-${p}$: Number of parameters including the intercept;
-${k}$: Number of independent variables in the full model;
-${q}$: Number of dependent variables;
-$\\sigma^2$: Estimate of pure error variance from fitting the full model, which is the average of sigma value when it is for multivariate multiple regression;
-${df}$:	Degree of freedom;
-${SST}$: Total sum of squares corrected for the mean for the dependent variable, which is a numeric and matrix for univariate regression and multivariate regression correspondingly;
-${SSE}$: Error sum of squares, which is a numeric and matrix for univariate regression and multivariate regression correspondingly;
-${LL}$:	The natural logarithm of likelihood;
-${I}$: The identity of matrix of size (${q} x {q}$);
-${SSEdet}$: The determinant of matrix ${SSE}$;
-${SSTdet}$: The determinant of matrix ${SST}$;
-${| |}$: The absolute value;
-$\\ln()$: The natural logarithm;
-"),
-                   footnote_as_chunk=TRUE, 
-                   escape=FALSE))
+df <- data.frame(Abbreviation, Definition, Formula_in_Linear,Formula_in_Logit_Cox_Poisson_Gamma)
+
+kable_styling(kable(df, format = "html", align='l', booktabs=TRUE, escape = F, caption = 'Abbreviation, Definition, and Formula of the Information Criterion for Linear, Logit, Cox, Possion and Gamma regression') %>%
+  column_spec(3:4, width = "0.6in"))
 ```
 
-There is some inconsistency in the literature on the precise definitions for the AIC and AICC statistics. In the context of linear regression, several different versions of the formulas for AIC and AICC appear in the statistics literature. The following formulas for AIC [@Darlington_1968; @Judge_1985] and AICC [@McQuarrie_Tsai_1998]:
+In the literature, there is some inconsistency regarding the precise definitions of the AIC and AICC statistics. Within the context of linear regression, multiple variations of the formulas for AIC and AICC are found in statistical literature.
 
-AIC=$n\ln\left(\frac{SSE}{n}\right) + 2p$
+$AIC^1=n\ln\left(\frac{SSE}{n}\right) + 2p$[@Darlington_1968; @Judge_1985]
 
-AICc=$\ln\left(\frac{SSE}{n}\right) + 1 + \frac{2(p+1)}{n-p-2}$
+$AICc^1=\ln\left(\frac{SSE}{n}\right) + 1 + \frac{2(p+1)}{n-p-2}$ [@McQuarrie_Tsai_1998]
 
-The definitions of AIC and AICC found in [@Hurvich_Tsai_1989]:
+$AIC^2=AIC^1 + n + 2=n\ln\left(\frac{SSE}{n}\right) + 2p + n + 2$ [@Hurvich_Tsai_1989]
 
-AIC=$n\ln\left(\frac{SSE}{n}\right) + 2p + n + 2$
+$AICc^2=n*AICc^1=n\ln\left(\frac{SSE}{n}\right) + \frac{n(p+n)}{n-p-2}$ [@Hurvich_Tsai_1989]
 
-AICc=$n\ln\left(\frac{SSE}{n}\right) + \frac{n(p+n)}{n-p-2}$
-
-However, for a fixed number of observations, these different versions differ by additive and positive multiplicative constants.
+For a fixed number of observations, these various versions differ only by additive and positive multiplicative constants.
 
 ## Multicollinearity
 
+This [blog](https://statisticsbyjim.com/regression/multicollinearity-in-regression-analysis/) by Jim Frost gives an excellent overview of multicollinearity and when it is necessary to remove it.
+
+Simply put, a dataset contains multicollinearity when input predictors are correlated. When multicollinearity occurs, the interpretability of predictors will be badly affected because changes in one input variable lead to changes in other input variables. Therefore, it is hard to individually estimate the relationship between each input variable and the dependent variable.
+
+Multicollinearity can dramatically reduce the precision of the estimated regression coefficients of correlated input variables, making it hard to find the correct model. However, as Jim pointed out, “Multicollinearity affects the coefficients and p-values, but it does not influence the predictions, precision of the predictions, and the goodness-of-fit statistics. If your primary goal is to make predictions, and you don’t need to understand the role of each independent variable, you don’t need to reduce severe multicollinearity.”
+
+In StepReg, [QC Matrix Decomposition](https://towardsdatascience.com/qr-matrix-factorization-15bae43a6b2#:~:text=The%20QR%20matrix%20decomposition%20allows%20one%20to%20express%20a%20matrix,zero%2C%20it%20is%20also%20invertible.) is performed ahead of time to detect and remove input variables causing multicollinearity.
+
 # StepReg Output
 
-A list containing multiple tables will be returned. Names and descriptions of each table are outlined as follows:
+A list containing multiple tables will be returned. 
 
--   `Table 1. Summary of Parameters`: This table presents the parameters utilized in stepwise regression along with their default or user-specified values.
+```{r, echo = FALSE}
+library(kableExtra)
+Table <- c(
+"Summary of Parameters",
+"Variables and Types",
+"Selection Process under IC",
+"Parameter Estimates")
 
--   `Table 2. Variables and Types`: This table outlines the variables and their respective types utilized in the dataset.
+Meanings <- c(
+"The parameters utilized in stepwise regression along with their default or user-specified values",
+"The variables and their respective types in the dataset",
+"The detailed overview of the variable selection process under information criteria IC.",
+"The parameter estimates for the optimal models under information criteria IC")
 
--   `Table names prefixed with Table. Selection Process`: This table details overview of the variable selection process. Variables are selected based on information criteria rules, such as AIC, BIC, SBC, IC(1), HQ, etc., where lower values indicate better model fit. The significance levels include SLE for the entry of variables in forward selection and SLS for staying in backward elimination. For Rsq or adjusted R-squared, higher values indicate a better model fit.
+kable_styling(kable(data.frame(Table,Meanings),format = "html", align='l', escape = F, caption = 'Output Explanation of StepReg')) #%>% column_spec(1:2, width = c("2in","4in")))
+```
 
--   `Tabel names prefixed with Table. Parameter Estimates`: This table provides summary information for the optimal models.
+# Recommendation of selection of variable selection method and information criteron
 
 # Demo
 
@@ -210,9 +220,21 @@ A breif introduction for four datasets is descripted as below,
 
 This section provides 9 examples utilizing distinct parameters across various regression scenarios with the above 4 datasets.
 
-## linear stepwise regression with `mtcars`
+## linear stepwise regression with _mtcars_
 
-> **Example1**: In this analysis, we used `mpg` as the response variable, with all other variables serving as predictors, employing a strategy of `forward` and a metric of `AIC` for linear stepwise regression. The analysis involved enforcing `disp` and `cyl` to be included in all models.
+> **Example1**:  
+>
+> type of regression: `linear`
+>
+> response: `mpg`
+>
+> predictors: all variables except `mpg` 
+>
+> variable selection method: `forward` 
+>
+> information criteria: `AIC` 
+>
+> force `disp` and `cyl` to be included in all models.
 
 ```{r}
     library(StepReg)
@@ -227,13 +249,25 @@ This section provides 9 examples utilizing distinct parameters across various re
     exam1
 ```
 
-> Visulization of the selection process using information criteron `AIC`.
+> Visulization of the selection process under `AIC`.
 
 ```{r plot_exam1, warning=FALSE}
     plot(exam1)
 ```
 
-> **Example2**: In this illustration, we maintained `mpg` as the response variable, while designating the other variables as predictors. The chosen strategy was `bidirectional` with `AIC`, `AICc`, `BIC`,`HQ`, `HQc`, `SBC`, and `SL` as the stopping criterion, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05 parallelly. The analysis involved removing `intercept` from the model. The specific characteristics of the data and the goals of the analysis in each subject area require users to choose different stepwise regression method and selection criteria. Users can compare all metics through the output list or the plots.
+> **Example2**: 
+>
+> type of regression: `linear`
+>
+> response: `mpg` 
+>
+> predictors: all other variables except `mpg` and `intercept`. 
+>
+> variable selection method: `bidirectional` 
+>
+> information criterion: run `AIC`, `AICc`, `BIC`,`HQ`, `HQc`, `SBC`, and `SL` parallelly, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05 . 
+>
+> Users can compare output within each metic through the output table and visualization.
 
 ```{r}
     formula <- mpg ~ . + 0
@@ -247,13 +281,23 @@ This section provides 9 examples utilizing distinct parameters across various re
     exam2
 ```
 
-> Visulization of the selection process using `bidirection` strategy under information criteron `AIC`, `AICc`, `BIC`,`HQ`, `HQc`, `SBC`, and `SL` with `sle`=0.05 and `sls`=0.05.
+> Visulization of the selection process using `bidirection` strategy under information criteron `AIC`, `AICc`, `BIC`,`HQ`, `HQc`, `SBC`, and `SL` with `sle`=0.05 and `sls`=0.05. 
 
 ```{r plot_exam2, warning=FALSE}
     plot(exam2)
 ```
 
-> **Example3**: In this multivariable multiple stepwise regression, we employed `mpg` and `drat` as response with `cyl`, `disp`, `hp`, `wt`, `vs` and `am` serving as predictors. The variable `wt` was enforced to be included in all models. The analysis involved the `subset` strategy for variable selection, with `AIC` and `AICc` as the criteria individually.
+> **Example3**: 
+>
+> type of regression: `linear`
+>
+> response: multivariates of `mpg` and `drat` 
+>
+> predictors: `cyl`, `disp`, `hp`, `wt`, `vs`, `am` and `intercept`. 
+>
+> variable selection method: `subset` 
+>
+> information criterion: run `AIC`, `SBC` and `HQ` parallelly
 
 ```{r}
     formula <- cbind(mpg,drat) ~ cyl + disp + hp + wt + vs + am
@@ -262,12 +306,12 @@ This section provides 9 examples utilizing distinct parameters across various re
                       type = "linear",
                       include = 'wt',
                       strategy = "subset",
-                      metric = c("AIC","AICc"),
+                      metric = c("AIC","AICc","SBC","HQ"),
                       best_n = 3)
     exam3
 ```
 
-> Visulization of the selection process using `subset` strategy under information criteron `AIC` and `AICc`.
+> Visulization of the selection process using `subset` strategy under information criteron `AIC`, `SBC` and `HQ`.
 
 ```{r plot_exam3, warning=FALSE}
     plot(exam3)
@@ -275,7 +319,19 @@ This section provides 9 examples utilizing distinct parameters across various re
 
 ## Logistic stepwise regression with `remission`
 
-> **Example4**: In this run, we employed `remiss` as response with the other 6 variables serving as predictors. The variable `cell` was enforced to be included in all models. The analysis involved the `forward` strategy for variable selection, with `AIC` and `SL` as the criteria parallelly, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05.
+> **Example4**: 
+>
+> type of regression: `logit`
+>
+> response: `remiss` 
+>
+> predictors: all variables except `remiss`
+>
+> variable selection method: `forward` 
+>
+> information criterion: run `AIC` and `SL` parallelly, where `sle` and `sls` were both set to 0.05.
+>
+> force `cell` always in the model.
 
 ```{r warning = FALSE}
     data(remission)
@@ -286,8 +342,7 @@ This section provides 9 examples utilizing distinct parameters across various re
                       include= "cell",
                       strategy = "forward",
                       metric = c("AIC","SL"),
-                      sle = 0.05,
-                      sls = 0.05)
+                      sle = 0.05)
     exma4
 ```
 
@@ -297,7 +352,17 @@ This section provides 9 examples utilizing distinct parameters across various re
     plot(exma4)
 ```
 
-> **Example5**: In this anslysis, `remiss` was retained as the response variable, while the other six variables served as predictors. The analysis utilized the `subset` strategy for variable selection, with `AIC` and `SL` as the criterion parallelly.
+> **Example5**: 
+>
+> type of regression: `logit`
+>
+> response: `remiss` 
+>
+> predictors: all variables except `remiss`
+>
+> variable selection method: `subset` 
+>
+> information criterion: run `SBC` and `SL` parallelly, where `sle` and `sls` used default 0.15.
 
 ```{r warning = FALSE}
     data(remission)
@@ -306,12 +371,12 @@ This section provides 9 examples utilizing distinct parameters across various re
                       data = remission,
                       type = "logit",
                       strategy = "subset",
-                      metric = c("AIC","SL"),
+                      metric = c("SBC","SL"),
                       best_n = 3)
     exma5
 ```
 
-> Visulization of the selection process using `subset` strategy under information criteron `AIC` and `SL`.
+> Visulization of the selection process using `subset` strategy under information criteron `SBC` and `SL`.
 
 ```{r plot_exam5, warning=FALSE}
     plot(exma5)
@@ -319,16 +384,28 @@ This section provides 9 examples utilizing distinct parameters across various re
 
 ## Cox stepwise regression with `lung`
 
-> **Example6**: Cox stepwise regression used the `forward` method for variable selection with `IC(1)` and `SL` as the criteria for stop rules parallelly, including variable `age` in all models. The significance levels for enter (`sle`) was set to 0.05.
+> **Example6**: 
+>
+> type of regression: `cox`
+>
+> response: `Surv(time, status_binary)`
+>
+> predictors: all variables except `status`
+>
+> variable selection method: `forward` 
+>
+> information criterion: run `IC(1)` and `SL` parallelly, where `sle` was set to 0.05.
+>
+> force `age` in all models.
 
 ```{r warning = FALSE}
     lung <- survival::lung
-    my.data <- na.omit(lung)
-    my.data$status1 <- ifelse(my.data$status == 2,1,0)
-    formula  =  Surv(time, status1) ~ . - status 
+    lung_noNA <- na.omit(lung)
+    lung_noNA$status_binary <- ifelse(lung_noNA$status == 2,1,0)
+    formula  =  Surv(time, status_binary) ~ . - status
     
     exma6 <- stepwise(formula = formula,
-                      data = my.data,
+                      data = lung_noNA,
                       type = "cox",
                       include = "age",
                       strategy = "forward",
@@ -343,12 +420,22 @@ This section provides 9 examples utilizing distinct parameters across various re
     plot(exma6)
 ```
 
-> **Example7**: Cox stepwise regression used the `backward` method for variable selection with `SL` and `AIC` as the criterion. The significance levels for staying (`sls`) was set to 0.05.
+> **Example7**: 
+>
+> type of regression: `cox`
+>
+> response: `Surv(time, status_binary)`
+>
+> predictors: all variables except `status`
+>
+> variable selection method: `backward` 
+>
+> information criterion: run `SL` and `AIC` parallelly, where `sls` was set to 0.05.
 
 ```{r warning = FALSE}
-    formula = Surv(time, status1) ~ . - status 
+    formula = Surv(time, status_binary) ~ . - status 
     exma7 <- stepwise(formula = formula,
-                      data = my.data,
+                      data = lung_noNA,
                       type = "cox",
                       strategy = "backward",
                       metric = c("SL","AIC"),
@@ -364,7 +451,17 @@ This section provides 9 examples utilizing distinct parameters across various re
 
 ## Poisson stepwise regression with `CreditCard`
 
-> **Example8**: In this exmaples, We designated `reports` as the response variable, with the remaining variables serving as predictors. The analysis employed the `forward` method for variable selection, utilizing `SL` and `IC(3/2)` as the criterion for stop rules, and the significance levels for entry (`sle`) was set to be 0.05.
+> **Example8**: 
+>
+> type of regression: `poisson`
+>
+> response: `reports`
+>
+> predictors: all variables except `reports`
+>
+> variable selection method: `forward` 
+>
+> information criterion: run `SL` and `IC(3/2)` parallelly, and `sle` was set to 0.05.
 
 ```{r warning = FALSE}
     data(CreditCard, package = 'AER')
@@ -385,7 +482,19 @@ This section provides 9 examples utilizing distinct parameters across various re
     plot(exma8)
 ```
 
-> **Example9**: `reports` variable was maintained as the response variable, and the remaining variables were set as predictors. The variables `card` and `months` were enforced to be included in all models. Poisson stepwise regression was performed using the `bidirection` method for variable selection with `IC(3/2)` and `AIC` as the criterion for stop rules parrallelly.
+> **Example9**: 
+>
+> type of regression: `poisson`
+>
+> response: `reports`
+>
+> predictors: all variables except `reports`
+>
+> variable selection method: `bidirection` 
+>
+> information criterion: run `AIC` and `IC(3/2)` parallelly
+>
+> force `card` and `months` in all models.
 
 ```{r warning = FALSE}
     formula = reports ~ .

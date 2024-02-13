@@ -120,7 +120,7 @@ validateUtils <- function(formula,
 	  # ref: https://stats.oarc.ucla.edu/other/mult-pkg/faq/general/faqwhat-is-complete-or-quasi-complete-separation-in-logistic-regression-and-what-are-some-strategies-to-deal-with-the-issue/
 	  tryCatch(                
 	    expr = {                      
-	      glm(formula, data = data, family = type)
+	      glm(formula, data = data, family = type_glm)
 	    },
 	    error = function(e) {          
 	      print("There was an error message.")
