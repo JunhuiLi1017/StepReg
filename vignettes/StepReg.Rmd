@@ -153,21 +153,19 @@ Formula_in_Logit_Cox_Poisson_Gamma <- c("$-2\\text{LL} + 2p$  [@Darlington_1968;
                               "not available")
 df <- data.frame(Abbreviation, Definition, Formula_in_Linear,Formula_in_Logit_Cox_Poisson_Gamma)
 
-kable_styling(kable(df, format = "html", align='l', booktabs=TRUE, escape = F, caption = 'Abbreviation, Definition, and Formula of the Information Criterion for Linear, Logit, Cox, Possion and Gamma regression') %>%
+kable_styling(footnote(kable(df, format = "html", align='l', booktabs=TRUE, escape = F, caption = 'Abbreviation, Definition, and Formula of the Information Criterion for Linear, Logit, Cox, Possion and Gamma regression'),alphabet = c("In the literature, there is some inconsistency regarding the precise definitions of the AIC and AICC statistics. Within the context of linear regression, multiple variations of the formulas for AIC and AICC are found in statistical literature. 
+
+$AIC^1=n\\ln\\left(\\frac{SSE}{n}\\right) + 2p$[@Darlington_1968; @Judge_1985] 
+
+$AIC^2=AIC^1 + n + 2=n\\ln\\left(\\frac{SSE}{n}\\right) + 2p + n + 2$ [@Hurvich_Tsai_1989]
+
+$AICc^1=\\ln\\left(\\frac{SSE}{n}\\right) + 1 + \\frac{2(p+1)}{n-p-2}$ [@McQuarrie_Tsai_1998]
+
+$AICc^2=n*AICc^1=n\\ln\\left(\\frac{SSE}{n}\\right) + \\frac{n(p+n)}{n-p-2}$ [@Hurvich_Tsai_1989]
+
+For a fixed number of observations, these various versions differ only by additive and positive multiplicative constants.")) %>%
   column_spec(3:4, width = "0.6in"))
 ```
-
-In the literature, there is some inconsistency regarding the precise definitions of the AIC and AICC statistics. Within the context of linear regression, multiple variations of the formulas for AIC and AICC are found in statistical literature.
-
-$AIC^1=n\ln\left(\frac{SSE}{n}\right) + 2p$[@Darlington_1968; @Judge_1985]
-
-$AIC^2=AIC^1 + n + 2=n\ln\left(\frac{SSE}{n}\right) + 2p + n + 2$ [@Hurvich_Tsai_1989]
-
-$AICc^1=\ln\left(\frac{SSE}{n}\right) + 1 + \frac{2(p+1)}{n-p-2}$ [@McQuarrie_Tsai_1998]
-
-$AICc^2=n*AICc^1=n\ln\left(\frac{SSE}{n}\right) + \frac{n(p+n)}{n-p-2}$ [@Hurvich_Tsai_1989]
-
-For a fixed number of observations, these various versions differ only by additive and positive multiplicative constants.
 
 ## How to choose variable selection method and information criterion
 
