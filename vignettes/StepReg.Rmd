@@ -59,12 +59,12 @@ Model selection aims to identify the subset of independent variables that provid
 ```{r, echo = FALSE}
 library(knitr)
 
-Model_Selection <- c("Forward Selection", "Backward Elimination", "Bidirectional Elimination", "Best Subsets")
-Definition <- c("In forward selection, the algorithm starts with an empty model (no predictors) and adds in variables one by one. Each step tests the addition of every possible predictor by calculating a pre-selected model fit score. Add the variable (if any) whose inclusion leads to the most statistically significant fit improvement. Repeat this process until more predictors no longer lead to a statistically better fit.",
+Method <- c("Forward Selection", "Backward Elimination", "Bidirectional Elimination", "Best Subsets")
+Description <- c("In forward selection, the algorithm starts with an empty model (no predictors) and adds in variables one by one. Each step tests the addition of every possible predictor by calculating a pre-selected model fit score. Add the variable (if any) whose inclusion leads to the most statistically significant fit improvement. Repeat this process until more predictors no longer lead to a statistically better fit.",
                 "In backward elimination, the algorithm starts with a full model (all predictors) and deletes variables one by one. Each step test the deletion of every possible predictor by calculating a pre-selected model fit score. Delete the variable (if any) whose loss leads to the most statistically significant fit improvement. Repeat this process until less predictors no longer lead to a statistically better fit.",
                 "Bidirectional elimination is essentially a forward selection procedure combined with backward elimination at each iteration. Each iteration starts with a forward selection step that adds in predictors, followed by a round of backward elimination that removes predictors. Repeat this process until no more predictors are added or excluded.",
                 "Stepwise algorithms add or delete one predictor at a time and output a single model without evaluating all candidates. Therefore, it is a relatively simple procedure that only produces one model. In contrast, the *Best Subsets* algorithm calculates all possible models and output the best-fitting models with one predictor, two predictors, etc., for users to choose from.")
-df <- data.frame(Model_Selection, Definition)
+df <- data.frame(Method, Description)
 
 kable(df, caption = 'Model selection method')
 ```
@@ -84,9 +84,7 @@ Statistic <- c(
 "$\\sigma^2$",
 "${SST}$",
 "${SSE}$",
-"${LL}$",
-"$\\text{SSE}_{\\text{det}}$",
-"$\\text{SST}_{\\text{det}}$",
+"$\\text{LL}$",
 "${| |}$",
 "$\\ln()$")
 
@@ -98,9 +96,7 @@ Meanings <- c(
 "Total sum of squares corrected for the mean for the dependent variable, which is a numeric value for UMR and a matrix for multivariate regression",
 "Error sum of squares, which is a numeric value for UMR and a matrix for multivariate regression",
 "The natural logarithm of likelihood",
-"The determinant of matrix ${SSE}$",
-"The determinant of matrix ${SST}$",
-"The absolute value",
+"The determinant function",
 "The natural logarithm")
 
 kable_styling(kable(data.frame(Statistic,Meanings),format = "html", align='l', escape = F, caption = 'Statistics in Information Criterion'))
@@ -122,37 +118,37 @@ Definition <- c("Akaike’s information criterion",
                 "R-square statistic",
                 "Adjusted R-square statistic")
 
-Formula_in_Linear <- c("$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + 2pq + n + q(q+1)$ [@Hurvich_Tsai_1989; @Al-Subaihi_2002]",
-                                 "$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + \\frac{nq(n+p)}{n-p-q-1}$ [@Hurvich_Tsai_1989; @Bedrick_Tsai_1994]",
+Formula_in_Linear <- c("$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + 2pq + n + q(q+1)$ [@Hurvich_Tsai_1989; @Al-Subaihi_2002]",
+                                 "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + \\frac{nq(n+p)}{n-p-q-1}$ [@Hurvich_Tsai_1989; @Bedrick_Tsai_1994]",
                                  
 "$n \\ln\\left(\\frac{SSE}{n}\\right) + 2(p+2)o - 2o^2, \\quad o = \\frac{n\\sigma^2}{SSE}$ [@Sawa_1978; @Judge_1985]; not available in StepReg for MMR",
 
 "$\\frac{SSE}{\\sigma^2} + 2p - n$ [@Mallows_1973; @Hocking_1976]; Formula is available but not implemented in StepReg for MMR",
 
-"$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + 2pq\\ln(\\ln(n))$ [@Hannan_Quinn_1979; @McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
+"$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + 2pq\\ln(\\ln(n))$ [@Hannan_Quinn_1979; @McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
 
-"$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + \\frac{2pqnln(\\ln(n))}{n-p-q-1}$ [@McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
-                              "$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + pq$ [@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
-                              "$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + \\frac{3}{2}pq$ [@Smith_Spiegelhalter_1980]",
+"$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + \\frac{2pqnln(\\ln(n))}{n-p-q-1}$ [@McQuarrie_Tsai_1998; @Hurvich_Tsai_1989] not available in StepReg for MMR",
+                              "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + p$ [@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980] not available in StepReg for MMR",
+                              "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + \\frac{3}{2}p$ [@Smith_Spiegelhalter_1980] not available in StepReg for MMR",
 
 "$\\textit{F test}$ for UMR and $\\textit{Approximate F test}$ for MMR",
 
-"$n\\ln\\left(\\frac{|\\text{SSE}_{\\text{det}}|}{n}\\right) + p \\ln(n)$ [@Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002]",
+"$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + p \\ln(n)$ [@Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002] not available in StepReg for MMR",
 
 "$1 - \\frac{SSE}{SST}$;Formula is available but not implemented in StepReg for MMR",
 
 "$1 - \\frac{(n-1)(1-R^2)}{n-p}$ [@Darlington_1968; @Judge_1985] Formula is available but not implemented in StepReg for MMR")
 
-Formula_in_Logit_Cox_Poisson_Gamma <- c("$-2{LL} + 2p$  [@Darlington_1968; @Judge_1985]",
-                              "$-2{LL} + \\frac{n(n+p)}{n-p-2}$ [@Hurvich_Tsai_1989]",
+Formula_in_Logit_Cox_Poisson_Gamma <- c("$-2\\text{LL} + 2p$  [@Darlington_1968; @Judge_1985]",
+                              "$-2\\text{LL} + \\frac{n(n+p)}{n-p-2}$ [@Hurvich_Tsai_1989]",
                               "not available",
                               "not available",
-                              "$-2{LL} + 2p\\ln(\\ln(n))$ [@Hannan_Quinn_1979]",
-                              "$-2{LL} + \\frac{2pn \\ln(\\ln(n))}{n-p-2}$ [@McQuarrie_Tsai_1998]",
-                              "$-2{LL} + p$ [@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
-                              "$-2{LL} + \\frac{3}{2}p$ [@Smith_Spiegelhalter_1980]",
+                              "$-2\\text{LL} + 2p\\ln(\\ln(n))$ [@Hannan_Quinn_1979]",
+                              "$-2\\text{LL} + \\frac{2pn \\ln(\\ln(n))}{n-p-2}$ [@McQuarrie_Tsai_1998]",
+                              "$-2\\text{LL} + p$ [@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
+                              "$-2\\text{LL} + \\frac{3}{2}p$ [@Smith_Spiegelhalter_1980]",
                               "Score Chi-square or LRT test in forward for Logistic, Poisson, and Gamma regresison; LRT test in forward for Cox; wald test in backward for Logistic, Poisson, Gamma, and Cox regression",
-                              "$-2{LL} + p\\ln(n)$ [@Schwarz_1978; @Judge_1985]",
+                              "$-2\\text{LL} + p\\ln(n)$ [@Schwarz_1978; @Judge_1985]",
                               "not available",
                               "not available")
 df <- data.frame(Abbreviation, Definition, Formula_in_Linear,Formula_in_Logit_Cox_Poisson_Gamma)
@@ -165,13 +161,15 @@ In the literature, there is some inconsistency regarding the precise definitions
 
 $AIC^1=n\ln\left(\frac{SSE}{n}\right) + 2p$[@Darlington_1968; @Judge_1985]
 
-$AICc^1=\ln\left(\frac{SSE}{n}\right) + 1 + \frac{2(p+1)}{n-p-2}$ [@McQuarrie_Tsai_1998]
-
 $AIC^2=AIC^1 + n + 2=n\ln\left(\frac{SSE}{n}\right) + 2p + n + 2$ [@Hurvich_Tsai_1989]
+
+$AICc^1=\ln\left(\frac{SSE}{n}\right) + 1 + \frac{2(p+1)}{n-p-2}$ [@McQuarrie_Tsai_1998]
 
 $AICc^2=n*AICc^1=n\ln\left(\frac{SSE}{n}\right) + \frac{n(p+n)}{n-p-2}$ [@Hurvich_Tsai_1989]
 
 For a fixed number of observations, these various versions differ only by additive and positive multiplicative constants.
+
+## How to choose variable selection method and information criterion
 
 ## Multicollinearity
 
@@ -203,8 +201,6 @@ Meanings <- c(
 
 kable_styling(kable(data.frame(Table,Meanings),format = "html", align='l', escape = F, caption = 'Output Explanation of StepReg')) #%>% column_spec(1:2, width = c("2in","4in")))
 ```
-
-# Recommendation of selection of variable selection method and information criteron
 
 # Demo
 

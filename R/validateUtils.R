@@ -97,8 +97,8 @@ validateUtils <- function(formula,
 	    }
 	  }
 	  if(n_y > 1) {
-	    if(any(metric %in% c("BIC", "CP", "Rsq", "adjRsq"))) {
-	      stop("The 'metric' can not be 'BIC', 'CP', 'Rsq' or 'adjRsq' when using multivariate multiple regression!")
+	    if(any(metric %in% c("BIC", "CP", "HQc", "IC(1)", "IC(3/2)", "Rsq", "adjRsq"))) {
+	      stop("The 'metric' can not be 'BIC', 'CP', 'HQc', 'IC(1)', 'IC(3/2)', 'Rsq' or 'adjRsq' when using multivariate multiple regression!")
 	    }
 	  }
 		if(strategy == "subset" & any(metric == "SL")) {
