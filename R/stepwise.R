@@ -88,13 +88,13 @@
 #'          strategy = "bidirection",
 #'          metric = "AIC")
 #' ## perform linear stepwise regression with 'bidirection' strategy and 
-#' ## "AIC","SBC","SL","AICc","BIC","HQ"and "HQc" stop rule..
+#' ## "AIC","SBC","SL","AICc","BIC", and "HQ" stop rule.
 #' formula <- mpg ~ . + 1
 #' stepwise(formula = formula,
 #'          data = mtcars,
 #'          type = "linear",
 #'          strategy = "bidirection",
-#'          metric = c("AIC","SBC","SL","AICc","BIC","HQ","HQc"))
+#'          metric = c("AIC","SBC","SL","AICc","BIC","HQ"))
 #'
 #' ## perform logit stepwise regression with 'forward' strategy and significance
 #' ## level as stop rule.
