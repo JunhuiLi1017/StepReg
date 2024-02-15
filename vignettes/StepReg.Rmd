@@ -50,8 +50,7 @@ Regression <- c("linear", "logit", "cox", "poisson", "gamma")
 Reponse <- c("continuous", "binary", "time-to-event", "count", "time-series")
 df <- data.frame(Regression, Reponse)
 
-kable(df, caption = 'Common regression categories')
-devtools::load_all("~/GitHub/StepReg/")
+kable(df, format = "html", caption = 'Common regression categories') %>% kable_styling()
 ```
 
 ## Model selection
@@ -66,7 +65,7 @@ Description <- c("In forward selection, the algorithm starts with an empty model
                 "Stepwise algorithms add or delete one predictor at a time and output a single model without evaluating all candidates. Therefore, it is a relatively simple procedure that only produces one model. In contrast, the *Best Subsets* algorithm calculates all possible models and output the best-fitting models with one predictor, two predictors, etc., for users to choose from.")
 df <- data.frame(Strategy, Description)
 
-kable(df, caption = 'Model selection strategy')
+kable(df, format = "html", caption = 'Model selection strategy') %>% kable_styling()
 ```
 
 Given the computational constraints, when dealing with datasets featuring a substantial number of predictor variables greater than the sample size, the Bidirectional Elimination typically emerges as the most advisable approach. Forward Selection and Backward Elimination can be considered in sequence. On the contrary, the Best Subsets approach requires the most substantial processing time, yet it calculates a comprehensive set of models with varying numbers of variables. In practice, users can experiment with various methods and select a final model based on the specific dataset and research objectives at hand.
@@ -84,7 +83,7 @@ Statistic <- c(
 "${SST}$",
 "${SSE}$",
 "$\\text{LL}$",
-"${| |}$",
+"${|  |}$",
 "$\\ln()$")
 
 Meanings <- c(
@@ -102,8 +101,9 @@ kable_styling(kable(data.frame(Statistic,Meanings),format = "html", align='l', e
 ```
 
 ```{r, echo = FALSE}
-Abbreviation <- c("AIC", "AICc", "BIC", "CP", "HQ", "IC(1)", "IC(3/2)", "SL", "SBC", "Rsq", "adjRsq")
-Definition <- c("Akaike’s information criterion",
+Abbreviation <- c("", "AIC", "AICc", "BIC", "CP", "HQ", "IC(1)", "IC(3/2)", "SL", "SBC", "Rsq", "adjRsq")
+Definition <- c("",
+                "Akaike’s information criterion",
                 "Corrected Akaike’s information criterion",
                 "Sawa Bayesian information criterion",
                 "Mallows’ Cp statistic",
@@ -115,30 +115,33 @@ Definition <- c("Akaike’s information criterion",
                 "R-square statistic",
                 "Adjusted R-square statistic")
 
-Formula_in_Linear <- c("$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + 2pq + n + q(q+1)$ \n\n[@Hurvich_Tsai_1989; @Al-Subaihi_2002]$^1$",
-                       "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + \\frac{nq(n+p)}{n-p-q-1}$ \n\n[@Hurvich_Tsai_1989; @Bedrick_Tsai_1994]$^2$",
-                       "$n\\ln\\left(\\frac{SSE}{n}\\right) + 2(p+2)o - 2o^2, \\quad o = \\frac{n\\sigma^2}{SSE}$ \n\n[@Sawa_1978; @Judge_1985] \n\nnot available for MMR",
-                       "$\\frac{SSE}{\\sigma^2} + 2p - n$ [@Mallows_1973; \n\n@Hocking_1976] \n\nnot available for MMR",
-                       "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + 2pq\\ln(\\ln(n))$ \n\n[@Hannan_Quinn_1979; @McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
-                       "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + p$ \n\n[@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980] not available in StepReg for MMR",
-                       "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + \\frac{3}{2}p$ \n\n[@Smith_Spiegelhalter_1980] \n\nnot available for MMR",
+Formula_in_Linear <- c("linear",
+                       "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + 2pq + n + q(q+1)$ <br>[@Hurvich_Tsai_1989; @Al-Subaihi_2002]$^1$",
+                       "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + \\frac{nq(n+p)}{n-p-q-1}$ <br>[@Hurvich_Tsai_1989; @Bedrick_Tsai_1994]$^2$",
+                       "$n\\ln\\left(\\frac{SSE}{n}\\right) + 2(p+2)o - 2o^2, o = \\frac{n\\sigma^2}{SSE}$ <br>[@Sawa_1978; @Judge_1985] <br>not available for MMR",
+                       "$\\frac{SSE}{\\sigma^2} + 2p - n$ <br> [@Mallows_1973; @Hocking_1976] <br>not available for MMR",
+                       "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + 2pq\\ln(\\ln(n))$ <br>[@Hannan_Quinn_1979; @McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
+                       "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + p$ <br>[@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980] not available for MMR",
+                       "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + \\frac{3}{2}p$ <br>[@Smith_Spiegelhalter_1980] <br>not available for MMR",
                        "$\\textit{F test}$ for UMR and $\\textit{Approximate F test}$ for MMR",
-                       "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + p \\ln(n)$ \n\n[@Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002] \n\nnot available for MMR",
-                       "$1 - \\frac{SSE}{SST}$ \n\nnot available for MMR",
-                       "$1 - \\frac{(n-1)(1-R^2)}{n-p}$ \n\n[@Darlington_1968; @Judge_1985] \n\nnot available for MMR")
+                       "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + p \\ln(n)$ <br>[@Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002] <br>not available for MMR",
+                       "$1 - \\frac{SSE}{SST}$ <br>not available for MMR",
+                       "$1 - \\frac{(n-1)(1-R^2)}{n-p}$ <br>[@Darlington_1968; @Judge_1985] <br>not available for MMR")
 
-Formula_in_Logit_Cox_Poisson_Gamma <- c("$-2\\text{LL} + 2p$ \n\n[@Darlington_1968; @Judge_1985]",
-                                        "$-2\\text{LL} + \\frac{n(n+p)}{n-p-2}$ \n\n[@Hurvich_Tsai_1989]",
+Formula_in_Logit_Cox_Poisson_Gamma <- c("logit|cox|poisson|gamma",
+                                        "$-2\\text{LL} + 2p$ <br>[@Darlington_1968; @Judge_1985]",
+                                        "$-2\\text{LL} + \\frac{n(n+p)}{n-p-2}$ <br>[@Hurvich_Tsai_1989]",
                                         "not available",
                                         "not available",
-                                        "$-2\\text{LL} + 2p\\ln(\\ln(n))$ \n\n[@Hannan_Quinn_1979]",
-                                        "$-2\\text{LL} + p$ \n\n[@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
-                                        "$-2\\text{LL} + \\frac{3}{2}p$ \n\n[@Smith_Spiegelhalter_1980]",
-                                        "Score Chi-square or LRT test in forward for Logistic, Poisson, and Gamma regresison; LRT test in forward for Cox; wald test in backward for Logistic, Poisson, Gamma, and Cox regression",
-                                        "$-2\\text{LL} + p\\ln(n)$ \n\n[@Schwarz_1978; @Judge_1985]",
+                                        "$-2\\text{LL} + 2p\\ln(\\ln(n))$ <br>[@Hannan_Quinn_1979]",
+                                        "$-2\\text{LL} + p$ <br>[@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
+                                        "$-2\\text{LL} + \\frac{3}{2}p$ <br>[@Smith_Spiegelhalter_1980]",
+                                        "Cox: LRT for forward, and Wald test for backward;<br> Others: LRT/Chao Chi-squre test for forward, and Wald test for backward",
+                                        "$-2\\text{LL} + p\\ln(n)$ <br>[@Schwarz_1978; @Judge_1985]",
                                         "not available",
                                         "not available")
 df <- data.frame(Abbreviation, Definition, Formula_in_Linear, Formula_in_Logit_Cox_Poisson_Gamma)
+colnames(df) <- c("Abb.","Definition","Formula","")
 
 kable(df, format = "html", align = "l", 
       booktabs = TRUE, escape = F, 
@@ -148,28 +151,11 @@ kable(df, format = "html", align = "l",
                       "Unsupported AICc formula (which does not affect the selection process as it only differs by constant additive and multiplicative factors):\n
                       $AICc=\\ln\\left(\\frac{SSE}{n}\\right) + 1 + \\frac{2(p+1)}{n-p-2}$ [@McQuarrie_Tsai_1998]")) %>%
   kable_styling() %>%
-  column_spec(3:4, width = "0.6in")
-  
-#   add_footnote("Formulat variant1: 
-#   $AIC^1=n\\ln\\left(\\frac{SSE}{n}\\right) + 2p$ [@Darlington_1968; @Judge_1985]", 
-# notation = "number")
-# 
-# kable_styling(footnote(kable(df, format = "html", align='l', booktabs=TRUE, escape = F, caption = 'Abbreviation, Definition, and Formula of the Information Criterion for Linear, Logit, Cox, Possion and Gamma regression'),alphabet = c("In the literature, there is some inconsistency regarding the precise definitions of the AIC and AICC statistics. Within the context of linear regression, multiple variations of the formulas for AIC and AICC are found in statistical literature.
-
-# $AIC^1=n\\ln\\left(\\frac{SSE}{n}\\right) + 2p$[@Darlington_1968; @Judge_1985] 
-# 
-# $AIC^2=AIC^1 + n + 2=n\\ln\\left(\\frac{SSE}{n}\\right) + 2p + n + 2$ [@Hurvich_Tsai_1989]
-# 
-# $AICc^1=\\ln\\left(\\frac{SSE}{n}\\right) + 1 + \\frac{2(p+1)}{n-p-2}$ [@McQuarrie_Tsai_1998]
-# 
-# $AICc^2=n*AICc^1=n\\ln\\left(\\frac{SSE}{n}\\right) + \\frac{n(p+n)}{n-p-2}$ [@Hurvich_Tsai_1989]
-# 
-# For a fixed number of observations, these various versions differ only by additive and positive multiplicative constants.")) %>%
-#   
+  column_spec(3, width = "0.4in") %>%
+  column_spec(4, width = "0.3in")
 ```
-In particular, to ensure formula consistency between *univariate multiple regression (UMR)* and , additional additive and positive multiplicative constants were incorporated into the formulas of multivariate linear regression.
 
-## How to choose variable selection strategy and information criterion
+In practice, considering the unique characteristics of the data and the objectives of the analysis within each field, we advise users to employ different selection criteria for conducting stepwise regression parallely, which allows users to choose the optimal model according to their specific requirements.
 
 ## Multicollinearity
 
