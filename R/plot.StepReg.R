@@ -75,16 +75,18 @@ plot.StepReg <- function(x, ...){
     geom_label_repel(label.size = 0.05,
                      aes(color = .data$IC_type),
                      show.legend = FALSE) +
-    xlab("Variable Number") +
+    labs(title = "Selection Process") + 
     theme_minimal()
   
-  if (ncol(sub_table) > 3){ # check if stepwise or best_subset
+  if (!"subset" %in% class(x)){ # check if stepwise or best_subset
      p <- p + 
        geom_line(aes(linetype = .data$IC_type,
-                     color = .data$IC_type))
+                     color = .data$IC_type)) + 
+       xlab("Step")
+     
   } else{
      p <- p + 
-       labs(title = "Selection Process")
+       xlab("Variable Number")
   }
   print(p)
 }

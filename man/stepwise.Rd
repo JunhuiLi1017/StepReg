@@ -19,8 +19,7 @@ stepwise(
   test_method_cox = c("efron", "breslow", "exact"),
   tolerance = 1e-07,
   weight = NULL,
-  best_n = Inf,
-  excel_name = NULL
+  best_n = Inf
 )
 }
 \arguments{
@@ -51,8 +50,6 @@ stepwise(
 \item{weight}{(numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weight reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weight should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is NULL, which means that all weight are set equal.}
 
 \item{best_n}{(numeric(integer)) The number of models to keep in the final output. Default is Inf, which means that all models will be displayed.}
-
-\item{excel_name}{(NULL|character) The output excel name. If NULL, do not output excel file. Default is NULL.}
 }
 \value{
 A list containing multiple tables will be returned.
