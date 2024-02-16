@@ -4,21 +4,14 @@
 \alias{report}
 \title{Plots from a StepReg object}
 \usage{
-report(
-  x,
-  report_name,
-  format = c("html", "pdf", "docx", "rtf", "pptx", "xlsx")
-)
+report(x, report_name, format = c("html", "docx", "rtf", "pptx", "xlsx"))
 }
 \arguments{
 \item{x}{StepReg object}
 
 \item{report_name}{report name}
 
-\item{format}{the format of report, choose one or more from 'html', 'pdf', 'docx', 'rtf', 'pptx', 'xlsx'. default is 'html'}
-}
-\value{
-plot
+\item{format}{the format of report, choose one or more from 'html', 'docx', 'rtf', 'pptx', 'xlsx'. default is 'html'}
 }
 \description{
 plot.StepReg visualizes the variable selection procedure using a StepReg object

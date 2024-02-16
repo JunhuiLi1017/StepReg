@@ -108,10 +108,12 @@
 #'          sle=0.05,
 #'          sls=0.05)
 #' @keywords stepwise regression
+#' 
 #' @import survival
+#' 
 #' @importFrom utils combn
-#' @importFrom openxlsx write.xlsx
-#' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms
+#' 
+#' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms deviance df.residual formula model.frame
 #' 
 #' @export
 
