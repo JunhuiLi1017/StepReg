@@ -144,15 +144,15 @@ kable_styling(kable(data.frame(Statistic,Meanings),format = "html", align='l', e
 ```{r, echo = FALSE}
 Abbreviation <- c("", "AIC", "AICc", "BIC", "CP", "HQ", "IC(1)", "IC(3/2)", "SBC", "SL", "Rsq", "adjRsq")
 Definition <- c("",
-                "Akaike’s information criterion",
-                "Corrected Akaike’s information criterion",
-                "Sawa Bayesian information criterion",
+                "Akaike’s Information Criterion",
+                "Corrected Akaike’s Information Criterion",
+                "Sawa Bayesian Information Criterion",
                 "Mallows’ Cp statistic",
-                "Hannan and Quinn information criterion",
+                "Hannan and Quinn Information Criterion",
                 "Information Criterion with Penalty Coefficient Set to 1",
                 "Information Criterion with Penalty Coefficient Set to 3/2",
-                "Schwarz information criterion",
-                "Significance Level(pvalue)",
+                "Schwarz Bayesian Information Criterion",
+                "Significance Level (pvalue)",
                 "R-square statistic",
                 "Adjusted R-square statistic")
 
@@ -196,10 +196,32 @@ kable(df, format = "html", align = "l",
   column_spec(4, width = "0.4in")
 ```
 
-The choice of selection criteria depends on your specific data and research goal, the following table summarizes the key differences of them.
+In practice, no information criterion is necessarily optimal for prediction for all data sets. The choice of them depends on your specific data and research goals. Below summarizes general guidance.
+
++ AIC: AIC works by penalizing the inclusion of additional variables in a model. The lower the AIC, the better performance of the model. AIC does not include sample size in penalty calculation, and it is optimal in minimizing the mean square error of predictions [1]().
++ AICc: AICc is a variant of AIC, which works better for small sample size, especially when `numObs / numParam < 40` [2]().
++ CP: Another variant of AIC, it is equivalent to AIC in terms of model selection.
++ IC(1) and IC(3/2): IC(1) and IC(3/2) have 1 and 3/2 as penalty factors respectively, compared to 2 used by AIC. As such, IC(1) turns to return a complex model with more variables that may suffer from overfitting issues.
++ BIC and SBC: Both BIC and SBC are variants of Bayesian Information Criterion. The precise definition of them differ in literature and in SAS. Here, BIC mirrors the definition in SAS (Sawa Bayesion Information Criterion) while SBC refers to Schwarz Bayesian Information Criterion. Compared to AIC, the only difference is that Bayesian Information Criterion penalizes the sample size in formula. In practice, SBC is more likely to return fewer variables that may cause the model to under fit [3, (Sawa 1978; Judge et al. 1985; Swacht, 1978)].
++ HQ: An alternative to AIC, but have seen little use in practice. [4] 
++ SL: 
++ Rsq
++ adjRsq
++
+
+1. https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210x.12541
+2. https://www.amazon.com/Model-Selection-Multimodel-Inference-Information-Theoretic/dp/0387953647
+3. SAS user guide
+4. 
+
+
+in the sense of minimizing the mean square error of predictions,
++ AICc:
++ BIC:
 
 ```{r}
 # table goes here
+
 
 Abbreviation <- c("AIC", "AICc", "BIC")
 
@@ -209,7 +231,6 @@ Use_case <- c("")
 AIC: 
 AICc: better for small sample size, especially when numObs / numParam < 40 []()
 BIC: penalize more on number of parameters
-
 
 ```
 
