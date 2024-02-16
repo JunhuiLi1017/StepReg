@@ -36,7 +36,37 @@ Stepwise regression is a widely employed data-mining technique aimed at identify
 
 Here, we applied the StepReg package to four well-established and diverse datasets---mtcars, remission, lung, and CreditCard---utilizing distinct parameters across various regression scenarios. These datasets provide robust test cases for showcasing the capabilities and versatility of the StepReg package in real-world applications. Through practical demonstrations, we illustrated the application of linear stepwise regression for continuous outcomes, logistic stepwise regression for binary outcomes, Cox stepwise regression for time-to-event outcomes, and Poisson stepwise regression for count outcomes. These examples offer users valuable insights into the effective utilization of StepReg for variable selection in different regression scenarios, providing a comprehensive guide for those seeking proficiency in incorporating StepReg into their analytical toolkit.
 
-# Features implemented in StepReg package
+# Quick Demo
+
++ 1. para
+
+```{r}
+    library(StepReg)
+    data(mtcars)
+    formula <- mpg ~ .
+    exam1 <- stepwise(formula = formula,
+                      data = mtcars,
+                      type = "linear",
+                      include = c("disp","cyl"),
+                      strategy = "forward",
+                      metric = c("AIC"))
+    exam1
+```
++ 2. table in output
+
+visulaze the process
+```{r}
+    plot(exam1)
+```
+
+output result to different output format
+```{r, eval = FALSE}
+    report(exam1)
+```
+
+
+
+# Key features
 
 ## Regression categories
 
@@ -53,7 +83,7 @@ df <- data.frame(Regression, Reponse)
 kable(df, format = "html", caption = 'Common regression categories') %>% kable_styling()
 ```
 
-## Model selection
+## Model selection strategies
 
 Model selection aims to identify the subset of independent variables that provide the best predictive performance for the response variable. Both stepwise regression and best subsets approaches are implemented in StepReg. For stepwise regression, there are mainly three methods: *Forward Selection*, *Backward Elimination*, *Bidirectional Elimination*.
 
@@ -101,7 +131,7 @@ kable_styling(kable(data.frame(Statistic,Meanings),format = "html", align='l', e
 ```
 
 ```{r, echo = FALSE}
-Abbreviation <- c("", "AIC", "AICc", "BIC", "CP", "HQ", "IC(1)", "IC(3/2)", "SL", "SBC", "Rsq", "adjRsq")
+Abbreviation <- c("", "AIC", "AICc", "BIC", "CP", "HQ", "IC(1)", "IC(3/2)", "SBC", "SL", "Rsq", "adjRsq")
 Definition <- c("",
                 "Akaike’s information criterion",
                 "Corrected Akaike’s information criterion",
@@ -110,8 +140,8 @@ Definition <- c("",
                 "Hannan and Quinn information criterion",
                 "Information Criterion with Penalty Coefficient Set to 1",
                 "Information Criterion with Penalty Coefficient Set to 3/2",
-                "Significance Level(pvalue)",
                 "Schwarz information criterion",
+                "Significance Level(pvalue)",
                 "R-square statistic",
                 "Adjusted R-square statistic")
 
@@ -123,12 +153,12 @@ Formula_in_Linear <- c("linear",
                        "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + 2pq\\ln(\\ln(n))$ <br>[@Hannan_Quinn_1979; @McQuarrie_Tsai_1998; @Hurvich_Tsai_1989]",
                        "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + p$ <br>[@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980] not available for MMR",
                        "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + \\frac{3}{2}p$ <br>[@Smith_Spiegelhalter_1980] <br>not available for MMR",
-                       "$\\textit{F test}$ for UMR and $\\textit{Approximate F test}$ for MMR",
                        "$n\\ln\\left(\\frac{|\\text{SSE}|}{n}\\right) + p \\ln(n)$ <br>[@Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002] <br>not available for MMR",
+                       "$\\textit{F test}$ for UMR and $\\textit{Approximate F test}$ for MMR",
                        "$1 - \\frac{SSE}{SST}$ <br>not available for MMR",
                        "$1 - \\frac{(n-1)(1-R^2)}{n-p}$ <br>[@Darlington_1968; @Judge_1985] <br>not available for MMR")
 
-Formula_in_Logit_Cox_Poisson_Gamma <- c("logit|cox|poisson|gamma",
+Formula_in_Logit_Cox_Poisson_Gamma <- c("logit, cox, poisson and gamma",
                                         "$-2\\text{LL} + 2p$ <br>[@Darlington_1968; @Judge_1985]",
                                         "$-2\\text{LL} + \\frac{n(n+p)}{n-p-2}$ <br>[@Hurvich_Tsai_1989]",
                                         "not available",
@@ -136,12 +166,12 @@ Formula_in_Logit_Cox_Poisson_Gamma <- c("logit|cox|poisson|gamma",
                                         "$-2\\text{LL} + 2p\\ln(\\ln(n))$ <br>[@Hannan_Quinn_1979]",
                                         "$-2\\text{LL} + p$ <br>[@Nelder_Wedderburn_1972; @Smith_Spiegelhalter_1980]",
                                         "$-2\\text{LL} + \\frac{3}{2}p$ <br>[@Smith_Spiegelhalter_1980]",
-                                        "Cox: LRT for forward, and Wald test for backward;<br> Others: LRT/Chao Chi-squre test for forward, and Wald test for backward",
                                         "$-2\\text{LL} + p\\ln(n)$ <br>[@Schwarz_1978; @Judge_1985]",
+                                        "Forward: LRT and Rao Chi-square test (logit, poisson, gamma); LRT (cox); <br><br>Backward: Wald test",
                                         "not available",
                                         "not available")
 df <- data.frame(Abbreviation, Definition, Formula_in_Linear, Formula_in_Logit_Cox_Poisson_Gamma)
-colnames(df) <- c("Abb.","Definition","Formula","")
+colnames(df) <- c("Abbreviation","Definition","Formula","")
 
 kable(df, format = "html", align = "l", 
       booktabs = TRUE, escape = F, 
@@ -151,9 +181,17 @@ kable(df, format = "html", align = "l",
                       "Unsupported AICc formula (which does not affect the selection process as it only differs by constant additive and multiplicative factors):\n
                       $AICc=\\ln\\left(\\frac{SSE}{n}\\right) + 1 + \\frac{2(p+1)}{n-p-2}$ [@McQuarrie_Tsai_1998]")) %>%
   kable_styling() %>%
-  column_spec(3, width = "0.4in") %>%
-  column_spec(4, width = "0.3in")
+  column_spec(3, width = "0.5in") %>%
+  column_spec(4, width = "0.4in")
 ```
+
+AIC:
+AICc: The analysis in [3] suggests using AICc when numObs/numParam < 40.
+SBC:
+
+Information criterion:
+Relationship to R² and the Adjusted-R²
+Relation to p-values and statistical significance
 
 In practice, considering the unique characteristics of the data and the objectives of the analysis within each field, we advise users to employ different selection criteria for conducting stepwise regression parallely, which allows users to choose the optimal model according to their specific requirements.
 
