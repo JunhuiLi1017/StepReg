@@ -176,7 +176,7 @@ Table <- c(
 "Summary of Parameters",
 "Variables and Types",
 "Selection Process under IC",
-"Parameter Estimates")
+"Parameter Estimates for y under IC")
 
 Meanings <- c(
 "The parameters utilized in stepwise regression along with their default or user-specified values",

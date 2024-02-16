@@ -821,3 +821,44 @@ getTable5CoefModel <- function(type, intercept, include, x_in_model_metric, y_na
   #table5 <- formatTable(summary_model_list, tbl_name = "Table 5. Summary of Model for")
   return(table5)
 }
+
+output_report <- function(object,report_name) {
+  if(!is.null(report_name)) {
+    report_format <- str_split(report_name,"\\.")
+    format_list <- lapply(report_format,function(x){
+      x[length(x)]
+    })
+    if(any('xlsx' %in% unlist(format_list))){
+      write.xlsx(x = object,  file = report_name)
+    }else if(any(c('html', 'pdf', 'docx', 'rtf', 'pptx') %in% unlist(format_list))){
+      results <- list()
+      for(j in seq_along(object)){
+        tb <- object[[j]] %>% 
+          as.data.frame() %>%
+          regulartable() %>% 
+          autofit() %>% 
+          align(align = "center", part = "all")
+        results[names(object)[j]] <- list(tb)
+      }
+      for(k in seq_along(format_list)){
+        i <- unlist(format_list)[k]
+        if(i %in% 'html'){
+          save_as_html(values=results,
+                       path = report_name[k])
+        }else if (i %in% 'pdf'){
+          save_as_pdf(values=results,
+                      path = report_name[k])
+        }else if (i %in% 'docx'){
+          save_as_docx(values=results,
+                       path = report_name[k])
+        }else if (i %in% 'rtf'){
+          save_as_rtf(values=results,
+                      path = report_name[k])
+        }else if (i %in% 'pptx'){
+          save_as_pptx(values=results,
+                       path = report_name[k])
+        }
+      }
+    }
+  }
+}

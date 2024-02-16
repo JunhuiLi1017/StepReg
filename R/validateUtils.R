@@ -17,7 +17,7 @@ validateUtils <- function(formula,
 													tolerance = 10e-7,
 													weight = NULL,
                           best_n = Inf,
-													excel_name = NULL,
+													#report_name = NULL,
 													n_y) {
 	## check required parameters
 	if(missing(data)) { 
@@ -159,10 +159,17 @@ validateUtils <- function(formula,
 		}
 	}
 	
-	## check 'excel_name'
-	if(!is.null(excel_name)) {
-		if(!is.character(excel_name)) {
-			stop("the 'excel_name' must be a character string.")
-		}
-	}
+	## check 'report_name'
+	# if(!is.null(report_name)) {
+	# 	if(!is.character(report_name)) {
+	# 		stop("the 'report_name' must be a character string.")
+	# 	}
+	#   report_format <- str_split(report_name,"\\.")
+	#   format_list <- lapply(report_format,function(x){
+	#     x[length(x)]
+	#   })
+	#   if(!all(unlist(format_list) %in% c("html","docx","rtf","pdf","xlsx","pptx"))){
+	#     stop("the extended format of report should be one of 'html', 'docx','rtf','pdf','xlsx',and 'pptx'")
+	#   }
+	# }
 }

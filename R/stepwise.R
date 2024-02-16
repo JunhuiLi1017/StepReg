@@ -30,7 +30,7 @@
 #' 
 #' @param best_n (numeric(integer)) The number of models to keep in the final output. Default is Inf, which means that all models will be displayed.
 #' 
-#' @param excel_name (NULL|character) The output excel name. If NULL, do not output excel file. Default is NULL.
+# @param report_name (NULL|character) The output report name with extented format, '.html', 'pdf', '.docx', '.pptx', '.xlsx' and '.rtf' are supported. If NULL, do not output report file. Default is NULL.
 #' 
 #' @references
 #' 
@@ -128,8 +128,7 @@ stepwise <- function(formula,
                       test_method_cox = c("efron", "breslow", "exact"),
                       tolerance = 1e-7,
                       weight = NULL,
-                      best_n = Inf,
-                      excel_name = NULL) {
+                      best_n = Inf) {
   ## validate input:
   ## check required parameters
   ## place match.arg() in the main function because validationUtils.R can't return type even with <<-, and type represents all values in c().
@@ -154,7 +153,7 @@ stepwise <- function(formula,
   }
   sigma_value <- getSigmaFullModel(model_raw, type, n_y)
   
-  validateUtils(formula = formula, data = data, type = type, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, sigma_value = sigma_value, test_method_linear = test_method_linear, test_method_glm = test_method_glm, test_method_cox = test_method_cox, tolerance = tolerance, weight = weight, best_n = best_n, excel_name = excel_name, n_y = n_y)
+  validateUtils(formula = formula, data = data, type = type, include = include, strategy = strategy, metric = metric, sle = sle, sls = sls, sigma_value = sigma_value, test_method_linear = test_method_linear, test_method_glm = test_method_glm, test_method_cox = test_method_cox, tolerance = tolerance, weight = weight, best_n = best_n, n_y = n_y)
   test_method <- getTestMethod(data, model_raw, type, metric, n_y, test_method_linear, test_method_glm, test_method_cox)
   
   multico_x <- getMulticolX(data, x_name_orig, tolerance)
@@ -199,11 +198,7 @@ stepwise <- function(formula,
       result[[paste0("Parameter Estimates for ", i, " under ",met,sep=" ")]] <- table5_coef_model[[i]]
     }
   }
-  
-  if(!is.null(excel_name)) {
-    write.xlsx(x = result,  file = paste0(excel_name, ".xlsx"))
-  }
   class(result) <- c("StepReg", "list", strategy)
+  #output_report(result,report_name)
   return(result)
 }
-
