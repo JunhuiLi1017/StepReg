@@ -93,7 +93,7 @@
 #' stepwise(formula = formula,
 #'          data = mtcars,
 #'          type = "linear",
-#'          strategy = "bidirection",
+#'          strategy = c("forward","bidirection"),
 #'          metric = c("AIC","SBC","SL","AICc","BIC","HQ"))
 #'
 #' ## perform logit stepwise regression with 'forward' strategy and significance
@@ -118,25 +118,25 @@
 #' @export
 
 stepwise <- function(formula,
-                      data,
-                      type = c("linear", "logit", "cox", "poisson", "Gamma"),
-                      include = NULL,
-                      strategy = c("forward", "backward", "bidirection", "subset"),
-                      metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
-                      sle = 0.15,
-                      sls = 0.15,
-                      test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
-                      test_method_glm = c("Rao", "LRT"),
-                      test_method_cox = c("efron", "breslow", "exact"),
-                      tolerance = 1e-7,
-                      weight = NULL,
-                      best_n = Inf) {
+                     data,
+                     type = c("linear", "logit", "cox", "poisson", "Gamma"),
+                     include = NULL,
+                     strategy = c("forward", "backward", "bidirection", "subset"),
+                     metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"),
+                     sle = 0.15,
+                     sls = 0.15,
+                     test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
+                     test_method_glm = c("Rao", "LRT"),
+                     test_method_cox = c("efron", "breslow", "exact"),
+                     tolerance = 1e-7,
+                     weight = NULL,
+                     best_n = Inf) {
   ## validate input:
   ## check required parameters
   ## place match.arg() in the main function because validationUtils.R can't return type even with <<-, and type represents all values in c().
   type <- match.arg(type)
-  strategy <- match.arg(strategy)
-  #metric <- match.arg(metric)
+  strategy <- match.arg(strategy, several.ok = TRUE)
+  metric <- match.arg(metric, several.ok = TRUE)
   
   test_method_linear <- match.arg(test_method_linear)
   test_method_glm <- match.arg(test_method_glm)
@@ -164,7 +164,7 @@ stepwise <- function(formula,
   
   result <- list()
   ## table1
-  table1_para_value <- getTable1SummaryOfParameters(data, type, x_name_orig, y_name, merged_multico_x, merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept)
+  table1_para_value <- getTable1SummaryOfParameters(data, type, x_name_orig, y_name, merged_multico_x, merged_include, paste0(strategy,collapse = " & "), paste0(metric,collapse = " & "), sle, sls, test_method, tolerance, intercept)
   result$'Summary of Parameters' <- table1_para_value
   
   ## table2
@@ -174,30 +174,30 @@ stepwise <- function(formula,
   ## table3
   table3_process_table_metric <- list()
   x_final_model_metric <- list()
-  for(met in metric) {
-    if(strategy == "subset") {
-      table3_process_table <- getSubsetWrapper(data, type, met, x_name, y_name, intercept, include, weight = weight, best_n, test_method, sigma_value)
-      x_final_model <- getXNameSelected(table3_process_table,met)
-    }else{
-      out_final_stepwise <- getStepwiseWrapper(data, type = type, strategy, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
-      table3_process_table <- out_final_stepwise$process_table
-      x_in_model <- out_final_stepwise$x_in_model
-      x_final_model <- c(include, x_in_model)
+  table5_coef_model_metric <- list()
+  #stra="forward"
+  #met="AIC"
+  for(stra in strategy){
+    for(met in metric) {
+      if(stra == "subset") {
+        table3_process_table <- getSubsetWrapper(data, type, met, x_name, y_name, intercept, include, weight = weight, best_n, test_method, sigma_value)
+        x_final_model <- getXNameSelected(table3_process_table,met)
+      }else{
+        out_final_stepwise <- getStepwiseWrapper(data, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
+        table3_process_table <- out_final_stepwise$process_table
+        x_in_model <- out_final_stepwise$x_in_model
+        x_final_model <- c(include, x_in_model)
+      }
+      result[[paste0("Selection Process under ",stra," with ",met,collapse="")]] <- table3_process_table
+      x_final_model_metric[[stra]][[met]] <- x_final_model
     }
-    table3_process_table_metric[met] <- list(table3_process_table)
-    x_final_model_metric[met] <- list(x_final_model)
-  }
-  np <- length(table3_process_table_metric)
-  for(n in 1:np) {
-    result[[paste0("Selection Process under ",names(table3_process_table_metric)[n],collapse="")]] <- table3_process_table_metric[[n]]
-  }
-  
-  ##table5
-  table5_coef_model_metric <- getTable5CoefModel(type = type, intercept, include, x_final_model_metric, y_name, n_y, data, weight, test_method_cox)
-  for(met in metric){
-    table5_coef_model <- table5_coef_model_metric[[met]]
-    for(i in names(table5_coef_model)) {
-      result[[paste0("Parameter Estimates for ", i, " under ",met,sep=" ")]] <- table5_coef_model[[i]]
+    ##table5
+    table5_coef_model_metric[[stra]] <- getTable5CoefModel(type = type, intercept, include, x_final_model_metric[[stra]], y_name, n_y, data, weight, test_method_cox)
+    for(met in metric){
+      table5_coef_model <- table5_coef_model_metric[[stra]][[met]]
+      for(i in names(table5_coef_model)) {
+        result[[paste0("Parameter Estimates for ", i, " under ",stra," with ",met,sep=" ")]] <- table5_coef_model[[i]]
+      }
     }
   }
   class(result) <- c("StepReg", "list", strategy)

@@ -101,7 +101,7 @@ validateUtils <- function(formula,
 	      stop("The 'metric' can not be 'BIC', 'CP', 'HQc', 'IC(1)', 'IC(3/2)', 'Rsq' or 'adjRsq' when using multivariate multiple regression!")
 	    }
 	  }
-		if(strategy == "subset" & any(metric == "SL")) {
+		if(any(strategy == "subset") & any(metric == "SL")) {
 			stop("metric = 'SL' is not allowed when strategy = 'subset'")
 		}
 	  if(any(metric == "CP") & sigma_value == 0) {
