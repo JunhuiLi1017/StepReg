@@ -2,7 +2,7 @@
 % Please edit documentation in R/report.R
 \name{report}
 \alias{report}
-\title{Plots from a StepReg object}
+\title{report from a StepReg object}
 \usage{
 report(x, report_name, format = c("html", "docx", "rtf", "pptx", "xlsx"))
 }
@@ -14,9 +14,10 @@ report(x, report_name, format = c("html", "docx", "rtf", "pptx", "xlsx"))
 \item{format}{the format of report, choose one or more from 'html', 'docx', 'rtf', 'pptx', 'xlsx'. default is 'html'}
 }
 \description{
-plot.StepReg visualizes the variable selection procedure using a StepReg object
+report output all tables in StepReg object to a report with format of html, docx, pptx, rtf, and xlsx.
 }
 \examples{
+\dontrun{
 data(mtcars)
 mtcars$yes <- mtcars$wt
 formula <- mpg ~ . + 0
@@ -26,4 +27,5 @@ x <- stepwise(formula = formula,
               strategy = "bidirection",
               metric = c("AIC", "BIC"))
 report(x,report_name = "report", format = c("html","docx"))
+}
 }

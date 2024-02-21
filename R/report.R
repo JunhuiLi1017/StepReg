@@ -1,6 +1,6 @@
-#' Plots from a StepReg object
+#' report from a StepReg object
 #'
-#' plot.StepReg visualizes the variable selection procedure using a StepReg object
+#' report output all tables in StepReg object to a report with format of html, docx, pptx, rtf, and xlsx.
 #'
 #' @param x StepReg object
 #' 
@@ -10,11 +10,16 @@
 #' 
 #' @importFrom openxlsx write.xlsx
 #' 
-#' @importFrom flextable save_as_html save_as_pptx save_as_rtf save_as_docx 
+#' @importFrom flextable save_as_html save_as_pptx save_as_rtf save_as_docx autofit flextable align
+#' 
+#' @importFrom dplyr %>%
+#' 
+#' @importFrom stringr str_split
 #' 
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' data(mtcars)
 #' mtcars$yes <- mtcars$wt
 #' formula <- mpg ~ . + 0
@@ -24,6 +29,8 @@
 #'               strategy = "bidirection",
 #'               metric = c("AIC", "BIC"))
 #' report(x,report_name = "report", format = c("html","docx"))
+#' }
+
 
 report <- function(x, report_name, format=c('html', 'docx', 'rtf', 'pptx', 'xlsx')) {
   format <- match.arg(format, several.ok = TRUE)

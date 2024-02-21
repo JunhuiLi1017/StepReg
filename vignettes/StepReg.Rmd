@@ -8,10 +8,10 @@ author:
   affiliation: University of Massachusset Chan medical school, Worcester, USA
 - name: Xiaohuan Lu
   affiliation: Clark University, Worcester, USA
-- name: Julie Lihua Zhu
-  affiliation: University of Massachusset Chan medical school, Worcester, USA
 - name: Wenxin Liu
   affiliation: China Agricultural University, Beijing, China
+- name: Julie Lihua Zhu
+  affiliation: University of Massachusset Chan medical school, Worcester, USA
 package: StepReg
 bibliography: bibliography.bib
 fontsize: 11pt
@@ -22,7 +22,7 @@ output:
     toc_float: true
   BiocStyle::pdf_document: default
 abstract: |
-  A tutorial on employing StepReg for stepwise regression analysis with four well-known datasets namely the mtcars, remission, lung, and CreditCard. The guild showcases the utility of StepReg across four well-known datasets, employing it for different regression models such as linear, logistic, Cox proportional hazard, and Poisson regression. The vignette elucidates the stepwise process with distinct parameters, offering users a clear understanding of how to effectively utilize StepReg for exploratory data analysis and model building in various regression scenarios.
+  A guild on using StepReg for stepwise regression analysis with four well-known datasets namely the mtcars, remission, lung, and CreditCard for different regression models such as linear, logistic, Cox proportional hazard, and Poisson regression. The vignette explains the stepwise process with distinct parameters, offering users a clear understanding of how to effectively utilize StepReg for exploratory data analysis and model building in various regression scenarios.
 
 vignette: |
   %\VignetteIndexEntry{StepReg: Stepwise Regression made it simple}
@@ -41,7 +41,6 @@ Here, we applied the StepReg package to four well-established and diverse datase
 The following example selects an optimal linear regression model with the `mtcars` dataset.
 ```{r, message = FALSE}
 library(StepReg)
-devtools::load_all("~/GitHub/StepReg/")
 
 data(mtcars)
 formula <- mpg ~ .
@@ -58,7 +57,7 @@ Breakdown of the parameters:
 + `type`: specifies the regression category, depending on your data, choose from "linear", "logit", "cox", etc.
 + `include`: specifies the variables that must be in the final model
 + `strategy`: specifies the model selection strategy, choose from "forward", "backward", "bidirection", "subset"
-+ `metric`: specifies the model fit evaluation information criterion, choose one or more from "AIC", "AICc", "BIC", etc.
++ `metric`: specifies the model fit evaluation metric, choose one or more from "AIC", "AICc", "BIC", "SL", etc.
 
 The output consists of multiple tables, which can be viewed with:
 ```{r, message = FALSE}
@@ -88,7 +87,7 @@ library(knitr)
 library(kableExtra)
 
 Regression <- c("linear", "logit", "cox", "poisson", "gamma")
-Reponse <- c("continuous", "binary", "time-to-event", "count", "time-series")
+Reponse <- c("continuous", "binary", "time-to-event", "count", "gamma distribution")
 df <- data.frame(Regression, Reponse)
 
 kable(df, format = "html", caption = 'Common regression categories') %>% kable_styling()
@@ -111,9 +110,13 @@ kable(df, format = "html", caption = 'Model selection strategy') %>% kable_styli
 
 Given the computational constraints, when dealing with datasets featuring a substantial number of predictor variables greater than the sample size, the Bidirectional Elimination typically emerges as the most advisable approach. Forward Selection and Backward Elimination can be considered in sequence. On the contrary, the Best Subsets approach requires the most substantial processing time, yet it calculates a comprehensive set of models with varying numbers of variables. In practice, users can experiment with various methods and select a final model based on the specific dataset and research objectives at hand.
 
-## Selection criteria
+## Selection metrics
 
-*Selection criteria*, also referred to as *selection metrics* or *metrics*, is a means of evaluating a model's performance, which typically constitutes two parts: the accuracy of the model fitting the data and the complexity of the model. A selection metric must typically balance the two parts. In practice, multiple metrics have been proposed, the ones supported by StepReg are summarized below. Importantly, given the discrepancies in terms of the precise definitions of each metric, StepReg mirrors the formulas adopted by [SAS](https://documentation.sas.com/doc/en/statcdc/14.2/statug/statug_glmselect_details15.htm) for *univariate multiple regression (UMR)* except for HQ, IC(1), and IC(3/2). A subset of the UMR can be easily extended to *multivariate multiple regression (MMR)*, which are indicated in the following table.
+Various *selection metrics* can be used to guide the process of adding or removing predictors from the model. These metrics help to determine the importance or significance of predictors in improving the model fit. In StepReg, selection metrics include two categories: *Information Criteria* and *Significance Level* of the coefficient associated with each predictor. *Information Criteria* is a means of evaluating a model's performance, which balances model fit with complexity by penalizing models with a higher number of parameters. Lower *Information Criteria* values indicate a better trade-off between model fit and complexity. Note that when comparing different models, it's important to evaluate them within the same *Information Criteria* framework rather than across multiple Information Criteria. This means that if you are using, for example, the AIC to compare models, you should compare all models using AIC. Similarly, if you are using BIC, compare models using BIC only. This ensures consistency and fairness in model comparison, as each Information Criterion has its own scale and penalization factors. Comparing models across different Information Criteria may lead to biased conclusions.
+
+In practice, multiple metrics have been proposed, the ones supported by StepReg are summarized below.
+
+Importantly, given the discrepancies in terms of the precise definitions of each metric, StepReg mirrors the formulas adopted by [SAS](https://documentation.sas.com/doc/en/statcdc/14.2/statug/statug_glmselect_details15.htm) for *univariate multiple regression (UMR)* except for HQ, IC(1), and IC(3/2). A subset of the UMR can be easily extended to *multivariate multiple regression (MMR)*, which are indicated in the following table.
 
 ```{r, echo = FALSE}
 Statistic <- c(
@@ -138,7 +141,7 @@ Meanings <- c(
 "The determinant function",
 "The natural logarithm")
 
-kable_styling(kable(data.frame(Statistic,Meanings),format = "html", align='l', escape = F, caption = 'Statistics in Information Criterion'))
+kable_styling(kable(data.frame(Statistic,Meanings),format = "html", align='l', escape = F, caption = 'Statistics in selection metric'))
 ```
 
 ```{r, echo = FALSE}
@@ -186,7 +189,7 @@ colnames(df) <- c("Abbreviation","Definition","Formula","")
 
 kable(df, format = "html", align = "l", 
       booktabs = TRUE, escape = F, 
-      caption = 'Abbreviation, Definition, and Formula of the Information Criterion for Linear, Logit, Cox, Possion, and Gamma regression') %>%
+      caption = 'Abbreviation, Definition, and Formula of the Selection Metric for Linear, Logit, Cox, Possion, and Gamma regression') %>%
   footnote(number = c("Unsupported AIC formula (which does not affect the selection process as it only differs by constant additive and multiplicative factors):\n
                       $AIC=n\\ln\\left(\\frac{SSE}{n}\\right) + 2p$ [@Darlington_1968; @Judge_1985]", 
                       "Unsupported AICc formula (which does not affect the selection process as it only differs by constant additive and multiplicative factors):\n
@@ -196,53 +199,27 @@ kable(df, format = "html", align = "l",
   column_spec(4, width = "0.4in")
 ```
 
-In practice, no information criterion is necessarily optimal for prediction for all data sets. The choice of them depends on your specific data and research goals. Below summarizes general guidance.
+In practice, no metric is necessarily optimal for prediction across all datasets. The choice of the metric depends on your specific data and research goals. We recommend using various metrics simultaneously when conducting stepwise regression. This approach enables you to select the most suitable model based on your specific needs. Below summarizes general guidance.
 
-+ AIC: AIC works by penalizing the inclusion of additional variables in a model. The lower the AIC, the better performance of the model. AIC does not include sample size in penalty calculation, and it is optimal in minimizing the mean square error of predictions [1]().
-+ AICc: AICc is a variant of AIC, which works better for small sample size, especially when `numObs / numParam < 40` [2]().
++ AIC: AIC works by penalizing the inclusion of additional variables in a model. The lower the AIC, the better performance of the model. AIC does not include sample size in penalty calculation, and it is optimal in minimizing the mean square error of predictions [@Brewer_2016].
+
++ AICc: AICc is a variant of AIC, which works better for small sample size, especially when `numObs / numParam < 40` [@Burnham_2002].
+
 + CP: Another variant of AIC, it is equivalent to AIC in terms of model selection.
+
 + IC(1) and IC(3/2): IC(1) and IC(3/2) have 1 and 3/2 as penalty factors respectively, compared to 2 used by AIC. As such, IC(1) turns to return a complex model with more variables that may suffer from overfitting issues.
-+ BIC and SBC: Both BIC and SBC are variants of Bayesian Information Criterion. The precise definition of them differ in literature and in SAS. Here, BIC mirrors the definition in SAS (Sawa Bayesion Information Criterion) while SBC refers to Schwarz Bayesian Information Criterion. Compared to AIC, the only difference is that Bayesian Information Criterion penalizes the sample size in formula. In practice, SBC is more likely to return fewer variables that may cause the model to under fit [3, (Sawa 1978; Judge et al. 1985; Swacht, 1978)].
-+ HQ: An alternative to AIC, but have seen little use in practice. [4] 
-+ SL: 
-+ Rsq
-+ adjRsq
-+
 
-1. https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210x.12541
-2. https://www.amazon.com/Model-Selection-Multimodel-Inference-Information-Theoretic/dp/0387953647
-3. SAS user guide
-4. 
++ BIC and SBC: Both BIC and SBC are variants of Bayesian Information Criterion. The precise definition of them differ in literature and in SAS. Here, BIC mirrors the definition of Sawa Bayesion Information Criterion from [SAS](https://documentation.sas.com/doc/en/pgmsascdc/9.4_3.3/statug/statug_glmselect_syntax07.htm) while SBC refers to Schwarz Bayesian Information Criterion. Compared to AIC, the only difference is that Bayesian Information Criterion penalizes the sample size in formula. In practice, if you prefer simpler models or have concerns about overfitting, SBC may be a better choice. SBC may cause the model to under fit [@SAS_Institute_2018; @Sawa_1978; @Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002].
 
++ HQ: An alternative to AIC, but have seen little use in practice. [@Burnham_2002] 
 
-in the sense of minimizing the mean square error of predictions,
-+ AICc:
-+ BIC:
++ Rsq: The R² statistic for model comparison, on the other hand, is proportional to the Log-Likelihood. Therefore, comparing models based on R² is akin to selecting them solely based on their fit to the data, disregarding the model complexity. Higher adjusted R-squared values indicate better model fit.
 
-```{r}
-# table goes here
++ adjRsq: The Adjusted-R² statistic shares similar objectives to information criteria, as both aim to compare models based on their fit and the number of parameters. Higher adjusted R-squared values indicate better model fit. However, information criteria are generally considered superior in this regard [@Stevens_2016].
 
++ SL: P-values and statistical Significance Levels is an alternative strategy for models comparison. Use p-values and assess statistical significance when you want to determine whether individual predictors have a significant effect on the response variable. If the p-value associated with a predictor's coefficient is below a certain significance level (e.g., 0.05), you would consider the predictor statistically significant, indicating that it has a non-zero effect on the response variable. P-values and statistical Significance Levels are useful for hypothesis testing and inference.
 
-Abbreviation <- c("AIC", "AICc", "BIC")
-
-Use_case <- c("")
-
-
-AIC: 
-AICc: better for small sample size, especially when numObs / numParam < 40 []()
-BIC: penalize more on number of parameters
-
-```
-
-AIC:
-AICc: The analysis in [3] suggests using AICc when numObs/numParam < 40.
-SBC:
-
-Information criterion:
-Relationship to R² and the Adjusted-R²
-Relation to p-values and statistical significance
-
-In practice, considering the unique characteristics of the data and the objectives of the analysis within each field, we advise users to employ different selection criteria for conducting stepwise regression parallely, which allows users to choose the optimal model according to their specific requirements.
+In summary, use p-values and statistical significance when you're interested in the effect of individual predictors, while use information criteria when you're comparing and selecting among different models.
 
 ## Multicollinearity
 
@@ -262,14 +239,14 @@ A list containing multiple tables will be returned.
 Table <- c(
 "Summary of Parameters",
 "Variables and Types",
-"Selection Process under IC",
-"Parameter Estimates for y under IC")
+"Selection Process under a given strategy with metrics",
+"Parameter Estimates for y under a given strategy with metrics")
 
 Meanings <- c(
-"The parameters utilized in stepwise regression along with their default or user-specified values",
+"The parameters used in stepwise regression along with their default or user-specified values",
 "The variables and their respective types in the dataset",
-"The detailed overview of the variable selection process under information criteria IC.",
-"The parameter estimates for the optimal models under information criteria IC")
+"The detailed overview of the variable selection process under a given strategy with metrics",
+"The parameter estimates for the optimal models under a given strategy with metrics")
 
 kable_styling(kable(data.frame(Table,Meanings),format = "html", align='l', escape = F, caption = 'Output Explanation of StepReg')) #%>% column_spec(1:2, width = c("2in","4in")))
 ```
@@ -284,97 +261,97 @@ In this section, we provided some examples using distinct parameters across vari
 
 > **Example1**:  
 >
-> type of regression: `linear`
+> + type of regression: `linear`
 >
-> response: `mpg`
+> + response: `mpg`
 >
-> predictors: all variables except `mpg` 
+> + predictors: all variables except `mpg` 
 >
-> variable selection strategy: `forward` 
+> + variable selection strategy: `forward` and `backward`
 >
-> information criteria: `AIC` 
+> + selection metric: `AIC` 
 >
-> force `disp` and `cyl` to be included in all models.
+> + force `disp` and `cyl` to be included in all models.
 
 ```{r}
     library(StepReg)
     data(mtcars)
     formula <- mpg ~ .
-    exam1 <- stepwise(formula = formula,
+    res1 <- stepwise(formula = formula,
                       data = mtcars,
                       type = "linear",
                       include = c("disp","cyl"),
-                      strategy = "forward",
+                      strategy = c("forward","backward"),
                       metric = "AIC")
-    exam1
+    res1
 ```
 
 > Visulization of the selection process under `AIC`.
 
-```{r plot_exam1, warning=FALSE}
-    plot(exam1)
+```{r plot_res1, warning=FALSE}
+    plot(res1)
 ```
 
 > **Example2**: 
 >
-> type of regression: `linear`
+> + type of regression: `linear`
 >
-> response: `mpg` 
+> + response: `mpg` 
 >
-> predictors: all other variables except `mpg` and `intercept`. 
+> + predictors: all other variables except `mpg` and `intercept`. 
 >
-> variable selection strategy: `bidirectional` 
+> + variable selection strategy: `bidirectional` 
 >
-> information criterion: run `AIC`, `AICc`, `BIC`,`HQ`, `HQc`, `SBC`, and `SL` parallelly, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05 . 
+> + selection metric: run `AIC`, `AICc`, `BIC`,`HQ`, `HQc`, `SBC`, and `SL` parallelly, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05 . 
 >
-> Users can compare output within each metic through the output table and visualization.
+> + Users can compare output within each metic through the output table and visualization.
 
 ```{r}
     formula <- mpg ~ . + 0
-    exam2 <- stepwise(formula = formula,
+    res2 <- stepwise(formula = formula,
                       data = mtcars,
                       type = "linear",
                       strategy = "bidirection",
                       metric = c("AIC","SBC","SL","AICc","BIC","HQ"),
                       sle = 0.05,
                       sls = 0.05)
-    exam2
+    res2
 ```
 
-> Visulization of the selection process using `bidirection` strategy under information criteron `AIC`, `AICc`, `BIC`,`HQ`, `SBC`, and `SL` with `sle`=0.05 and `sls`=0.05. 
+> + Visulization of the selection process using `bidirection` strategy under information criteron `AIC`, `AICc`, `BIC`,`HQ`, `SBC`, and `SL` with `sle`=0.05 and `sls`=0.05. 
 
-```{r plot_exam2, warning=FALSE}
-    plot(exam2)
+```{r plot_res2, warning=FALSE}
+    plot(res2)
 ```
 
 > **Example3**: 
 >
-> type of regression: `linear`
+> + type of regression: `linear`
 >
-> response: multivariates of `mpg` and `drat` 
+> + response: multivariates of `mpg` and `drat` 
 >
-> predictors: `cyl`, `disp`, `hp`, `wt`, `vs`, `am` and `intercept`. 
+> + predictors: `cyl`, `disp`, `hp`, `wt`, `vs`, `am` and `intercept`. 
 >
-> variable selection strategy: `subset` 
+> + variable selection strategy: `subset` 
 >
-> information criterion: run `AIC`, `SBC` and `HQ` parallelly
+> + selection metric: run `AIC`, `SBC` and `HQ` parallelly
 
 ```{r}
     formula <- cbind(mpg,drat) ~ cyl + disp + hp + wt + vs + am
-    exam3 <- stepwise(formula = formula,
+    res3 <- stepwise(formula = formula,
                       data = mtcars,
                       type = "linear",
                       include = 'wt',
                       strategy = "subset",
                       metric = c("AIC","AICc","SBC","HQ"),
                       best_n = 3)
-    exam3
+    res3
 ```
 
-> Visulization of the selection process using `subset` strategy under information criteron `AIC`, `SBC` and `HQ`.
+> + Visulization of the selection process using `subset` strategy under information criteron `AIC`, `SBC` and `HQ`.
 
-```{r plot_exam3, warning=FALSE}
-    plot(exam3)
+```{r plot_res3, warning=FALSE}
+    plot(res3)
 ```
 
 ## Logistic stepwise regression with `remission`
@@ -384,65 +361,65 @@ In this section, we provided some examples using distinct parameters across vari
 
 > **Example4**: 
 >
-> type of regression: `logit`
+> + type of regression: `logit`
 >
-> response: `remiss` 
+> + response: `remiss` 
 >
-> predictors: all variables except `remiss`
+> + predictors: all variables except `remiss`
 >
-> variable selection strategy: `forward` 
+> + variable selection strategy: `forward` 
 >
-> information criterion: run `AIC` and `SL` parallelly, where `sle` and `sls` were both set to 0.05.
+> + selection metric: run `AIC` and `SL` parallelly, where `sle` and `sls` were both set to 0.05.
 >
-> force `cell` always in the model.
+> + force `cell` always in the model.
 
 ```{r warning = FALSE}
     data(remission)
     formula <- remiss ~ .
-    exma4 <- stepwise(formula = formula,
+    res4 <- stepwise(formula = formula,
                       data = remission,
                       type = "logit",
                       include= "cell",
                       strategy = "forward",
                       metric = c("AIC","SL"),
                       sle = 0.05)
-    exma4
+    res4
 ```
 
-> Visulization of the selection process using `forward` strategy under information criteron `AIC` and `SL`.
+> + Visulization of the selection process using `forward` strategy under information criteron `AIC` and `SL`.
 
-```{r plot_exam4, warning=FALSE}
-    plot(exma4)
+```{r plot_res4, warning=FALSE}
+    plot(res4)
 ```
 
 > **Example5**: 
 >
-> type of regression: `logit`
+> + type of regression: `logit`
 >
-> response: `remiss` 
+> + response: `remiss` 
 >
-> predictors: all variables except `remiss`
+> + predictors: all variables except `remiss`
 >
-> variable selection strategy: `subset` 
+> + variable selection strategy: `subset` 
 >
-> information criterion: run `SBC` and `SL` parallelly, where `sle` and `sls` used default 0.15.
+> + selection metric: run `SBC` and `SL` parallelly, where `sle` and `sls` used default 0.15.
 
 ```{r warning = FALSE}
     data(remission)
     formula <- remiss ~ .
-    exma5 <- stepwise(formula = formula,
+    res5 <- stepwise(formula = formula,
                       data = remission,
                       type = "logit",
                       strategy = "subset",
                       metric = c("SBC","SL"),
                       best_n = 3)
-    exma5
+    res5
 ```
 
-> Visulization of the selection process using `subset` strategy under information criteron `SBC` and `SL`.
+> + Visulization of the selection process using `subset` strategy under information criteron `SBC` and `SL`.
 
-```{r plot_exam5, warning=FALSE}
-    plot(exma5)
+```{r plot_res5, warning=FALSE}
+    plot(res5)
 ```
 
 ## Cox stepwise regression with `lung`
@@ -451,17 +428,17 @@ In this section, we provided some examples using distinct parameters across vari
 
 > **Example6**: 
 >
-> type of regression: `cox`
+> + type of regression: `cox`
 >
-> response: `Surv(time, status_binary)`
+> + response: `Surv(time, status_binary)`
 >
-> predictors: all variables except `status`
+> + predictors: all variables except `status`
 >
-> variable selection strategy: `forward` 
+> + variable selection strategy: `forward` 
 >
-> information criterion: run `IC(1)` and `SL` parallelly, where `sle` was set to 0.05.
+> + selection metric: run `IC(1)` and `SL` parallelly, where `sle` was set to 0.05.
 >
-> force `age` in all models.
+> + force `age` in all models.
 
 ```{r warning = FALSE}
     lung <- survival::lung
@@ -469,49 +446,49 @@ In this section, we provided some examples using distinct parameters across vari
     lung_noNA$status_binary <- ifelse(lung_noNA$status == 2,1,0)
     formula  =  Surv(time, status_binary) ~ . - status
     
-    exma6 <- stepwise(formula = formula,
+    res6 <- stepwise(formula = formula,
                       data = lung_noNA,
                       type = "cox",
                       include = "age",
                       strategy = "forward",
                       metric = c("IC(1)","SL"),
                       sle = 0.05)
-    exma6
+    res6
 ```
 
-> Visulization of the selection process using `forward` strategy under information criteron `IC(1)` and `SL`.
+> + Visulization of the selection process using `forward` strategy under information criteron `IC(1)` and `SL`.
 
-```{r plot_exam6, warning=FALSE}
-    plot(exma6)
+```{r plot_res6, warning=FALSE}
+    plot(res6)
 ```
 
 > **Example7**: 
 >
-> type of regression: `cox`
+> + type of regression: `cox`
 >
-> response: `Surv(time, status_binary)`
+> + response: `Surv(time, status_binary)`
 >
-> predictors: all variables except `status`
+> + predictors: all variables except `status`
 >
-> variable selection strategy: `backward` 
+> + variable selection strategy: `backward` 
 >
-> information criterion: run `SL` and `AIC` parallelly, where `sls` was set to 0.05.
+> + selection metric: run `SL` and `AIC` parallelly, where `sls` was set to 0.05.
 
 ```{r warning = FALSE}
     formula = Surv(time, status_binary) ~ . - status 
-    exma7 <- stepwise(formula = formula,
+    res7 <- stepwise(formula = formula,
                       data = lung_noNA,
                       type = "cox",
                       strategy = "backward",
                       metric = c("SL","AIC"),
                       sls = 0.05)
-    exma7
+    res7
 ```
 
-> Visulization of the selection process using `backward` strategy under information criteron `AIC` and `SL`.
+> + Visulization of the selection process using `backward` strategy under information criteron `AIC` and `SL`.
 
-```{r plot_exam7, warning=FALSE}
-    plot(exma7)
+```{r plot_res7, warning=FALSE}
+    plot(res7)
 ```
 
 ## Poisson stepwise regression with `CreditCard`
@@ -520,65 +497,65 @@ In this section, we provided some examples using distinct parameters across vari
 
 > **Example8**: 
 >
-> type of regression: `poisson`
+> + type of regression: `poisson`
 >
-> response: `reports`
+> + response: `reports`
 >
-> predictors: all variables except `reports`
+> + predictors: all variables except `reports`
 >
-> variable selection strategy: `forward` 
+> + variable selection strategy: `forward` 
 >
-> information criterion: run `SL` and `IC(3/2)` parallelly, and `sle` was set to 0.05.
+> + selection metric: run `SL` and `IC(3/2)` parallelly, and `sle` was set to 0.05.
 
 ```{r warning = FALSE}
     data(CreditCard, package = 'AER')
     formula  = reports ~ .
     
-    exma8 <- stepwise(formula = formula,
+    res8 <- stepwise(formula = formula,
                       data = CreditCard,
                       type = "poisson",
                       strategy = "forward",
                       metric = c("SL","IC(3/2)"),
                       sle=0.05)
-    exma8
+    res8
 ```
 
-> Visulization of the selection process using `forward` strategy under information criteron `IC(3/2)` and `SL`.
+> + Visulization of the selection process using `forward` strategy under information criteron `IC(3/2)` and `SL`.
 
-```{r plot_exam8, warning=FALSE}
-    plot(exma8)
+```{r plot_res8, warning=FALSE}
+    plot(res8)
 ```
 
 > **Example9**: 
 >
-> type of regression: `poisson`
+> + type of regression: `poisson`
 >
-> response: `reports`
+> + response: `reports`
 >
-> predictors: all variables except `reports`
+> + predictors: all variables except `reports`
 >
-> variable selection strategy: `bidirection` 
+> + variable selection strategy: `bidirection` 
 >
-> information criterion: run `AIC` and `IC(3/2)` parallelly
+> + selection metric: run `AIC` and `IC(3/2)` parallelly
 >
-> force `card` and `months` in all models.
+> + force `card` and `months` in all models.
 
 ```{r warning = FALSE}
     formula = reports ~ .
-    exma9 <- stepwise(formula = formula,
+    res9 <- stepwise(formula = formula,
                       data = CreditCard,
                       type = "poisson",
                       include=c("card","months"),
                       strategy = "bidirection",
                       metric = c("IC(3/2)","AIC")
                       )
-    exma9
+    res9
 ```
 
-> Visulization of the selection process using `bidirection` strategy under information criteron `IC(3/2)` and `AIC`.
+> + Visulization of the selection process using `bidirection` strategy under information criteron `IC(3/2)` and `AIC`.
 
-```{r plot_exam9, warning=FALSE}
-    plot(exma9)
+```{r plot_res9, warning=FALSE}
+    plot(res9)
 ```
 
 # Session Info

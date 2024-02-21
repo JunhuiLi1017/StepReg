@@ -28,17 +28,18 @@
 #' plot(p)
 
 plot.StepReg <- function(x, ...){
-  process_table <- x[which(str_starts(names(x), "Selection Process"))]
+  x1 <- x[which(str_starts(names(x), "Selection Process"))]
   # Combine tables if multiple of them
   plot_list <- list()
   for(n in class(x)[!class(x) %in% c("StepReg","list")]){
+    process_table <- x1[which(str_starts(names(x1), paste0("Selection Process under ",n)))]
     plot_data <- NULL
     if ("subset" %in% class(x)){
       for (i in 1:length(process_table)){
         for (i in 1:length(process_table)){
           sub_table <- process_table[[i]]
           sub_plot_data <- cbind(sub_table, colnames(sub_table)[2])
-          colnames(sub_plot_data) <- c("Step", "IC", "Variable", "IC_type")
+          colnames(sub_plot_data) <- c("Step", "IC", "Variable", "Metric")
           plot_data <- rbind(plot_data, sub_plot_data)
         }
       }
@@ -64,26 +65,26 @@ plot.StepReg <- function(x, ...){
         plot_data <- rbind(plot_data, sub_plot_data)
       }
     }
-    colnames(plot_data) <- c("Step", "IC", "Variable", "IC_type")
+    colnames(plot_data) <- c("Step", "MetricValue", "Variable", "Metric")
     plot_data$Step <- as.factor(as.numeric(plot_data$Step))
-    plot_data$IC <- as.numeric(plot_data$IC)
+    plot_data$MetricValue <- as.numeric(plot_data$MetricValue)
     
     p <- ggplot(data = plot_data) + 
       aes(x = .data$Step,
-          y = .data$IC, 
+          y = .data$MetricValue, 
           label = .data$Variable,
-          group = .data$IC_type) + 
-      geom_point(aes(color = .data$IC_type)) + 
+          group = .data$Metric) + 
+      geom_point(aes(color = .data$Metric)) + 
       geom_label_repel(label.size = 0.05,
-                       aes(color = .data$IC_type),
+                       aes(color = .data$Metric),
                        show.legend = FALSE) +
       labs(title = paste0("Selection Process under strategy ",n)) + 
       theme_minimal()
     
     if (!"subset" %in% class(x)){ # check if stepwise or best_subset
       p <- p + 
-        geom_line(aes(linetype = .data$IC_type,
-                      color = .data$IC_type)) + 
+        geom_line(aes(linetype = .data$Metric,
+                      color = .data$Metric)) + 
         xlab("Step")
       
     } else{

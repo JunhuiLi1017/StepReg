@@ -56,8 +56,8 @@ A list containing multiple tables will be returned.
 \itemize{
 \item Summary of Parameters: The parameters utilized in stepwise regression along with their default or user-specified values.
 \item Type of Variables: The variables and their respective types in the dataset.
-\item Selection Process under IC: The detailed overview of the variable selection process under information criteria IC. Variables are selected based on information criteria rules. For AIC, AICc, BIC, Cp, HQ, HQc, IC(1), IC(3/2) and SBC, the lower value of information criteria, the better of model fit. For Rsq or adjRsq, higher values indicate a better model fit.
-\item Parameter Estimates: The parameter estimates for the optimal models under information criteria IC.
+\item Selection Process under a given strategy with metric: The detailed overview of the variable selection process under under a given strategy with metric. Variables are selected based on information criteria rules. For AIC, AICc, BIC, Cp, HQ, HQc, IC(1), IC(3/2) and SBC, the lower value of information criteria, the better of model fit. For Rsq or adjRsq, higher values indicate a better model fit.
+\item Parameter Estimates: The parameter estimates for the optimal models under a given strategy with metric.
 }
 }
 \description{
@@ -80,7 +80,7 @@ formula <- mpg ~ . + 1
 stepwise(formula = formula,
          data = mtcars,
          type = "linear",
-         strategy = "bidirection",
+         strategy = c("forward","bidirection"),
          metric = c("AIC","SBC","SL","AICc","BIC","HQ"))
 
 ## perform logit stepwise regression with 'forward' strategy and significance
