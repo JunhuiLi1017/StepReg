@@ -23,6 +23,14 @@ output:
   BiocStyle::pdf_document: default
 abstract: |
   A guild on using StepReg for stepwise regression analysis with four well-known datasets namely the mtcars, remission, lung, and CreditCard for different regression models such as linear, logistic, Cox proportional hazard, and Poisson regression. The vignette explains the stepwise process with distinct parameters, offering users a clear understanding of how to effectively utilize StepReg for exploratory data analysis and model building in various regression scenarios.
+  
+  StepReg is a comprehensive package aiming to simplify the stepwise regression procedures. 
+  
+  
+  for simplifies the model selection procedure 
+  
+  
+  A guild on using StepReg for stepwise regression analysis with four well-known datasets namely the mtcars, remission, lung, and CreditCard for different regression models such as linear, logistic, Cox proportional hazard, and Poisson regression. The vignette explains the stepwise process with distinct parameters, offering users a clear understanding of how to effectively utilize StepReg for exploratory data analysis and model building in various regression scenarios.
 
 vignette: |
   %\VignetteIndexEntry{StepReg: Stepwise Regression made it simple}
@@ -80,7 +88,7 @@ Replace `"path_to/demo_res"` with desired output file name, the suffix `".html"`
 
 ## Regression categories
 
-**StepReg** supports multiple regressions, including *linear*, *logit*, *cox*, *poisson*, and *gamma* regressions. These methods primarily vary by the type of response variable (refer to the table below). Additional regression techniques can be incorporated upon user request.
+**StepReg** supports multiple types of regressions, including *linear*, *logit*, *cox*, *poisson*, and *gamma* regressions. These methods primarily vary by the type of response variable (refer to the table below). Additional regression techniques can be incorporated upon user request.
 
 ```{r, echo = FALSE}
 library(knitr)
@@ -112,9 +120,7 @@ Given the computational constraints, when dealing with datasets featuring a subs
 
 ## Selection metrics
 
-Various *selection metrics* can be used to guide the process of adding or removing predictors from the model. These metrics help to determine the importance or significance of predictors in improving the model fit. In StepReg, selection metrics include two categories: *Information Criteria* and *Significance Level* of the coefficient associated with each predictor. *Information Criteria* is a means of evaluating a model's performance, which balances model fit with complexity by penalizing models with a higher number of parameters. Lower *Information Criteria* values indicate a better trade-off between model fit and complexity. Note that when comparing different models, it's important to evaluate them within the same *Information Criteria* framework rather than across multiple Information Criteria. This means that if you are using, for example, the AIC to compare models, you should compare all models using AIC. Similarly, if you are using BIC, compare models using BIC only. This ensures consistency and fairness in model comparison, as each Information Criterion has its own scale and penalization factors. Comparing models across different Information Criteria may lead to biased conclusions.
-
-In practice, multiple metrics have been proposed, the ones supported by StepReg are summarized below.
+Various *selection metrics* can be used to guide the process of adding or removing predictors from the model. These metrics help to determine the importance or significance of predictors in improving the model fit. In StepReg, selection metrics include two categories: *Information Criteria* and *Significance Level* of the coefficient associated with each predictor. *Information Criteria* is a means of evaluating a model's performance, which balances model fit with complexity by penalizing models with a higher number of parameters. Lower *Information Criteria* values indicate a better trade-off between model fit and complexity. Note that when evaluating different models, it's important to compare them within the same *Information Criteria* framework rather than across multiple Information Criteria. For example, if you decide to use AIC, you should compare all models using AIC. This ensures consistency and fairness in model comparison, as each Information Criterion has its own scale and penalization factors. In practice, multiple metrics have been proposed, the ones supported by StepReg are summarized below.
 
 Importantly, given the discrepancies in terms of the precise definitions of each metric, StepReg mirrors the formulas adopted by [SAS](https://documentation.sas.com/doc/en/statcdc/14.2/statug/statug_glmselect_details15.htm) for *univariate multiple regression (UMR)* except for HQ, IC(1), and IC(3/2). A subset of the UMR can be easily extended to *multivariate multiple regression (MMR)*, which are indicated in the following table.
 
@@ -134,7 +140,7 @@ Meanings <- c(
 "Sample Size",
 "Number of parameters including the intercept",
 "Number of dependent variables",
-"Estimate of pure error variance from fitting the full model, which is the average of sigma value when it is for multivariate multiple regression",
+"Estimate of pure error variance from fitting the full model",
 "Total sum of squares corrected for the mean for the dependent variable, which is a numeric value for UMR and a matrix for multivariate regression",
 "Error sum of squares, which is a numeric value for UMR and a matrix for multivariate regression",
 "The natural logarithm of likelihood",
@@ -145,7 +151,7 @@ kable_styling(kable(data.frame(Statistic,Meanings),format = "html", align='l', e
 ```
 
 ```{r, echo = FALSE}
-Abbreviation <- c("", "AIC", "AICc", "BIC", "CP", "HQ", "IC(1)", "IC(3/2)", "SBC", "SL", "Rsq", "adjRsq")
+Abbreviation <- c("", "AIC", "AICc", "BIC", "Cp", "HQ", "IC(1)", "IC(3/2)", "SBC", "SL", "Rsq", "adjRsq")
 Definition <- c("",
                 "Akaike’s Information Criterion",
                 "Corrected Akaike’s Information Criterion",
@@ -199,27 +205,27 @@ kable(df, format = "html", align = "l",
   column_spec(4, width = "0.4in")
 ```
 
-In practice, no metric is necessarily optimal for prediction across all datasets. The choice of the metric depends on your specific data and research goals. We recommend using various metrics simultaneously when conducting stepwise regression. This approach enables you to select the most suitable model based on your specific needs. Below summarizes general guidance.
+No metric is necessarily optimal for all datasets. The choice of them depends on your data and research goals. We recommend using multiple metrics simultaneously, which allows the selection of the best model based on your specific needs. Below summarizes general guidance.
 
 + AIC: AIC works by penalizing the inclusion of additional variables in a model. The lower the AIC, the better performance of the model. AIC does not include sample size in penalty calculation, and it is optimal in minimizing the mean square error of predictions [@Brewer_2016].
 
 + AICc: AICc is a variant of AIC, which works better for small sample size, especially when `numObs / numParam < 40` [@Burnham_2002].
 
-+ CP: Another variant of AIC, it is equivalent to AIC in terms of model selection.
++ Cp: Cp is used for linear models. It is equivalent to AIC when dealing with Gaussian linear model selection.
 
 + IC(1) and IC(3/2): IC(1) and IC(3/2) have 1 and 3/2 as penalty factors respectively, compared to 2 used by AIC. As such, IC(1) turns to return a complex model with more variables that may suffer from overfitting issues.
 
-+ BIC and SBC: Both BIC and SBC are variants of Bayesian Information Criterion. The precise definition of them differ in literature and in SAS. Here, BIC mirrors the definition of Sawa Bayesion Information Criterion from [SAS](https://documentation.sas.com/doc/en/pgmsascdc/9.4_3.3/statug/statug_glmselect_syntax07.htm) while SBC refers to Schwarz Bayesian Information Criterion. Compared to AIC, the only difference is that Bayesian Information Criterion penalizes the sample size in formula. In practice, if you prefer simpler models or have concerns about overfitting, SBC may be a better choice. SBC may cause the model to under fit [@SAS_Institute_2018; @Sawa_1978; @Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002].
++ BIC and SBC: Both BIC and SBC are variants of Bayesian Information Criterion. The main distinction between BIC/SBC and AIC lies in the magnitude of the penalty imposed: BIC/SBC are more parsimonious when penalizing model complexity, which typically results to a simpler model [@SAS_Institute_2018; @Sawa_1978; @Hurvich_Tsai_1989; @Schwarz_1978; @Judge_1985; @Al-Subaihi_2002].
 
-+ HQ: An alternative to AIC, but have seen little use in practice. [@Burnham_2002] 
+The precise definitions of these criteria can vary across literature and in the SAS environment. Here, BIC aligns with the definition of the Sawa Bayesion Information Criterion as outlined in  [SAS](https://documentation.sas.com/doc/en/pgmsascdc/9.4_3.3/statug/statug_glmselect_syntax07.htm) documentation, while SBC corresponds to the Schwarz Bayesian Information Criterion. According to Richard's [post](https://www.linkedin.com/pulse/aicbic-model-selection-richard-randa/), whereas AIC often favors selecting overly complex models, BIC/SBC prioritize a small models. Consequently, when dealing with a limited sample size, AIC may seem preferable, whereas BIC/SBC tend to perform better with larger sample sizes.
 
-+ Rsq: The R² statistic for model comparison, on the other hand, is proportional to the Log-Likelihood. Therefore, comparing models based on R² is akin to selecting them solely based on their fit to the data, disregarding the model complexity. Higher adjusted R-squared values indicate better model fit.
++ HQ: HQ is an alternative to AIC, differing primarily in the method of penalty calculation. However, HQ has remained relatively underutilized in practice [@Burnham_2002].
 
-+ adjRsq: The Adjusted-R² statistic shares similar objectives to information criteria, as both aim to compare models based on their fit and the number of parameters. Higher adjusted R-squared values indicate better model fit. However, information criteria are generally considered superior in this regard [@Stevens_2016].
++ Rsq: The R-squared (R²) statistic measures the proportion of variations that is explained by the model. It ranges from 0 to 1, with 1 indicating that all of the variability in the response variables is accounted for by the independent variables. As such, R-squared is valuable for communicating the explanatory power of a model. However, R-squared alone is not sufficient for selection because it does not take into account the complexity of the model. Therefore, while R-squared is useful for understanding how well the model fits the data, it should not be the sole criterion for model selection.
 
-+ SL: P-values and statistical Significance Levels is an alternative strategy for models comparison. Use p-values and assess statistical significance when you want to determine whether individual predictors have a significant effect on the response variable. If the p-value associated with a predictor's coefficient is below a certain significance level (e.g., 0.05), you would consider the predictor statistically significant, indicating that it has a non-zero effect on the response variable. P-values and statistical Significance Levels are useful for hypothesis testing and inference.
++ adjRsq: The adjusted R-squared (adj-R²) seeks to overcome the limitation of R-squared in model selection by considering the number of predictors. It serves a similar purpose to information criteria, as both methods compare models by weighing their goodness of fit against the number of parameters. However, information criteria are typically regarded as superior in this context [@Stevens_2016].
 
-In summary, use p-values and statistical significance when you're interested in the effect of individual predictors, while use information criteria when you're comparing and selecting among different models.
++ SL: SL stands for Significance Level (P-value), embodying a distinct approach to model selection in contrast to information criteria. The SL method operates by calculating a P-value through specific hypothesis testing. Should this P-value fall below a predefined threshold, such as 0.05, one should favor the alternative hypothesis, indicating that the full model significantly outperforms the reduced model. The effectiveness of this method hinges upon the selection of the P-value threshold, wherein smaller thresholds tend to yield simpler models.
 
 ## Multicollinearity
 
