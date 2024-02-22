@@ -8,7 +8,7 @@
 #' 
 #' @param format the format of report, choose one or more from 'html', 'docx', 'rtf', 'pptx', 'xlsx'. default is 'html'
 #' 
-#' @importFrom openxlsx write.xlsx
+#' @importFrom xlsx createWorkbook createSheet CellStyle Font Border addDataFrame saveWorkbook
 #' 
 #' @importFrom flextable save_as_html save_as_pptx save_as_rtf save_as_docx autofit flextable align
 #' 
@@ -31,12 +31,24 @@
 #' report(x,report_name = "report", format = c("html","docx"))
 #' }
 
-
 report <- function(x, report_name, format=c('html', 'docx', 'rtf', 'pptx', 'xlsx')) {
   format <- match.arg(format, several.ok = TRUE)
   if(!is.null(report_name)) {
     if(any('xlsx' %in% format)) {
-      write.xlsx(x = x,  file = paste0(report_name,".xlsx"))
+      wb <- createWorkbook()
+      sheet <- createSheet(wb,"StepReg")
+      currRow <- 1
+      for(i in 1:length(x)){
+        cs <- CellStyle(wb) + Font(wb, isBold=TRUE) + Border(position=c("BOTTOM", "LEFT", "TOP", "RIGHT"))
+        addDataFrame(x[[i]],
+                     sheet=sheet,
+                     startRow=currRow,
+                     row.names=FALSE,
+                     colnamesStyle=cs)
+        currRow <- currRow + nrow(x[[i]]) + 2 
+      }
+      saveWorkbook(wb, file = paste0(report_name,".xlsx"))
+      #write.xlsx(x = x,  file = paste0(report_name,".xlsx"))
     }else if(any(c('html', 'docx', 'rtf', 'pptx') %in% format)) {
       results <- list()
       for(j in seq_along(x)) {

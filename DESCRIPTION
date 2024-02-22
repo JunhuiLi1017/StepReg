@@ -29,11 +29,11 @@ Imports:
     dplyr,
     ggplot2,
     ggrepel,
-    openxlsx,
     purrr,
     stringr,
     survival,
-    flextable
+    flextable,
+    xlsx
 Encoding: UTF-8
 RoxygenNote: 7.3.1
 NeedsCompilation: no
