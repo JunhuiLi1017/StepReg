@@ -78,7 +78,7 @@ plot.StepReg <- function(x, ...){
       geom_label_repel(label.size = 0.05,
                        aes(color = .data$Metric),
                        show.legend = FALSE) +
-      labs(title = paste0("Selection Process under strategy ",n)) + 
+      labs(title = paste0("Selection Process under ",n)) + 
       theme_minimal()
     
     if (!"subset" %in% class(x)){ # check if stepwise or best_subset
