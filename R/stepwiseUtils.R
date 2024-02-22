@@ -503,7 +503,7 @@ getInitStepModelStat <- function(fit_intercept, fit_fm, type, strategy, metric, 
 #return 3 num for IC and remove 1st of 3 num for SL
 getNumberEffect <- function(fit, type) {
   if(type == "linear") {
-    vec <- c(length(attr(fit$terms, "term.labels")), fit$rank)
+    vec <- c(length(attr(fit$terms, "term.labels")) + attr(fit$terms,"intercept"), fit$rank)
   }else if(type == "logit" | type == "poisson" | type == "Gamma") {
     vec <- c(fit$rank, fit$rank)
   }else if(type == "cox") {

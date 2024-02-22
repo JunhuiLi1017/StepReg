@@ -540,7 +540,7 @@ In this section, we provided some examples using distinct parameters across vari
 >
 > + predictors: all variables except `reports`
 >
-> + variable selection strategy: `bidirection` 
+> + variable selection strategy: `forward` and `bidirection` 
 >
 > + selection metric: run `AIC` and `IC(3/2)` parallelly
 >
@@ -552,7 +552,7 @@ In this section, we provided some examples using distinct parameters across vari
                       data = CreditCard,
                       type = "poisson",
                       include=c("card","months"),
-                      strategy = "bidirection",
+                      strategy = c("forward","bidirection"),
                       metric = c("IC(3/2)","AIC")
                       )
     res9

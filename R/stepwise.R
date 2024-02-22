@@ -175,8 +175,6 @@ stepwise <- function(formula,
   table3_process_table_metric <- list()
   x_final_model_metric <- list()
   table5_coef_model_metric <- list()
-  #stra="forward"
-  #met="AIC"
   for(stra in strategy){
     for(met in metric) {
       if(stra == "subset") {
