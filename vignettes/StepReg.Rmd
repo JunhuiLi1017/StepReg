@@ -40,7 +40,6 @@ StepReg simplifies model selection tasks by providing a unified programming inte
 The following example selects an optimal linear regression model with the `mtcars` dataset.
 ```{r, message = FALSE}
 library(StepReg)
-devtools::load_all("~/GitHub/StepReg/")
 
 data(mtcars)
 formula <- mpg ~ .
@@ -88,7 +87,7 @@ library(knitr)
 library(kableExtra)
 
 Regression <- c("linear", "logit", "cox", "poisson", "gamma")
-Reponse <- c("continuous", "binary", "time-to-event", "count", "gamma distribution")
+Reponse <- c("continuous", "binary", "time-to-event", "count", "continuous and positively skewed")
 df <- data.frame(Regression, Reponse)
 
 kable(df, format = "html", caption = 'Common regression categories') %>% kable_styling()
@@ -551,7 +550,7 @@ In this section, we provided some examples using distinct parameters across vari
     res9
 ```
 
-> + Visulization of the selection process using `bidirection` strategy under information criteron `IC(3/2)` and `AIC`.
+> + Visulization of the selection process using `forward` and `bidirection` strategy under information criteron `IC(3/2)` and `AIC`.
 
 ```{r plot_res9, warning=FALSE}
     plot(res9)
