@@ -6,7 +6,7 @@
 #' 
 #' @param ... Not used
 #'
-#' @return plot
+#' @return line and point plot for summary of selection process.
 #' 
 #' @import ggplot2
 #' 
@@ -28,11 +28,11 @@
 #' plot(p)
 
 plot.StepReg <- function(x, ...){
-  x1 <- x[which(str_starts(names(x), "Selection Process"))]
+  x1 <- x[which(str_starts(names(x), "Summary of selection process under"))]
   # Combine tables if multiple of them
   plot_list <- list()
   for(n in class(x)[!class(x) %in% c("StepReg","list")]){
-    process_table <- x1[which(str_starts(names(x1), paste0("Selection Process under ",n)))]
+    process_table <- x1[which(str_starts(names(x1), paste0("Summary of selection process under ",n)))]
     plot_data <- NULL
     if ("subset" %in% class(x)){
       for (i in 1:length(process_table)){
@@ -78,7 +78,7 @@ plot.StepReg <- function(x, ...){
       geom_label_repel(label.size = 0.05,
                        aes(color = .data$Metric),
                        show.legend = FALSE) +
-      labs(title = paste0("Selection Process under ",n)) + 
+      labs(title = paste0("Summary of selection process under ",n)) + 
       theme_minimal()
     
     if (!"subset" %in% class(x)){ # check if stepwise or best_subset

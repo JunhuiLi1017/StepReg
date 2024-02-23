@@ -165,11 +165,11 @@ stepwise <- function(formula,
   result <- list()
   ## table1
   table1_para_value <- getTable1SummaryOfParameters(data, type, x_name_orig, y_name, merged_multico_x, merged_include, paste0(strategy,collapse = " & "), paste0(metric,collapse = " & "), sle, sls, test_method, tolerance, intercept)
-  result$'Summary of Parameters' <- table1_para_value
+  result$'Summary of arguments for model selection' <- table1_para_value
   
   ## table2
   table2_class_table <- getTable2TypeOfVariables(model_raw)
-  result$'Type of Variables' <- table2_class_table
+  result$'Summary of variables in dataset' <- table2_class_table
   
   ## table3
   table3_process_table_metric <- list()
@@ -186,7 +186,7 @@ stepwise <- function(formula,
         x_in_model <- out_final_stepwise$x_in_model
         x_final_model <- c(include, x_in_model)
       }
-      result[[paste0("Selection Process under ",stra," with ",met,collapse="")]] <- table3_process_table
+      result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table
       x_final_model_metric[[stra]][[met]] <- x_final_model
     }
     ##table5
@@ -194,7 +194,7 @@ stepwise <- function(formula,
     for(met in metric){
       table5_coef_model <- table5_coef_model_metric[[stra]][[met]]
       for(i in names(table5_coef_model)) {
-        result[[paste0("Parameter Estimates for ", i, " under ",stra," with ",met,sep=" ")]] <- table5_coef_model[[i]]
+        result[[paste0("Summary of coefficients for the selected model with", i, " under ",stra," and ",met,sep=" ")]] <- table5_coef_model[[i]]
       }
     }
   }
