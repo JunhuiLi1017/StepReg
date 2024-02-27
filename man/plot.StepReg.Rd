@@ -12,7 +12,7 @@
 \item{...}{Not used}
 }
 \value{
-plot
+line and point plot for summary of selection process.
 }
 \description{
 plot.StepReg visualizes the variable selection procedure using a StepReg object

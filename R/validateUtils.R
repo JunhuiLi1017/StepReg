@@ -84,7 +84,7 @@ validateUtils <- function(formula,
 	
 	if(type == "linear") {
 		if(any(!metric %in% linear_metric)) {
-			stop("for type 'linear': 'metric' must be from one of the c('", paste0(linear_metric, collapse = "','"),"').")
+			stop("for type 'linear': 'metric' should come from the c('", paste0(linear_metric, collapse = "','"),"').")
 		}
 	  if(any(metric %in% c("BIC","CP"))){
 	    x_name_orig <- getXname(formula, data)
@@ -109,7 +109,7 @@ validateUtils <- function(formula,
 	  }
 	}else if(type == "logit" | type == "poisson" | type == "Gamma") {
 		if(any(!metric %in% glm_metric)) {
-			stop("for type ",type,": 'metric' must be from one of the c('", paste0(glm_metric, collapse = "','"),"').")
+			stop("for type ",type,": 'metric' should come from the c('", paste0(glm_metric, collapse = "','"),"').")
 		}
 	  if(type == 'logit') {
 	    type_glm <- "binomial"
@@ -133,7 +133,7 @@ validateUtils <- function(formula,
 	  )
 	}else if(type == 'cox') {
 		if(any(!metric %in% cox_metric)) {
-			stop("for type 'cox': 'metric' must be from one of the c('", paste0(cox_metric, collapse = "','"),"').")
+			stop("for type 'cox': 'metric' should come from the c('", paste0(cox_metric, collapse = "','"),"').")
 		}
 	}
 	## check 'tolerance'
@@ -158,18 +158,4 @@ validateUtils <- function(formula,
 			stop("the 'best_n' must be an integer.")
 		}
 	}
-	
-	## check 'report_name'
-	# if(!is.null(report_name)) {
-	# 	if(!is.character(report_name)) {
-	# 		stop("the 'report_name' must be a character string.")
-	# 	}
-	#   report_format <- str_split(report_name,"\\.")
-	#   format_list <- lapply(report_format,function(x){
-	#     x[length(x)]
-	#   })
-	#   if(!all(unlist(format_list) %in% c("html","docx","rtf","pdf","xlsx","pptx"))){
-	#     stop("the extended format of report should be one of 'html', 'docx','rtf','pdf','xlsx',and 'pptx'")
-	#   }
-	# }
 }

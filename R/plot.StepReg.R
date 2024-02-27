@@ -23,7 +23,7 @@
 #' p <- stepwise(formula = formula,
 #'               data = mtcars,
 #'               type = "linear",
-#'               strategy = "bidirection",
+#'               strategy = c("forward","bidirection"),
 #'               metric = c("AIC", "BIC"))
 #' plot(p)
 
