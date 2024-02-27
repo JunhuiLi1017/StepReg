@@ -194,7 +194,7 @@ stepwise <- function(formula,
     for(met in metric){
       table5_coef_model <- table5_coef_model_metric[[stra]][[met]]
       for(i in names(table5_coef_model)) {
-        result[[paste0("Summary of coefficients for the selected model with", i, " under ",stra," and ",met,sep=" ")]] <- table5_coef_model[[i]]
+        result[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table5_coef_model[[i]]
       }
     }
   }
