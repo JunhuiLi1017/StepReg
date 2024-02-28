@@ -40,7 +40,7 @@ StepReg simplifies model selection tasks by providing a unified programming inte
 The following example selects an optimal linear regression model with the `mtcars` dataset.
 ```{r, message = FALSE}
 library(StepReg)
-devtools::load_all("~/GitHub/StepReg/")
+#devtools::load_all("~/GitHub/StepReg/")
 
 data(mtcars)
 formula <- mpg ~ .
@@ -278,18 +278,12 @@ You should select the appropriate regression model according to the response var
 -   [**mtcars**](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html): the mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower(hp), and the number of cylinders(cyl). For more information, please ```?mtcars```
 
 ### Example1:  
->
-> + type of regression: `linear`
->
-> + response: `mpg`
->
-> + predictors: all variables except `mpg` 
->
-> + variable selection strategy: `forward` and `backward`
->
-> + selection metric: `AIC` 
->
-> + force `disp` and `cyl` to be included in all models.
++ type of regression: `linear`
++ response: `mpg`
++ predictors: all variables except `mpg` 
++ variable selection strategy: `forward` and `backward`
++ selection metric: `AIC` 
++ force `disp` and `cyl` to be included in all models.
 
 ```{r}
     library(StepReg)

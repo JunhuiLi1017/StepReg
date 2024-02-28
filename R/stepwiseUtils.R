@@ -195,7 +195,7 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
   initial_process_table <- NULL
   if (length(include) != 0) {
     initial_process_table <- matrix(NA, 1, 3)
-    colnames(initial_process_table) <- c("NumberOfVariables", metric, "VariablesInModel")
+    colnames(initial_process_table) <- c("NumberOfVariables", "VariablesInModel", metric)
     x_fit <- getModel(data = data, type = type, intercept = intercept, x_name = c(intercept, include), y_name = y_name, weight = weight, method = test_method)
 
     if(metric == "SL") {
@@ -217,7 +217,7 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
     }else{
       pic_set <- getModelFitStat(metric, x_fit, type, sigma_value)
     }
-    initial_process_table[1, 1:3] <- c(as.numeric(intercept) + length(include), pic_set, paste(intercept, include, sep = " "))
+    initial_process_table[1, 1:3] <- c(as.numeric(intercept) + length(include), paste(intercept, include, sep = " "), pic_set)
   }
   return(initial_process_table)
 }
@@ -232,7 +232,8 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		com_var_df <- cbind(paste(intercept, include, sep = " "), data.frame(com_var))
 		com_var_set <- apply(com_var_df, 1, paste, collapse = " ")
 		sub_process_table <- data.frame(sub_process_table, c(com_var_set))
-		colnames(sub_process_table) <- c("NumberOfVariables", metric, "VariablesInModel")
+		sub_process_table <- sub_process_table[,c(1,3,2)]
+		colnames(sub_process_table) <- c("NumberOfVariables", "VariablesInModel", metric)
 		colnames(com_table) <- com_var_set
 		x_test_list <- as.list(com_table)
 		x_name_list <- lapply(x_test_list, function(x) {c(intercept, include, x)})
@@ -258,7 +259,7 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		}else{
 		  pic_set <- sapply(x_fit_list, function(x) {getModelFitStat(metric, x, type, sigma_value)})
 		}
-		sub_process_table[, 2] <- pic_set
+		sub_process_table[, 3] <- pic_set
 		
 		if (metric %in% c("SL", "Rsq", "adjRsq")) {
 		  # "Rsq" and "adjRsq" are for type "linear"; "SL" is for type "logit" and "cox"
@@ -266,7 +267,7 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		} else{
 		  decreasing = FALSE
 		}
-		sub_process_table_sort <- sub_process_table[order(sub_process_table[, 2], decreasing = decreasing), ]
+		sub_process_table_sort <- sub_process_table[order(sub_process_table[, 3], decreasing = decreasing), ]
 		if(nrow(sub_process_table_sort) < best_n) {
 		  best_n_model <- nrow(sub_process_table_sort)
 		}else{

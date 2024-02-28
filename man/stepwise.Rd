@@ -10,8 +10,8 @@ stepwise(
   type = c("linear", "logit", "cox", "poisson", "Gamma"),
   include = NULL,
   strategy = c("forward", "backward", "bidirection", "subset"),
-  metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", "Rsq", "adjRsq", "SL", "SBC",
-    "IC(3/2)", "IC(1)"),
+  metric = c("AIC", "AICc", "BIC", "CP", "HQ", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)",
+    "IC(1)"),
   sle = 0.15,
   sls = 0.15,
   test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
@@ -19,7 +19,8 @@ stepwise(
   test_method_cox = c("efron", "breslow", "exact"),
   tolerance = 1e-07,
   weight = NULL,
-  best_n = Inf
+  best_n = Inf,
+  num_digits = 6
 )
 }
 \arguments{
@@ -33,7 +34,7 @@ stepwise(
 
 \item{strategy}{(character) The model selection strategy. Choose from 'forward', 'backward', 'bidirectional' and 'subset'. Default is 'forward'. More information, see \href{https://cran.r-project.org/web/packages/StepReg/vignettes/StepReg.html}{StepReg_vignettes}}
 
-\item{metric}{(character) The model selection criterion (model fit score). Used for the evaluation of the predictive performance of an intermediate model. Choose from 'AIC', 'AICc', 'BIC', 'CP', 'HQ', 'HQc', 'Rsq', 'adjRsq', 'SL', 'SBC', 'IC(3/2)', 'IC(1)'. Default is 'AIC'. More information, see \href{https://cran.r-project.org/web/packages/StepReg/vignettes/StepReg.html}{StepReg_vignettes}}
+\item{metric}{(character) The model selection criterion (model fit score). Used for the evaluation of the predictive performance of an intermediate model. Choose from 'AIC', 'AICc', 'BIC', 'CP', 'HQ', 'Rsq', 'adjRsq', 'SL', 'SBC', 'IC(3/2)', 'IC(1)'. Default is 'AIC'. More information, see \href{https://cran.r-project.org/web/packages/StepReg/vignettes/StepReg.html}{StepReg_vignettes}}
 
 \item{sle}{(numeric) Significance Level to Enter. It is the statistical significance level that a predictor variable must meet to be included in the model. E.g. if 'sle = 0.05', a predictor with a P-value less than 0.05 will 'enter' the model. Default is 0.15.}
 
@@ -50,6 +51,8 @@ stepwise(
 \item{weight}{(numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weight reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weight should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is NULL, which means that all weight are set equal.}
 
 \item{best_n}{(numeric(integer)) The number of models to keep in the final output. Default is Inf, which means that all models will be displayed.}
+
+\item{num_digits}{(numeric(integer)) The number of digits to keep when rounding the results. Default is 6.}
 }
 \value{
 A list containing multiple tables will be returned.
