@@ -41,7 +41,7 @@ stepwise(
 
 \item{test_method_linear}{(character) Test method for multivariate linear regression analysis, choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'. Default is 'Pillai'. For univariate regression, 'F-test' will be used.}
 
-\item{test_method_glm}{(character) Test method for univariate logit, Poisson, or Gamma regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy = 'subset'.}
+\item{test_method_glm}{(character) Test method for logit, Poisson, or Gamma regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy = 'subset'.}
 
 \item{test_method_cox}{(character) Test method for cox regression analysis, choose from 'efron', 'breslow', 'exact'. Default is 'efron'.}
 

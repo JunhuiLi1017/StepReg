@@ -2,6 +2,7 @@
 
 S3method(plot,StepReg)
 S3method(print,StepReg)
+export(StepRegShinyApp)
 export(report)
 export(stepwise)
 import(ggplot2)
