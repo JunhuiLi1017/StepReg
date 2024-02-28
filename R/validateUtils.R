@@ -18,7 +18,8 @@ validateUtils <- function(formula,
 													weight = NULL,
                           best_n = Inf,
 													#report_name = NULL,
-													n_y) {
+													n_y,
+													num_digits = 6) {
 	## check required parameters
 	if(missing(data)) { 
 		stop("'data' parameter is missing.") 
@@ -157,5 +158,10 @@ validateUtils <- function(formula,
 		if(!best_n %% 1 == 0) {
 			stop("the 'best_n' must be an integer.")
 		}
+	}
+	
+	## check if num_digits:
+	if (!is.numeric(num_digits) || num_digits <= 0) {
+	  abort("The 'num_digits' must be numeric and above 0!")
 	}
 }

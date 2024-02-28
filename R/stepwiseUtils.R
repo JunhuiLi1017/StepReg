@@ -781,17 +781,18 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
   return(out_final_stepwise)
 }
 
-getTable4FinalVariable <- function(all_x_in_model) {
-  variables <- as.data.frame(t(data.frame(all_x_in_model)))
-  colnames(variables) <- paste0("variable", 1:ncol(variables))
-  rownames(variables) <- c("x in model")
-  #table4 <- formatTable(variables, tbl_name = "Table 4. Selected Varaibles")
-  table4 <- variables
-  return(table4)
-}
+# not called:
+# getTable4FinalVariable <- function(all_x_in_model) {
+#   variables <- as.data.frame(t(data.frame(all_x_in_model)))
+#   colnames(variables) <- paste0("variable", 1:ncol(variables))
+#   rownames(variables) <- c("x in model")
+#   #table4 <- formatTable(variables, tbl_name = "Table 4. Selected Varaibles")
+#   table4 <- variables
+#   return(table4)
+# }
 
-getTable5CoefModel <- function(type, intercept, include, x_in_model_metric, y_name, n_y, data, weight, test_method) {
-  table5 <- list()
+getTable4CoefModel <- function(type, intercept, include, x_in_model_metric, y_name, n_y, data, weight, test_method) {
+  table4 <- list()
   for(met in names(x_in_model_metric)) {
     x_in_model <- x_in_model_metric[[met]]
     if(is.null(c(include, x_in_model))) {
@@ -816,9 +817,9 @@ getTable5CoefModel <- function(type, intercept, include, x_in_model_metric, y_na
         names(summary_model_list) <- y_name
       }
     }
-    table5[met] <- list(summary_model_list)
+    table4[met] <- list(summary_model_list)
   }
-  #table5 <- formatTable(summary_model_list, tbl_name = "Table 5. Summary of Model for")
-  return(table5)
+  #table4 <- formatTable(summary_model_list, tbl_name = "Table 5. Summary of Model for")
+  return(table4)
 }
 

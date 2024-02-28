@@ -29,6 +29,8 @@
 #' @param test_method_cox (character) Test method for cox regression analysis, choose from 'efron', 'breslow', 'exact'. Default is 'efron'.
 #' 
 #' @param best_n (numeric(integer)) The number of models to keep in the final output. Default is Inf, which means that all models will be displayed.
+#'  
+#' @param num_digits (numeric(integer)) The number of digits to keep when rounding the results. Default is 6.
 #' 
 # @param report_name (NULL|character) The output report name with extented format, '.html', 'pdf', '.docx', '.pptx', '.xlsx' and '.rtf' are supported. If NULL, do not output report file. Default is NULL.
 #' 
@@ -115,6 +117,8 @@
 #' 
 #' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms deviance df.residual formula model.frame
 #' 
+#' @param num_digits (numeric(integer)) The number of digits to keep when rounding the results. Default is 6.
+#' 
 #' @export
 
 stepwise <- function(formula,
@@ -130,7 +134,8 @@ stepwise <- function(formula,
                      test_method_cox = c("efron", "breslow", "exact"),
                      tolerance = 1e-7,
                      weight = NULL,
-                     best_n = Inf) {
+                     best_n = Inf,
+                     num_digits = 6) {
   ## validate input:
   ## check required parameters
   ## place match.arg() in the main function because validationUtils.R can't return type even with <<-, and type represents all values in c().
@@ -174,7 +179,6 @@ stepwise <- function(formula,
   ## table3
   table3_process_table_metric <- list()
   x_final_model_metric <- list()
-  table5_coef_model_metric <- list()
   for(stra in strategy){
     for(met in metric) {
       if(stra == "subset") {
@@ -186,15 +190,41 @@ stepwise <- function(formula,
         x_in_model <- out_final_stepwise$x_in_model
         x_final_model <- c(include, x_in_model)
       }
+      # Round metric column to num_digits:
+      table3_process_table[, ncol(table3_process_table)] <- 
+        table3_process_table[, ncol(table3_process_table)] %>% 
+        as.numeric() %>% 
+        round(digits = num_digits) %>% 
+        as.character()
+      
       result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table
       x_final_model_metric[[stra]][[met]] <- x_final_model
     }
-    ##table5
-    table5_coef_model_metric[[stra]] <- getTable5CoefModel(type = type, intercept, include, x_final_model_metric[[stra]], y_name, n_y, data, weight, test_method_cox)
+    
+    ##table4
+    table4_coef_model_metric <- list()
+    table4_coef_model_metric[[stra]] <- getTable4CoefModel(type = type, intercept, include, x_final_model_metric[[stra]], y_name, n_y, data, weight, test_method_cox)
     for(met in metric){
-      table5_coef_model <- table5_coef_model_metric[[stra]][[met]]
-      for(i in names(table5_coef_model)) {
-        result[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table5_coef_model[[i]]
+      table4_coef_model <- table4_coef_model_metric[[stra]][[met]]
+      
+      # Round all columns except for column 1 (Variable) to num_digits:
+      for (i in 1:length(table4_coef_model)) { # there might be multiple tables depending on the number of response variables
+        table4_coef_model[[i]]$Estimate <- 
+          table4_coef_model[[i]]$Estimate %>% as.numeric() %>% round(digits = num_digits) %>% 
+          as.character()
+        table4_coef_model[[i]]$`Std. Error` <- 
+          table4_coef_model[[i]]$`Std. Error` %>% as.numeric() %>% round(digits = num_digits) %>% 
+          as.character()
+        table4_coef_model[[i]]$`t value` <- 
+          table4_coef_model[[i]]$`t value` %>% as.numeric() %>% round(digits = num_digits) %>% 
+          as.character()
+        table4_coef_model[[i]]$`Pr(>|t|)` <- 
+          table4_coef_model[[i]]$`Pr(>|t|)` %>% as.numeric() %>% round(digits = num_digits) %>% 
+          as.character()
+      }
+      
+      for(i in names(table4_coef_model)) {
+        result[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table4_coef_model[[i]]
       }
     }
   }
