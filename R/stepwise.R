@@ -115,6 +115,8 @@
 #' 
 #' @importFrom utils combn
 #' 
+#' @importFrom tibble tibble
+#' 
 #' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms deviance df.residual formula model.frame
 #' 
 #' @param num_digits (numeric(integer)) The number of digits to keep when rounding the results. Default is 6.

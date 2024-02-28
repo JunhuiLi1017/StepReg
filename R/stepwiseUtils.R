@@ -195,6 +195,9 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
   initial_process_table <- NULL
   if (length(include) != 0) {
     initial_process_table <- matrix(NA, 1, 3)
+    initial_process_table <- tibble(NumberOfVariables=numeric(),
+                                    VariablesInModel=character(),
+                                    metric=numeric())
     colnames(initial_process_table) <- c("NumberOfVariables", "VariablesInModel", metric)
     x_fit <- getModel(data = data, type = type, intercept = intercept, x_name = c(intercept, include), y_name = y_name, weight = weight, method = test_method)
 
@@ -514,7 +517,7 @@ getNumberEffect <- function(fit, type) {
 }
 
 initialProcessTable <- function(metric) {
-  sub_init_process_table <- data.frame(Step = numeric(), 
+  sub_init_process_table <- tibble(Step = numeric(), 
                                EnteredEffect = character(), 
                                RemovedEffect = character(), 
                                NumberEffectIn = numeric(), 
