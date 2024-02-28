@@ -203,7 +203,7 @@ stepwise <- function(formula,
     
     ##table4
     table4_coef_model_metric <- list()
-    table4_coef_model_metric[[stra]] <- getTable4CoefModel(type = type, intercept, include, x_final_model_metric[[stra]], y_name, n_y, data, weight, test_method_cox)
+    table4_coef_model_metric[[stra]] <- getTable4CoefModel(type = type, intercept, include, x_final_model_metric[[stra]] , y_name, n_y, data, weight, test_method_cox)
     for(met in metric){
       table4_coef_model <- table4_coef_model_metric[[stra]][[met]]
       
