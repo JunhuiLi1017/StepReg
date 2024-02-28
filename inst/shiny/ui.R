@@ -49,12 +49,9 @@ ui <- navbarPage(
                             selected = "head"),
                
                # Horizontal line ----
-               # tags$hr(),
-               # Distribution of selected variables
-               # selectInput("distribution_plot",
-               #             "Distribution Plot based on Selected Variables",
-               #             choices = NULL,
-               #             multiple = TRUE)
+               tags$hr(),
+               # Select variables for summary
+               uiOutput("variable_selector")
                
              ),
              
@@ -62,8 +59,8 @@ ui <- navbarPage(
              mainPanel(
                
                # Output: Data file ----
-               tableOutput("contents")#,
-               #plotOutput("distPlot")
+               tableOutput("contents"),
+               DTOutput("summary_table")
                
              )
              

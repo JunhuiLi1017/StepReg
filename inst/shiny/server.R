@@ -113,13 +113,33 @@ server <- function(input, output, session) {
     })
   })
   
-  # Display summary of uploaded dataset
-  # Inside the server function, capture the output of str() to a variable
-  df <- NULL
-  output$distPlot <- renderPlot({
-    req(dataset())
-    df <- dataset()
-    return(hist(df[,input$distribution_plot]))
+  # Output variable selector based on dataset columns
+  output$variable_selector <- renderUI({
+    if(is.null(dataset())) return()
+    selectInput("selected_variable", "Select Variable for Summary:",
+                choices = colnames(dataset()))
+  })
+  
+  # Generate summary table based on selected variable
+  output$summary_table <- renderDT({
+    req(input$selected_variable)
+    summary_data <- summary(dataset()[,input$selected_variable])
+    summary_data <- as.data.frame(as.matrix(summary_data)) # Ensure summary is a data frame
+    colnames(summary_data) <- input$selected_variable
+    datatable(summary_data, 
+              options = list(paging = FALSE, searching = FALSE, ordering = FALSE))
+  })
+  
+  # Generate summary table based on selected variable
+  output$summary_table <- renderDT({
+    req(input$selected_variable)
+    summary_data <- summary(dataset()[, input$selected_variable])
+    summary_data <- as.data.frame(as.matrix(summary_data))
+    colnames(summary_data) <- input$selected_variable
+    datatable(summary_data, 
+              options = list(paging = FALSE, 
+                             searching = FALSE, 
+                             ordering = FALSE))
   })
   
   output$contents <- renderTable({
