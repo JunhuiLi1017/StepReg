@@ -57,10 +57,10 @@ stepwise(
 \value{
 A list containing multiple tables will be returned.
 \itemize{
-\item Summary of Parameters: The parameters utilized in stepwise regression along with their default or user-specified values.
-\item Type of Variables: The variables and their respective types in the dataset.
-\item Selection Process under a given strategy with metric: The detailed overview of the variable selection process under under a given strategy with metric. Variables are selected based on information criteria rules. For AIC, AICc, BIC, Cp, HQ, HQc, IC(1), IC(3/2) and SBC, the lower value of information criteria, the better of model fit. For Rsq or adjRsq, higher values indicate a better model fit.
-\item Parameter Estimates: The parameter estimates for the optimal models under a given strategy with metric.
+\item Summary of arguments for model selection: Arguments used in the stepwise function, either default or user-supplied values.
+\item Summary of variables in dataset: Variable names, types, and classes in dataset.
+\item Summary of selection process under xxx(strategy) with xxx(metric): Overview of the variable selection process under specified strategy and metric.
+\item Summary of coefficients for the selected model with xxx(dependent variable) under xxx(strategy) and xxx(metric): Coefficients for the selected models under specified strategy with metric.
 }
 }
 \description{

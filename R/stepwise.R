@@ -72,10 +72,10 @@
 #' 
 #' @return A list containing multiple tables will be returned.
 #' \itemize{
-#' \item Summary of Parameters: The parameters utilized in stepwise regression along with their default or user-specified values.
-#' \item Type of Variables: The variables and their respective types in the dataset.
-#' \item Selection Process under a given strategy with metric: The detailed overview of the variable selection process under under a given strategy with metric. Variables are selected based on information criteria rules. For AIC, AICc, BIC, Cp, HQ, HQc, IC(1), IC(3/2) and SBC, the lower value of information criteria, the better of model fit. For Rsq or adjRsq, higher values indicate a better model fit.
-#' \item Parameter Estimates: The parameter estimates for the optimal models under a given strategy with metric.
+#' \item Summary of arguments for model selection: Arguments used in the stepwise function, either default or user-supplied values.
+#' \item Summary of variables in dataset: Variable names, types, and classes in dataset.
+#' \item Summary of selection process under xxx(strategy) with xxx(metric): Overview of the variable selection process under specified strategy and metric.
+#' \item Summary of coefficients for the selected model with xxx(dependent variable) under xxx(strategy) and xxx(metric): Coefficients for the selected models under specified strategy with metric.
 #' }
 
 #' @examples
@@ -115,7 +115,9 @@
 #' 
 #' @importFrom utils combn
 #' 
-#' @importFrom tibble tibble
+#' @importFrom dplyr `%>%` mutate_if
+#' 
+#' @importFrom rlang arg_match
 #' 
 #' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms deviance df.residual formula model.frame
 #' 
@@ -142,8 +144,10 @@ stepwise <- function(formula,
   ## check required parameters
   ## place match.arg() in the main function because validationUtils.R can't return type even with <<-, and type represents all values in c().
   type <- match.arg(type)
-  strategy <- match.arg(strategy, several.ok = TRUE)
-  metric <- match.arg(metric, several.ok = TRUE)
+  strategy <- arg_match(strategy, c("forward", "backward", "bidirection", "subset") ,multiple = TRUE)
+  metric <- arg_match(metric, c("AIC", "AICc", "BIC", "CP", "HQ", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)") ,multiple = TRUE)
+  
+  
   
   test_method_linear <- match.arg(test_method_linear)
   test_method_glm <- match.arg(test_method_glm)
@@ -186,47 +190,24 @@ stepwise <- function(formula,
       if(stra == "subset") {
         table3_process_table <- getSubsetWrapper(data, type, met, x_name, y_name, intercept, include, weight = weight, best_n, test_method, sigma_value)
         x_final_model <- getXNameSelected(table3_process_table,met)
+        table3_process_table[,2] <- as.numeric(table3_process_table[,2])
       }else{
         out_final_stepwise <- getStepwiseWrapper(data, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
         table3_process_table <- out_final_stepwise$process_table
         x_in_model <- out_final_stepwise$x_in_model
         x_final_model <- c(include, x_in_model)
       }
-      # Round metric column to num_digits:
-      table3_process_table[, ncol(table3_process_table)] <- 
-        table3_process_table[, ncol(table3_process_table)] %>% 
-        as.numeric() %>% 
-        round(digits = num_digits) %>% 
-        as.character()
-      
+      table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric() %>% round(num_digits) %>% as.character()
       result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table
       x_final_model_metric[[stra]][[met]] <- x_final_model
     }
-    
     ##table4
     table4_coef_model_metric <- list()
     table4_coef_model_metric[[stra]] <- getTable4CoefModel(type = type, intercept, include, x_final_model_metric[[stra]] , y_name, n_y, data, weight, test_method_cox)
     for(met in metric){
       table4_coef_model <- table4_coef_model_metric[[stra]][[met]]
-      
-      # Round all columns except for column 1 (Variable) to num_digits:
-      for (i in 1:length(table4_coef_model)) { # there might be multiple tables depending on the number of response variables
-        table4_coef_model[[i]]$Estimate <- 
-          table4_coef_model[[i]]$Estimate %>% as.numeric() %>% round(digits = num_digits) %>% 
-          as.character()
-        table4_coef_model[[i]]$`Std. Error` <- 
-          table4_coef_model[[i]]$`Std. Error` %>% as.numeric() %>% round(digits = num_digits) %>% 
-          as.character()
-        table4_coef_model[[i]]$`t value` <- 
-          table4_coef_model[[i]]$`t value` %>% as.numeric() %>% round(digits = num_digits) %>% 
-          as.character()
-        table4_coef_model[[i]]$`Pr(>|t|)` <- 
-          table4_coef_model[[i]]$`Pr(>|t|)` %>% as.numeric() %>% round(digits = num_digits) %>% 
-          as.character()
-      }
-      
       for(i in names(table4_coef_model)) {
-        result[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table4_coef_model[[i]]
+        result[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table4_coef_model[[i]] %>% mutate_if(is.numeric, round, num_digits)
       }
     }
   }

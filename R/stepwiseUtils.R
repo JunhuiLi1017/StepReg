@@ -194,25 +194,24 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
 	# metric refers to PIC method, e.g. AIC, BIC, etc. for "logit" and "cox" type, if metric is "SL", the PIC is calculated differently
   initial_process_table <- NULL
   if (length(include) != 0) {
-    initial_process_table <- matrix(NA, 1, 3)
-    initial_process_table <- tibble(NumberOfVariables=numeric(),
-                                    VariablesInModel=character(),
-                                    metric=numeric())
-    colnames(initial_process_table) <- c("NumberOfVariables", "VariablesInModel", metric)
+    initial_process_table <- data.frame(NumberOfVariables=numeric(),
+                                        metric=numeric(),
+                                        VariablesInModel=character())
+    colnames(initial_process_table) <- c("NumberOfVariables", metric, "VariablesInModel")
     x_fit <- getModel(data = data, type = type, intercept = intercept, x_name = c(intercept, include), y_name = y_name, weight = weight, method = test_method)
 
     if(metric == "SL") {
       if(type == "logit") {
         fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "binomial")
-        f_pic_vec <- getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x_fit, type = type, test_method = "Rao")
+        f_pic_vec <- getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x_fit, type = type, test_method = test_method)
         pic_set <- f_pic_vec[1]
       }else if(type == "poisson") {
         fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "poisson")
-        f_pic_vec <- getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x_fit, type = type, test_method = "Rao")
+        f_pic_vec <- getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x_fit, type = type, test_method = test_method)
         pic_set <- f_pic_vec[1]
       }else if(type == "Gamma") {
         fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "Gamma")
-        f_pic_vec <- getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x_fit, type = type, test_method = "Rao")
+        f_pic_vec <- getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x_fit, type = type, test_method = test_method)
         pic_set <- f_pic_vec[1]
       }else if(type == "cox") {
         pic_set <- x_fit$score
@@ -220,7 +219,7 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
     }else{
       pic_set <- getModelFitStat(metric, x_fit, type, sigma_value)
     }
-    initial_process_table[1, 1:3] <- c(as.numeric(intercept) + length(include), paste(intercept, include, sep = " "), pic_set)
+    initial_process_table[1, 1:3] <- c(as.numeric(intercept) + length(include), pic_set, paste(intercept, include, sep = " "))
   }
   return(initial_process_table)
 }
@@ -235,8 +234,7 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		com_var_df <- cbind(paste(intercept, include, sep = " "), data.frame(com_var))
 		com_var_set <- apply(com_var_df, 1, paste, collapse = " ")
 		sub_process_table <- data.frame(sub_process_table, c(com_var_set))
-		sub_process_table <- sub_process_table[,c(1,3,2)]
-		colnames(sub_process_table) <- c("NumberOfVariables", "VariablesInModel", metric)
+		colnames(sub_process_table) <- c("NumberOfVariables", metric, "VariablesInModel")
 		colnames(com_table) <- com_var_set
 		x_test_list <- as.list(com_table)
 		x_name_list <- lapply(x_test_list, function(x) {c(intercept, include, x)})
@@ -245,15 +243,15 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		if(metric == "SL") {
 		  if(type == "logit") {
 		    fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "binomial")
-		    f_pic_vec <- sapply(x_fit_list, function(x) {getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x, type = type, test_method = "Rao")})
+		    f_pic_vec <- sapply(x_fit_list, function(x) {getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x, type = type, test_method = test_method)})
 		    pic_set <- f_pic_vec[1, ]
 		  }else if(type == "poisson") {
 		    fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "poisson")
-		    f_pic_vec <- sapply(x_fit_list, function(x) {getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x, type = type, test_method = "Rao")})
+		    f_pic_vec <- sapply(x_fit_list, function(x) {getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x, type = type, test_method = test_method)})
 		    pic_set <- f_pic_vec[1, ]
 		  }else if(type == "Gamma") {
 		    fit_reduce <- glm(reformulate(intercept, y_name), data = data, weights = weight, family = "Gamma")
-		    f_pic_vec <- sapply(x_fit_list, function(x) {getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x, type = type, test_method = "Rao")})
+		    f_pic_vec <- sapply(x_fit_list, function(x) {getAnovaStat(add_or_remove = "add", include = include, fit_reduced = fit_reduce, fit_full = x, type = type, test_method = test_method)})
 		    pic_set <- f_pic_vec[1, ]
 		  }else if(type == "cox") {
 		    #pic_set <- fit$score
@@ -262,7 +260,7 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		}else{
 		  pic_set <- sapply(x_fit_list, function(x) {getModelFitStat(metric, x, type, sigma_value)})
 		}
-		sub_process_table[, 3] <- pic_set
+		sub_process_table[, 2] <- pic_set
 		
 		if (metric %in% c("SL", "Rsq", "adjRsq")) {
 		  # "Rsq" and "adjRsq" are for type "linear"; "SL" is for type "logit" and "cox"
@@ -270,7 +268,7 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 		} else{
 		  decreasing = FALSE
 		}
-		sub_process_table_sort <- sub_process_table[order(sub_process_table[, 3], decreasing = decreasing), ]
+		sub_process_table_sort <- sub_process_table[order(sub_process_table[, 2], decreasing = decreasing), ]
 		if(nrow(sub_process_table_sort) < best_n) {
 		  best_n_model <- nrow(sub_process_table_sort)
 		}else{
@@ -284,9 +282,9 @@ getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_ta
 getXNameSelected <- function(process_table, metric) {
 	if (metric %in% c("SL", "Rsq", "adjRsq")) {
 		# "Rsq" and "adjRsq" are for type "linear"; "SL" is for type "logit" and "cox"
-		x_name_selected <- unlist(strsplit(process_table[which.max(as.numeric(process_table[, metric])), 2], " "))
+		x_name_selected <- unlist(strsplit(process_table[which.max(as.numeric(process_table[, metric])), 3], " "))
 	} else{
-		x_name_selected <- unlist(strsplit(process_table[which.min(as.numeric(process_table[, metric])), 2], " "))
+		x_name_selected <- unlist(strsplit(process_table[which.min(as.numeric(process_table[, metric])), 3], " "))
 	}
   x_name_selected <- x_name_selected[!x_name_selected %in% ""]
 	return(x_name_selected)
@@ -517,7 +515,7 @@ getNumberEffect <- function(fit, type) {
 }
 
 initialProcessTable <- function(metric) {
-  sub_init_process_table <- tibble(Step = numeric(), 
+  sub_init_process_table <- data.frame(Step = numeric(), 
                                EnteredEffect = character(), 
                                RemovedEffect = character(), 
                                NumberEffectIn = numeric(), 

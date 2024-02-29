@@ -17,7 +17,6 @@ validateUtils <- function(formula,
 													tolerance = 10e-7,
 													weight = NULL,
                           best_n = Inf,
-													#report_name = NULL,
 													n_y,
 													num_digits = 6) {
 	## check required parameters
@@ -35,34 +34,17 @@ validateUtils <- function(formula,
 		if(!inherits(formula, "formula")) {
 			stop("'formula' must be a formula class.")
 		}
-		# term_form <- terms(formula,data=data)
-		# vars <- as.character(attr(term_form, "variables"))[-1]
-		# y_name <<- vars[attr(term_form, "response")]
-		# x_name <<- attr(term_form,"term.labels")
-		# if(attr(term_form, "intercept") == 0) {
-		# 	intercept <<- "0"
-		# }else{
-		# 	intercept <<- "1"
-		# }
 	}
 	# response_variable_n <<- length(all.vars(formula[[2]]))
 	
 	 # Ref: https://stackoverflow.com/questions/13217322/how-to-reliably-get-dependent-variable-name-from-formula-object
 	
-	# if(is.null(include)) {
-	# 	# include_name <<- NULL
-	# 	# merge_inc_name <<- "NULL"
-	# }else{
 	if(!is.null(include)) {
 		term_form <- terms(formula, data = data)
 		x_name <- attr(term_form, "term.labels")
 		if(!all(include %in% x_name)) {
 			stop(paste0("'include' must be a subset of: c('",paste0(x_name,collapse = "','"),"')"))
 		}
-		# else{
-		# 	include_name <<- include
-		# 	merge_inc_name <<- paste0(include_name,collapse=" ")
-		# }
 	}
 	
 	if(is.numeric(sle) & is.numeric(sls)) {
@@ -162,6 +144,6 @@ validateUtils <- function(formula,
 	
 	## check if num_digits:
 	if (!is.numeric(num_digits) || num_digits <= 0) {
-	  abort("The 'num_digits' must be numeric and above 0!")
+	  stop("The 'num_digits' must be numeric and above 0!")
 	}
 }

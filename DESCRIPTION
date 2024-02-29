@@ -36,7 +36,8 @@ Imports:
     xlsx,
     shiny,
     gridExtra,
-    DT
+    DT,
+    rlang
 Encoding: UTF-8
 RoxygenNote: 7.3.1
 NeedsCompilation: no
