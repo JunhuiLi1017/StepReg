@@ -115,7 +115,7 @@
 #' 
 #' @importFrom utils combn
 #' 
-#' @importFrom dplyr `%>%` mutate_if
+#' @importFrom dplyr `%>%` mutate_if mutate
 #' 
 #' @importFrom rlang arg_match
 #' 

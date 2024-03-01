@@ -22,7 +22,7 @@ output:
     toc_float: true
   BiocStyle::pdf_document: default
 abstract: |
-  The StepReg package, developed for exploratory model building tasks, offers support across diverse scenarios. It facilitates model construction for various response variable types, including continuous (linear regression), binary (logistic regression), and time-to-event (Cox regression), among others. StepReg encompasses all commonly used model selection strategies, including forward selection, backward elimination, bidirectional elimination, and best subsets. Notably, it offers flexibility in selection metrics, accommodating both information criteria (AIC, BIC, etc.) and significance level cutoffs. This vignettes provide four examples showcasing the effective utilization of StepReg for model development in diverse contexts. Furthermore, it delves into considerations for selecting appropriate strategies and metrics, empowering users to make informed decisions throughout the modeling process.
+  The StepReg package, developed for exploratory model building tasks, offers support across diverse scenarios. It facilitates model construction for various response variable types, including continuous (linear regression), binary (logistic regression), and time-to-event (Cox regression), among others. StepReg encompasses all commonly used model selection strategies, including forward selection, backward elimination, bidirectional elimination, and best subsets. Notably, it offers flexibility in selection metrics, accommodating both information criteria (AIC, BIC, etc.) and significance level cutoffs. This vignettes provide numerous examples showcasing the effective utilization of StepReg for model development in diverse contexts. Furthermore, it delves into considerations for selecting appropriate strategies and metrics, empowering users to make informed decisions throughout the modeling process.
 vignette: |
   %\VignetteIndexEntry{StepReg: Stepwise Regression made it simple}
   %\VignetteEngine{knitr::rmarkdown}
@@ -33,14 +33,14 @@ vignette: |
 
 Model selection is the process of choosing the most relevant features from a set of candidate variables. This procedure is crucial because it ensures that the final model is both accurate and interpretable while being computationally efficient and avoiding overfitting. Stepwise regression algorithms iteratively add or remove features from the model based on certain criteria (e.g., significance level or P-value, information criteria like AIC or BIC, etc.). The process continues until no further improvements can be made according to the chosen criterion. At the end of the stepwise procedure, you'll have a final model that includes the selected features and their coefficients.
 
-StepReg simplifies model selection tasks by providing a unified programming interface. It currently supports model buildings for five distinct response variable types (section \@ref(regressioncategories)), four model selection strategies (section \@ref(modelselectionstrategies)) including the best subsets algorithm, and a variety of selection metrics (section \@ref(selectionmetrics)). Moreover, StepReg detects and addresses the multicollinearity issues if they exist (section \@ref(multicollinearity)). The output of StepReg includes multiple tables summarizing the final model and the variable selection procedures. Additionally, StepReg offers a plot function to visualize the selection steps (section \@ref(stepregoutput)). For demonstration, the vignettes include four use cases covering distinct regression scenarios (section \@ref(usecases)).
+StepReg simplifies model selection tasks by providing a unified programming interface. It currently supports model buildings for five distinct response variable types (section \@ref(regressioncategories)), four model selection strategies (section \@ref(modelselectionstrategies)) including the best subsets algorithm, and a variety of selection metrics (section \@ref(selectionmetrics)). Moreover, StepReg detects and addresses the multicollinearity issues if they exist (section \@ref(multicollinearity)). The output of StepReg includes multiple tables summarizing the final model and the variable selection procedures. Additionally, StepReg offers a plot function to visualize the selection steps (section \@ref(stepregoutput)). For demonstration, the vignettes include four use cases covering distinct regression scenarios (section \@ref(usecases)). Non-programmers can access the tool through the iterative Shiny app detailed in section \@ref(shinyapp).
 
 # Quick demo
 
 The following example selects an optimal linear regression model with the `mtcars` dataset.
 ```{r, message = FALSE}
 library(StepReg)
-#devtools::load_all("~/GitHub/StepReg/")
+devtools::load_all("~/GitHub/StepReg/")
 
 data(mtcars)
 formula <- mpg ~ .
@@ -264,310 +264,224 @@ data.frame(Table_Name, Table_Description) %>%
   kable_styling()
 ```
 
-You can also save the output into various formats such as "xlsx", "docx", "html", "pptx", and more, for easy sharing. Of note, the suffix will be appended automatically to the `report_name`. The following example generates both "results.xlsx" and "results.docx" reports.
+You can save the output in different format like "xlsx", "docx", "html", "pptx", and others, facilitating easy sharing. Of note, the suffix will be automatically added to the `report_name`. For instance, the following example generates both "results.xlsx" and "results.docx" reports.
 ```{r, eval = FALSE}
 report(res, report_name = "results", format = c("xlsx", "docx"))
 ```
 
 # Use cases {#usecases}
 
-You should select the appropriate regression model according to the response variable type. Refer to section \@ref(regressioncategories) for more information. Below, we provide multiple examples using distinct models with different datasets.
+Please choose the regression model that best suits the type of response variable. For detailed guidance, see section \@ref(regressioncategories). Below, we present various examples utilizing different models tailored to specific datasets.
 
-## linear stepwise regression with _mtcars_
+## Linear regression with the _mtcars_ dataset
 
--   [**mtcars**](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html): the mtcars dataset is a classic automotive dataset that provides information on various car models and their performance attributes. With 32 observations and 11 variables, it includes details such as miles per gallon (mpg), horsepower(hp), and the number of cylinders(cyl). For more information, please ```?mtcars```
+In this section, we'll demonstrate how to perform linear regression analysis using the [`mtcars`](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html) dataset, showcasing different scenarios with varying numbers of predictors and dependent variables. We set `type = "linear"` to direct the function to perform linear regression. 
 
-### Example1:  
-+ type of regression: `linear`
-+ response: `mpg`
-+ predictors: all variables except `mpg` 
-+ variable selection strategy: `forward` and `backward`
-+ selection metric: `AIC` 
-+ force `disp` and `cyl` to be included in all models.
+**Description of the `mtcars` dataset**
 
+The `mtcars` is a classic dataset in statistics and is included in the base R installation. It was sourced from the 1974 _Motor Trend_ US magazine, comprising 32 observations on 11 variables. Here's a brief description of the variables included:
+
+1. mpg: miles per gallon (fuel efficiency)
+2. cyl: number of cylinders
+3. disp: displacement (engine size) in cubic inches
+4. hp: gross horsepower
+5. drat: rear axle ratio
+6. wt: weight (in thousands of pounds)
+7. qsec: 1/4 mile time (in seconds)
+8. vs: engine type (0 = V-shaped, 1 = straight)
+9. am: transmission type (0 = automatic, 1 = manual)
+10. gear: number of forward gears
+11. carb: number of carburetors
+
+**Why choose linear regression**
+
+Linear regression is an ideal choice for analyzing the `mtcars` dataset due to its inclusion of continuous variables like "mpg", "hp", or "weight", which can serve as response variables. Furthermore, the dataset exhibits potential linear relationships between the response variable and other variables.
+
+### Example1: single dependent variable ("mpg")
+
+In this example, we employ "forward" strategy with "AIC" as the selection criteria. Additionally, we specify using the `include` argument that "disp", "cyl" must always be included in the model.
+```{r, message = FALSE}
+library(StepReg)
+data(mtcars)
+
+formula <- mpg ~ .
+res1 <- stepwise(formula = formula,
+                 data = mtcars,
+                 type = "linear",
+                 include = c("disp", "cyl"),
+                 strategy = "forward",
+                 metric = "AIC")
+res1
+```
+
+To visualize the selection process:
+```{r plot_res1, warning = FALSE}
+plot(res1)
+```
+
+To exclude the intercept from the model, adjust the formula as follows:
+```{r, eval = FALSE}
+formula <- mpg ~ . + 0
+```
+
+To limit the model to a specific subset of predictors, adjust the formula as follows, which will only consider "cyp", "disp", "hp", "wt", "vs", and "am" as the predictors.
+```{r, eval = FALSE}
+formula <- mpg ~ cyl + disp + hp + wt + vs + am + 0
+```
+
+You can simultaneously provide multiple selection strategies and metrics. For example, the following code snippet employs both "forward" and "backward" strategies using metrics "AIC", "BIC", and "SL". It's worth mentioning that when "SL" is specified, you may also want to set the significance level for entry ("sle") and stay ("sls"), both of which default to 0.15.
+```{r, message = FALSE, warning = FALSE}
+formula <- mpg ~ .
+res2 <- stepwise(formula = formula,
+                 data = mtcars,
+                 type = "linear",
+                 strategy = c("forward", "backward"),
+                 metric = c("AIC", "BIC", "SL"),
+                 sle = 0.05,
+                 sls = 0.05)
+plot(res2)
+```
+
+### Example2: multivariate regression ("mpg" and "drat")
+
+In this scenario, there are two dependent variables, "mpg" and "drat". The model selection aims to identify the most influential predictors that affect both variables.
 ```{r}
-    library(StepReg)
-    data(mtcars)
-    formula <- mpg ~ .
-    res1 <- stepwise(formula = formula,
-                      data = mtcars,
-                      type = "linear",
-                      include = c("disp","cyl"),
-                      strategy = c("forward","backward"),
-                      metric = "AIC")
-    res1
+formula <- cbind(mpg, drat) ~ .
+res3 <- stepwise(formula = formula,
+                 data = mtcars,
+                 type = "linear",
+                 strategy = "forward",
+                 metric = c("AIC", "HQ"))
+plot(res3)
 ```
 
-> Visulization of the selection process under `AIC`.
+## Logistic regression with the _remission_ dataset
 
-```{r plot_res1, warning=FALSE}
-    plot(res1)
+In this example, we'll showcase logistic regression using the `remission` dataset. By setting `type = "logit"`, we instruct the function to perform logistic regression. 
+
+**Description of the `remission` dataset**
+
+The `[remission](https://online.stat.psu.edu/stat501/book/export/html/1011)` dataset, obtained from the online course STAT501 at Penn State University, has been integrated into StepReg. It consists of 27 observations across seven variables, including a binary variable named "remiss":
+
+1. remiss: whether leukemia remission occurred, a value of 1 indicates occurrence while 0 means non-occurrence
+2. cell: cellularity of the marrow clot section
+3. smear: smear differential percentage of blasts
+4. infil: percentage of absolute marrow leukemia cell infiltrate
+5. li: percentage labeling index of the bone marrow leukemia cells
+6. blast: the absolute number of blasts in the peripheral blood
+7. temp: the highest temperature before the start of treatment
+
+**Why choose logistic regression**
+
+Logistic regression effectively captures the relationship between predictors and a categorical response variable, offering insights into the probability of being assigned into specific response categories given a set of predictors. It is suitable for analyzing binary outcomes, such as the remission status ("remiss") in the `remission` dataset. 
+
+### Example1: using "forward" strategy
+
+In this example, we employ a "forward" strategy with "AIC" as the selection criteria, while force ensuring that the "cell" variable is included in the model.
+```{r, message = FALSE}
+data(remission)
+
+formula <- remiss ~ .
+res4 <- stepwise(formula = formula,
+                 data = remission,
+                 type = "logit",
+                 include= "cell",
+                 strategy = "forward",
+                 metric = "AIC")
+res4
+plot(res4)
 ```
 
-> **Example2**: 
->
-> + type of regression: `linear`
->
-> + response: `mpg` 
->
-> + predictors: all other variables except `mpg` and `intercept`. 
->
-> + variable selection strategy: `bidirectional` 
->
-> + selection metric: run `AIC`, `AICc`, `BIC`,`HQ`, `HQc`, `SBC`, and `SL` parallelly, and the significance levels for entry (`sle`) and stay (`sls`) were both set to 0.05 . 
->
-> + Users can compare output within each metic through the output table and visualization.
+### Example2: using "subset" strategy
 
+In this example, we employ a "subset" strategy, utilizing "SBC" as the selection criteria while excluding the intercept. Meanwhile, we set `best_n = 3` to restrict the output to the top 3 models for each number of variables.
+```{r, message = FALSE}
+data(remission)
+
+formula <- remiss ~ . + 0
+res5 <- stepwise(formula = formula,
+                  data = remission,
+                  type = "logit",
+                  strategy = "subset",
+                  metric = "SBC",
+                  best_n = 3)
+res5
+plot(res5)
+```
+
+## Cox regression with the `lung` dataset
+
+In this example, we'll demonstrate how to perform Cox regression analysis using the [`lung`](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html) dataset. By setting `type = "cox"`, we instruct the function to conduct Cox regression.
+
+**Description of the `lung` dataset**
+
+The `lung` dataset, available in the `r CRANpkg("survival")` R package, includes information on survival times for 228 patients with advanced lung cancer. It comprises ten variables, among which the "status" variable codes for censoring status (1 = censored, 2 = dead), and the "time" variable denotes the patient survival time in days. To learn more about the dataset, use `?survival::lung`.
+
+**Why choose Cox regression**
+
+Cox regression, also termed the Cox proportional hazards model, is specifically designed for analyzing survival data, making it well-suited for datasets like `lung` that include information on the time until an event (e.g., death) occurs. This method accommodates censoring and assumes proportional hazards, enhancing its applicability to medical studies involving time-to-event outcomes.
+
+### Example1: using "forward" strategy
+
+In this example, we employ a "forward" strategy with "AICc" as the selection criteria.
+```{r, message = FALSE}
+# Preprocess:
+lung <- survival::lung %>%
+  mutate(sex = factor(sex, levels = c(1,2))) %>% # make sex as factor
+  mutate(status = ifelse(status == 1, 0, 1)) %>% # recode status: 0 means cencored, 1 means dead
+  na.omit() # get rid of incomplete records
+
+formula  =  Surv(time, status) ~ .
+res6 <- stepwise(formula = formula,
+                 data = lung,
+                 type = "cox",
+                 strategy = "forward",
+                 metric = "AICc")
+res6
+plot(res6)
+```
+
+## Poisson regression with the `CreditCard` dataset
+
+In this example, we'll demonstrate how to perform Poisson regression analysis using the [`CreditCard`](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html) dataset.  We set `type = "poisson"` to direct the function to perform Poisson regression.
+
+**Descprition of the `CreditCard` dataset**
+
+The `CreditCard` dataset contains credit history information for a sample of applicants for a specific type of credit card, included in the `r CRANpkg("AER")` package. It encompasses 1319 observations across 12 variables, including "reports", "age", "income", among others. The "reports" variable represents the number of major derogatory reports. For detailed information, refer to `?AER::CreditCard`.
+
+**Why choose Poisson regression**
+
+Poisson regression is frequently employed method for analyzing count data, where the response variable represents the occurrences of an event within a defined time or space frame. In the context of the `CreditCard` dataset, Poisson regression can model the count of major derogatory reports ("reports"), enabling assessment of predictors' impact on this variable.
+
+### Example1: using "forward" strategy
+
+In this example, we employ a "forward" strategy with "SL" as the selection criteria. We set the significance level for entry to 0.05 (`sle = 0.05`).
+```{r, message = FALSE}
+data(CreditCard, package = 'AER')
+
+formula  = reports ~ .
+res7 <- stepwise(formula = formula,
+                 data = CreditCard,
+                 type = "poisson",
+                 strategy = "forward",
+                 metric = "SL",
+                 sle = 0.05)
+res7
+plot(res7)
+```
+
+# Interactive app {#shinyapp}
+
+We have developed an interactive Shiny application to simplify model selection tasks for non-programmers. You can access the app through the following URLs:
+
+1. Rstudio url:
+2. MCCB url:
+
+Alternatively, you can also access the Shiny app directly from within RStudio:
 ```{r}
-    formula <- mpg ~ . + 0
-    res2 <- stepwise(formula = formula,
-                      data = mtcars,
-                      type = "linear",
-                      strategy = "bidirection",
-                      metric = c("AIC","SBC","SL","AICc","BIC","HQ"),
-                      sle = 0.05,
-                      sls = 0.05)
-    res2
-```
+library(StepReg)
+# Code to launch the shiny app
 
-> + Visulization of the selection process using `bidirection` strategy under information criteron `AIC`, `AICc`, `BIC`,`HQ`, `SBC`, and `SL` with `sle`=0.05 and `sls`=0.05. 
-
-```{r plot_res2, warning=FALSE}
-    plot(res2)
-```
-
-> **Example3**: 
->
-> + type of regression: `linear`
->
-> + response: multivariates of `mpg` and `drat` 
->
-> + predictors: `cyl`, `disp`, `hp`, `wt`, `vs`, `am` and `intercept`. 
->
-> + variable selection strategy: `subset` 
->
-> + selection metric: run `AIC`, `SBC` and `HQ` parallelly
-
-```{r}
-    formula <- cbind(mpg,drat) ~ cyl + disp + hp + wt + vs + am
-    res3 <- stepwise(formula = formula,
-                      data = mtcars,
-                      type = "linear",
-                      include = 'wt',
-                      strategy = "subset",
-                      metric = c("AIC","AICc","SBC","HQ"),
-                      best_n = 3)
-    res3
-```
-
-> + Visulization of the selection process using `subset` strategy under information criteron `AIC`, `SBC` and `HQ`.
-
-```{r plot_res3, warning=FALSE}
-    plot(res3)
-```
-
-## Logistic stepwise regression with `remission`
-
--   [**remission**](https://online.stat.psu.edu/stat501/book/export/html/1011): the remission dataset is relevant in the context of medical research, specifically in oncology. It captures data related to the remission status of leukemia patients. With 27 observations and 7 variables, the dataset includes variables such as remission status (1 for remission and 0 for non-remission), cellularity of the marrow clot section(cell), and the highest temperature before the start of treatment(temp). For more information, please ```?StepReg::remission```
-
-
-> **Example4**: 
->
-> + type of regression: `logit`
->
-> + response: `remiss` 
->
-> + predictors: all variables except `remiss`
->
-> + variable selection strategy: `forward` 
->
-> + selection metric: run `AIC` and `SL` parallelly, where `sle` and `sls` were both set to 0.05.
->
-> + force `cell` always in the model.
-
-```{r warning = FALSE}
-    data(remission)
-    formula <- remiss ~ .
-    res4 <- stepwise(formula = formula,
-                      data = remission,
-                      type = "logit",
-                      include= "cell",
-                      strategy = "forward",
-                      metric = c("AIC","SL"),
-                      sle = 0.05)
-    res4
-```
-
-> + Visulization of the selection process using `forward` strategy under information criteron `AIC` and `SL`.
-
-```{r plot_res4, warning=FALSE}
-    plot(res4)
-```
-
-> **Example5**: 
->
-> + type of regression: `logit`
->
-> + response: `remiss` 
->
-> + predictors: all variables except `remiss`
->
-> + variable selection strategy: `subset` 
->
-> + selection metric: run `SBC` and `SL` parallelly, where `sle` and `sls` used default 0.15.
-
-```{r warning = FALSE}
-    data(remission)
-    formula <- remiss ~ .
-    res5 <- stepwise(formula = formula,
-                      data = remission,
-                      type = "logit",
-                      strategy = "subset",
-                      metric = c("SBC","SL"),
-                      best_n = 3)
-    res5
-```
-
-> + Visulization of the selection process using `subset` strategy under information criteron `SBC` and `SL`.
-
-```{r plot_res5, warning=FALSE}
-    plot(res5)
-```
-
-## Cox stepwise regression with `lung`
-
--   [**lung**](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html): the lung dataset is a dataset in the survival analysis domain, containing information related to the survival times of 228 patients with advanced lung cancer. It includes variables such as the patient's age, the type of treatment received, and survival status. For more information, please ```?survival::lung```
-
-> **Example6**: 
->
-> + type of regression: `cox`
->
-> + response: `Surv(time, status_binary)`
->
-> + predictors: all variables except `status`
->
-> + variable selection strategy: `forward` 
->
-> + selection metric: run `IC(1)` and `SL` parallelly, where `sle` was set to 0.05.
->
-> + force `age` in all models.
-
-```{r warning = FALSE}
-    lung <- survival::lung
-    lung_noNA <- na.omit(lung)
-    lung_noNA$status_binary <- ifelse(lung_noNA$status == 2,1,0)
-    formula  =  Surv(time, status_binary) ~ . - status
-    
-    res6 <- stepwise(formula = formula,
-                      data = lung_noNA,
-                      type = "cox",
-                      include = "age",
-                      strategy = "forward",
-                      metric = c("IC(1)","SL"),
-                      sle = 0.05)
-    res6
-```
-
-> + Visulization of the selection process using `forward` strategy under information criteron `IC(1)` and `SL`.
-
-```{r plot_res6, warning=FALSE}
-    plot(res6)
-```
-
-> **Example7**: 
->
-> + type of regression: `cox`
->
-> + response: `Surv(time, status_binary)`
->
-> + predictors: all variables except `status`
->
-> + variable selection strategy: `backward` 
->
-> + selection metric: run `SL` and `AIC` parallelly, where `sls` was set to 0.05.
-
-```{r warning = FALSE}
-    formula = Surv(time, status_binary) ~ . - status 
-    res7 <- stepwise(formula = formula,
-                      data = lung_noNA,
-                      type = "cox",
-                      strategy = "backward",
-                      metric = c("SL","AIC"),
-                      sls = 0.05)
-    res7
-```
-
-> + Visulization of the selection process using `backward` strategy under information criteron `AIC` and `SL`.
-
-```{r plot_res7, warning=FALSE}
-    plot(res7)
-```
-
-## Poisson stepwise regression with `CreditCard`
-
--   [**CreditCard**](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html): the CreditCard dataset is associated with credit risk analysis and financial research. It contains information about credit card transactions, including details such as the amount spent, credit limit, and payment status. For more information, please ```?AER::CreditCard```
-
-> **Example8**: 
->
-> + type of regression: `poisson`
->
-> + response: `reports`
->
-> + predictors: all variables except `reports`
->
-> + variable selection strategy: `forward` 
->
-> + selection metric: run `SL` and `IC(3/2)` parallelly, and `sle` was set to 0.05.
-
-```{r warning = FALSE}
-    data(CreditCard, package = 'AER')
-    formula  = reports ~ .
-    
-    res8 <- stepwise(formula = formula,
-                      data = CreditCard,
-                      type = "poisson",
-                      strategy = "forward",
-                      metric = c("SL","IC(3/2)"),
-                      sle=0.05)
-    res8
-```
-
-> + Visulization of the selection process using `forward` strategy under information criteron `IC(3/2)` and `SL`.
-
-```{r plot_res8, warning=FALSE}
-    plot(res8)
-```
-
-> **Example9**: 
->
-> + type of regression: `poisson`
->
-> + response: `reports`
->
-> + predictors: all variables except `reports`
->
-> + variable selection strategy: `forward` and `bidirection` 
->
-> + selection metric: run `AIC` and `IC(3/2)` parallelly
->
-> + force `card` and `months` in all models.
-
-```{r warning = FALSE}
-    formula = reports ~ .
-    res9 <- stepwise(formula = formula,
-                      data = CreditCard,
-                      type = "poisson",
-                      include=c("card","months"),
-                      strategy = c("forward","bidirection"),
-                      metric = c("IC(3/2)","AIC")
-                      )
-    res9
-```
-
-> + Visulization of the selection process using `forward` and `bidirection` strategy under information criteron `IC(3/2)` and `AIC`.
-
-```{r plot_res9, warning=FALSE}
-    plot(res9)
 ```
 
 # Session info
