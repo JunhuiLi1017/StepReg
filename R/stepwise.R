@@ -2,7 +2,7 @@
 #' 
 #' Select optimal model using various stepwise regression strategies, e.g., Forward Selection, Backward Elimination, Bidirectional Elimination; meanwhile, it also supports Best Subset method. Four types of models are currently implemented: linear regression, logistic regression, Cox regression, Poisson, and Gamma regression. For selection criteria, a.k.a, stop rule, users can choose from AIC, AICc, BIC, HQ, Significant Level, and more.
 #' 
-#' @param formula (formula) The formula used for model fitting. The formula takes the form of a '~' (tilde) symbol, with the response variable(s) on the left-hand side, and the predictor variable(s) on the right-hand side. The 'lm()' function uses this formula to fit a regression model. A formula can be as simple as 'y ~ x'. For multiple predictors, they must be separated by the '+' (plus) symbol, e.g. 'y ~ x1 + x2'. To include an interaction term between variables, use the ':' (colon) symbol: 'y ~ x1 + x1:x2'. Use the '.' (dot) symbol to indicate that all other variables in the dataset should be included as predictors, e.g. 'y ~ .'. In the case of multiple response variables (multivariate), the formula can be specified as 'cbind(y1, y2) ~ x1 + x2'. By default, an intercept term is always included in the models, to exclude it, include '0' or '- 1' in your formula: 'y ~ 0 + x1', 'y ~ x1 + 0', and 'y ~ x1 - 1'.
+#' @param formula (formula) The formula used for model fitting by defining the scope of dependent and independent variables. The formula takes the form of a '~' (tilde) symbol, with the response variable(s) on the left-hand side, and the predictor variable(s) on the right-hand side. The 'lm()' function uses this formula to fit a regression model. A formula can be as simple as 'y ~ x'. For multiple predictors, they must be separated by the '+' (plus) symbol, e.g. 'y ~ x1 + x2'. To include an interaction term between variables, use the ':' (colon) symbol: 'y ~ x1 + x1:x2'. Use the '.' (dot) symbol to indicate that all other variables in the dataset should be included as predictors, e.g. 'y ~ .'. In the case of multiple response variables (multivariate), the formula can be specified as 'cbind(y1, y2) ~ x1 + x2'. By default, an intercept term is always included in the models, to exclude it, include '0' or '- 1' in your formula: 'y ~ 0 + x1', 'y ~ x1 + 0', and 'y ~ x1 - 1'.
 #' 
 #' @param data (data.frame) A dataset consisting of predictor variable(s) and response variable(s).
 #' 
@@ -113,6 +113,15 @@
 #' 
 #' @import survival
 #' 
+#' @importFrom gridExtra grid.arrange
+#' @importFrom summarytools dfSummary
+#' @importFrom ggcorrplot ggcorrplot
+#' @importFrom tidyr gather
+#' @importFrom GGally ggpairs
+#' @importFrom rmarkdown render
+#' @importFrom shinythemes shinytheme
+#' 
+#' 
 #' @importFrom utils combn
 #' 
 #' @importFrom dplyr `%>%` mutate_if mutate
@@ -175,7 +184,7 @@ stepwise <- function(formula,
   
   result <- list()
   ## table1
-  table1_para_value <- getTable1SummaryOfParameters(data, type, x_name_orig, y_name, merged_multico_x, merged_include, paste0(strategy,collapse = " & "), paste0(metric,collapse = " & "), sle, sls, test_method, tolerance, intercept)
+  table1_para_value <- getTable1SummaryOfParameters(data, type, x_name_orig, y_name, merged_multico_x, merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept)
   result$'Summary of arguments for model selection' <- table1_para_value
   
   ## table2
@@ -190,10 +199,20 @@ stepwise <- function(formula,
       if(stra == "subset") {
         table3_process_table <- getSubsetWrapper(data, type, met, x_name, y_name, intercept, include, weight = weight, best_n, test_method, sigma_value)
         x_final_model <- getXNameSelected(table3_process_table,met)
-        table3_process_table[,2] <- as.numeric(table3_process_table[,2])
+        table3_process_table[,met] <- as.numeric(table3_process_table[,met])
       }else{
         out_final_stepwise <- getStepwiseWrapper(data, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
         table3_process_table <- out_final_stepwise$process_table
+        remove_col <- NULL
+        if(stra == "forward") {
+          remove_col <- "RemovedEffect"
+        } else if(stra == "backward") {
+          remove_col <- "EnteredEffect"
+        }
+        table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% remove_col]
+        if(all(table3_process_table[,"NumberEffectIn"] == table3_process_table[,"NumberParmsIn"])){
+          table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% "NumberEffectIn"]
+        }
         x_in_model <- out_final_stepwise$x_in_model
         x_final_model <- c(include, x_in_model)
       }

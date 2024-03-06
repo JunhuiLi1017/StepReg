@@ -1,9 +1,16 @@
-# importFrom gridExtra grid.arrange
-# importFrom dplyr %>% mutate
-# importFrom summarytools dfSummary
-# importFrom ggcorrplot ggcorrplot
-# importFrom tidyr %>% 
-# importFrom GGally ggpairs
+library(shiny)
+library(StepReg)
+library(gridExtra)
+library(DT)
+library(shinythemes)
+#library(pastecs)
+library(ggplot2)
+library(dplyr)
+library(summarytools)
+library(ggcorrplot)
+library(tidyr)
+library(GGally)
+
 
 require("shiny") || stop("unable to load shiny")
 require("StepReg") || stop("unable to load StepReg")
@@ -16,6 +23,21 @@ require("summarytools") || stop("unable to load summarytools")
 require("ggcorrplot") || stop("unable to load ggcorrplot")
 require("tidyr") || stop("unable to load tidyr")
 require("GGally") || stop("unable to load GGally")
+#library(gpairs)
+
+# importFrom gridExtra grid.arrange
+# importFrom dplyr %>% mutate
+# importFrom summarytools dfSummary
+# importFrom ggcorrplot ggcorrplot
+# importFrom tidyr %>% 
+# importFrom GGally ggpairs
+
+# 
+
+# https://statsandr.com/blog/descriptive-statistics-in-r/
+# Load mtcars dataset
+#source("bin/upload_or_select_dataset.R") #can not select example dataset
+source("bin/plot_data_func.R")
 
 ui <- navbarPage(
   
@@ -244,8 +266,7 @@ ui <- navbarPage(
                         "SL",
                         "Rsq",
                         "adjRsq"),
-            selected = "AIC"
-          )
+            selected = "AIC")
         ),
         
         conditionalPanel(
@@ -260,8 +281,7 @@ ui <- navbarPage(
                         "IC(3/2)",
                         "SBC",
                         "SL"),
-            selected = "AIC"
-          )
+            selected = "AIC")
         ),
         
         conditionalPanel(
@@ -386,6 +406,7 @@ ui <- navbarPage(
       ),
       
       mainPanel(
+        textOutput("Metric_value"),
         textOutput("selectionStatText"),
         verbatimTextOutput("modelSelection"),
         textOutput("selectionPlotText"),
@@ -417,3 +438,250 @@ ui <- navbarPage(
     )
   )
 )
+
+# Define server logic
+server <- function(input, output, session) {
+  # Function to read uploaded dataset
+  dataset <- reactive({
+    req(input$example_dataset)
+    
+    if (input$example_dataset != " ") {
+      # Read the selected example dataset
+      data(CreditCard, package = 'AER')
+      data(remission,package="StepReg")
+      survival::lung %>%
+        mutate(sex = factor(sex, levels = c(1,2))) %>% # make sex as factor
+        mutate(status = ifelse(status == 1, 0, 1)) %>% # recode status: 0 means cencored, 1 means dead
+        na.omit() -> lung# get rid of incomplete records
+      
+      
+      df <- switch(input$example_dataset,
+                   "base::mtcars" = mtcars,
+                   "StepReg::remission" = remission,
+                   "survival::lung" = lung,
+                   "AER::CreditCard" = CreditCard)
+    }
+    if (!is.null(input$upload_file)) {
+      req(input$upload_file)
+      # Read the uploaded file
+      df <- read.table(input$upload_file$datapath,
+                       header = input$header,
+                       sep = input$sep,
+                       quote = input$quote)
+    }
+    
+    # df <- upload_or_select_dataset(input$example_dataset, 
+    #                                input$upload_file,
+    #                                input$header,
+    #                                input$sep,
+    #                                input$quote)
+    
+    # Update select input for distribution plot
+    updateSelectInput(session, "distribution_plot", choices = names(df))
+    
+    # Update select inputs based on regression type
+    
+    updateSelectInput(session, "dependent_linear", choices = names(df))
+    updateSelectInput(session, "status", choices = names(df))
+    updateSelectInput(session, "time", choices = names(df))
+    updateSelectInput(session, "dependent_glm", choices = names(df))
+    
+    observeEvent(input$dependent_linear, {
+      updateSelectInput(session, "independent", choices = setdiff(names(df), input$dependent_linear))
+    })
+    
+    observeEvent(input$status, {
+      updateSelectInput(session, "time", choices = setdiff(names(df), input$status))
+    })
+    
+    observeEvent(c(input$status, input$time), {
+      updateSelectInput(session, "independent", choices = setdiff(names(df), c(input$status, input$time)))
+    })
+    
+    observeEvent(input$dependent_glm, {
+      updateSelectInput(session, "independent", choices = setdiff(names(df), input$dependent_glm))
+    })
+    
+    observeEvent(input$independent, {
+      updateSelectInput(session, "include", choices = input$independent)
+    })
+    
+    # Return the dataframe
+    return(df)
+  })
+  
+  # Perform stepwise regression based on uploaded dataset
+  stepwiseModel <- reactive({
+    req(dataset())
+    if (input$intercept == TRUE) {
+      intercept <- 1
+    } else {
+      intercept <- 0
+    }
+    
+    metric <- switch(
+      input$type,
+      "linear" = {
+        if (length(input$dependent_linear) > 1) {
+          input$metric_multivariate_linear
+        } else {
+          input$metric_univariate_linear
+        }
+      },
+      "cox" = input$metric_glm_cox,
+      "logit" = input$metric_glm_cox,
+      "poisson" = input$metric_glm_cox,
+      "Gamma" = input$metric_glm_cox
+    )
+    
+    formula <- switch(
+      input$type,
+      "linear" = {
+        if (length(input$dependent_linear) > 1) {
+          formula <- as.formula(paste(paste0("cbind(", paste(input$dependent_linear, collapse = ","), ")", collapse = ""), "~", paste(c(intercept, input$independent), collapse = "+")))
+        } else {
+          formula <- as.formula(paste(input$dependent_linear, "~", paste(c(intercept, input$independent), collapse = "+")))
+        }
+      },
+      "cox" = as.formula(paste("Surv(", input$time, ",", input$status, ") ~", paste(input$independent, collapse = "+"))),
+      "logit" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+"))),
+      "poisson" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+"))),
+      "Gamma" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+")))
+    )
+    
+    res <- stepwise(
+      formula = formula,
+      data = dataset(),
+      type = input$type,
+      include = input$include,
+      strategy = input$strategy,
+      metric = metric,
+      sle = input$sle,
+      sls = input$sls,
+      test_method_linear = input$Approx_F,
+      test_method_glm = input$glm_test,
+      test_method_cox = input$cox_test
+    )
+    return(res)
+  })
+  
+  observeEvent(input$run_analysis, {
+    # Define the action you want to perform when the button is clicked
+    output$modelSelection <- renderPrint({
+      withProgress(
+        message = 'Calculation in progress', 
+        value = 0, 
+        {
+        incProgress(1/2)
+        #Sys.sleep(2)
+        })
+      stepwiseModel()
+    })
+    
+    # Display plots of stepwise regression results
+    output$selectionPlot <- renderPlot({
+      plotList <- plot(stepwiseModel())
+      grid.arrange(grobs = plotList)
+    })
+    
+    output$selectionPlotText <- renderText({
+      "Visualization of Variable Selection:"
+    })
+    output$selectionStatText <- renderText({
+      "Statistics of Variable Selection:"
+    })
+    
+    shinyjs::enable("report")
+  })
+  
+  # Output Data
+  output$tbl = renderDataTable({
+    req(dataset())
+    DT::datatable(dataset())
+  })
+  
+  output$summaryText <- renderDataTable({
+    DT::datatable(stat.desc(dataset()) %>% mutate_if(is.numeric,round,3))
+  })
+  
+  # Render the appropriate summary based on the selected type
+  output$summary <- renderPrint({
+    summary_type = summarytools::dfSummary(dataset())
+    # summary_type <- switch(input$summary_type,
+    #                        "dfSummary" = summarytools::dfSummary(dataset()),
+    #                        "base::summary" = summary(dataset()),
+    #                        "base::str" = str(dataset()),
+    #                        "pastecs::stat.desc" = pastecs::stat.desc(dataset()))
+    summary_type
+  })
+  
+  observe({
+    req(dataset())
+    updateSelectInput(session, "var_plot", choices = colnames(dataset()))
+  })
+  
+  observeEvent(input$make_plot, {
+    # Render plots based on user selection
+    observeEvent(input$plot_type, {
+      # Define plot rendering logic here
+      req(input$var_plot)
+      plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
+      if (input$plot_type == "Pairs plot") {
+        output$Plot <- renderPlot({
+          withProgress(
+            message = 'Calculation in progress', 
+            value = 0, 
+            {
+              #sampleSize <- nrow(dataset())
+              #for(i in 1:(length(input$var_plot)*sampleSize)){
+                incProgress(1/2)
+                Sys.sleep(0.5)
+              #}
+            })
+          plot_type
+        })
+      } else {
+        output$Plot <- renderPlot({
+          withProgress(
+            message = 'Calculation in progress', 
+            value = 0, 
+            {
+              #sampleSize <- nrow(dataset())
+              #for(i in 1:(length(input$var_plot)*sampleSize)){
+                incProgress(1/2)
+                Sys.sleep(0.25)
+              #}
+            })
+          grid.arrange(grobs = plot_type)
+        })
+      }
+    })
+  })
+  
+  output$report <- downloadHandler(
+    # For PDF output, change this to "report.pdf"
+    filename = paste0("StepReg_report_",format(Sys.time(), "%Y%m%d%H%M%S"),".html"),
+    content = function(file) {
+      # Copy the report file to a temporary directory before processing it, in
+      # case we don't have write permissions to the current working dir (which
+      # can happen when deployed).
+      tempReport <- file.path(tempdir(), "report.Rmd")
+      file.copy("bin/report.Rmd", tempReport, overwrite = TRUE)
+      
+      # Set up parameters to pass to Rmd document
+      params <- list(modelSelection = stepwiseModel())
+      
+      # Knit the document, passing in the `params` list, and eval it in a
+      # child of the global environment (this isolates the code in the document
+      # from the code in this app).
+      rmarkdown::render(tempReport, output_file = file,
+                        params = params,
+                        envir = new.env(parent = globalenv())
+      )
+    }
+  )
+  session$onSessionEnded(function() { stopApp() }) 
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)

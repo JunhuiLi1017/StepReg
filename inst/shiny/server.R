@@ -1,15 +1,61 @@
+# importFrom gridExtra grid.arrange
+# importFrom dplyr %>% mutate
+# importFrom summarytools dfSummary
+# importFrom ggcorrplot ggcorrplot
+# importFrom tidyr %>% 
+# importFrom GGally ggpairs
+
+require("shiny") || stop("unable to load shiny")
+require("StepReg") || stop("unable to load StepReg")
+require("gridExtra") || stop("unable to load gridExtra")
+require("DT") || stop("unable to load DT")
+require("shinythemes") || stop("unable to load shinythemes")
+require("ggplot2") || stop("unable to load ggplot2")
+require("dplyr") || stop("unable to load dplyr")
+require("summarytools") || stop("unable to load summarytools")
+require("ggcorrplot") || stop("unable to load ggcorrplot")
+require("tidyr") || stop("unable to load tidyr")
+require("GGally") || stop("unable to load GGally")
+
+#source("bin/upload_or_select_dataset.R") #can not select example dataset
+source("bin/plot_data_func.R")
+
 # Define server logic
 server <- function(input, output, session) {
   # Function to read uploaded dataset
-  
   dataset <- reactive({
-    req(input$file1)  # Ensure file is uploaded
+    req(input$example_dataset)
     
-    # Read the uploaded file
-    df <- read.table(input$file1$datapath,
-                     header = input$header,
-                     sep = input$sep,
-                     quote = input$quote)
+    if (input$example_dataset != " ") {
+      # Read the selected example dataset
+      data(CreditCard, package = 'AER')
+      data(remission,package="StepReg")
+      survival::lung %>%
+        dplyr::mutate(sex = factor(sex, levels = c(1,2))) %>% # make sex as factor
+        dplyr::mutate(status = ifelse(status == 1, 0, 1)) %>% # recode status: 0 means cencored, 1 means dead
+        na.omit() -> lung# get rid of incomplete records
+      
+      
+      df <- switch(input$example_dataset,
+                   "base::mtcars" = mtcars,
+                   "StepReg::remission" = remission,
+                   "survival::lung" = lung,
+                   "AER::CreditCard" = CreditCard)
+    }
+    if (!is.null(input$upload_file)) {
+      req(input$upload_file)
+      # Read the uploaded file
+      df <- read.table(input$upload_file$datapath,
+                       header = input$header,
+                       sep = input$sep,
+                       quote = input$quote)
+    }
+    
+    # df <- upload_or_select_dataset(input$example_dataset, 
+    #                                input$upload_file,
+    #                                input$header,
+    #                                input$sep,
+    #                                input$quote)
     
     # Update select input for distribution plot
     updateSelectInput(session, "distribution_plot", choices = names(df))
@@ -48,7 +94,7 @@ server <- function(input, output, session) {
   # Perform stepwise regression based on uploaded dataset
   stepwiseModel <- reactive({
     req(dataset())
-    if (input$non_intercept == "FALSE") {
+    if (input$intercept == TRUE) {
       intercept <- 1
     } else {
       intercept <- 0
@@ -56,7 +102,13 @@ server <- function(input, output, session) {
     
     metric <- switch(
       input$type,
-      "linear" = ifelse(length(input$dependent_linear) > 1, input$metric_multivariate_linear, input$metric_univariate_linear),
+      "linear" = {
+        if (length(input$dependent_linear) > 1) {
+          input$metric_multivariate_linear
+        } else {
+          input$metric_univariate_linear
+        }
+      },
       "cox" = input$metric_glm_cox,
       "logit" = input$metric_glm_cox,
       "poisson" = input$metric_glm_cox,
@@ -96,13 +148,14 @@ server <- function(input, output, session) {
   
   observeEvent(input$run_analysis, {
     # Define the action you want to perform when the button is clicked
-    
-    # For example, you can update a reactive expression or call a function
-    # In this case, let's update the stepwiseModel reactive expression
-    result <- stepwiseModel()
-    
-    # Display stepwise regression results
     output$modelSelection <- renderPrint({
+      withProgress(
+        message = 'Calculation in progress', 
+        value = 0, 
+        {
+          incProgress(1/2)
+          #Sys.sleep(2)
+        })
       stepwiseModel()
     })
     
@@ -111,46 +164,102 @@ server <- function(input, output, session) {
       plotList <- plot(stepwiseModel())
       gridExtra::grid.arrange(grobs = plotList)
     })
+    
+    output$selectionPlotText <- renderText({
+      "Visualization of Variable Selection:"
+    })
+    output$selectionStatText <- renderText({
+      "Statistics of Variable Selection:"
+    })
+    
+    shinyjs::enable("report")
   })
   
-  # Output variable selector based on dataset columns
-  output$variable_selector <- renderUI({
-    if(is.null(dataset())) return()
-    selectInput("selected_variable", "Select Variable for Summary:",
-                choices = colnames(dataset()))
-  })
-  
-  # Generate summary table based on selected variable
-  output$summary_table <- renderDT({
-    req(input$selected_variable)
-    summary_data <- summary(dataset()[,input$selected_variable])
-    summary_data <- as.data.frame(as.matrix(summary_data)) # Ensure summary is a data frame
-    colnames(summary_data) <- input$selected_variable
-    datatable(summary_data, 
-              options = list(paging = FALSE, searching = FALSE, ordering = FALSE))
-  })
-  
-  # Generate summary table based on selected variable
-  output$summary_table <- renderDT({
-    req(input$selected_variable)
-    summary_data <- summary(dataset()[, input$selected_variable])
-    summary_data <- as.data.frame(as.matrix(summary_data))
-    colnames(summary_data) <- input$selected_variable
-    datatable(summary_data, 
-              options = list(paging = FALSE, 
-                             searching = FALSE, 
-                             ordering = FALSE))
-  })
-  
-  output$contents <- renderTable({
+  # Output Data
+  output$tbl = renderDataTable({
     req(dataset())
-    
-    if(input$disp == "head") {
-      return(head(dataset()))
-    }
-    else {
-      return(dataset())
-    }
-    
+    DT::datatable(dataset())
   })
+  
+  output$summaryText <- renderDataTable({
+    DT::datatable(stat.desc(dataset()) %>% mutate_if(is.numeric,round,3))
+  })
+  
+  # Render the appropriate summary based on the selected type
+  output$summary <- renderPrint({
+    summary_type = summarytools::dfSummary(dataset())
+    # summary_type <- switch(input$summary_type,
+    #                        "dfSummary" = summarytools::dfSummary(dataset()),
+    #                        "base::summary" = summary(dataset()),
+    #                        "base::str" = str(dataset()),
+    #                        "pastecs::stat.desc" = pastecs::stat.desc(dataset()))
+    summary_type
+  })
+  
+  observe({
+    req(dataset())
+    updateSelectInput(session, "var_plot", choices = colnames(dataset()))
+  })
+  
+  observeEvent(input$make_plot, {
+    # Render plots based on user selection
+    observeEvent(input$plot_type, {
+      # Define plot rendering logic here
+      req(input$var_plot)
+      plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
+      if (input$plot_type == "Pairs plot") {
+        output$Plot <- renderPlot({
+          withProgress(
+            message = 'Calculation in progress', 
+            value = 0, 
+            {
+              #sampleSize <- nrow(dataset())
+              #for(i in 1:(length(input$var_plot)*sampleSize)){
+              incProgress(1/2)
+              Sys.sleep(0.5)
+              #}
+            })
+          plot_type
+        })
+      } else {
+        output$Plot <- renderPlot({
+          withProgress(
+            message = 'Calculation in progress', 
+            value = 0, 
+            {
+              #sampleSize <- nrow(dataset())
+              #for(i in 1:(length(input$var_plot)*sampleSize)){
+              incProgress(1/2)
+              Sys.sleep(0.25)
+              #}
+            })
+          gridExtra::grid.arrange(grobs = plot_type)
+        })
+      }
+    })
+  })
+  
+  output$report <- downloadHandler(
+    # For PDF output, change this to "report.pdf"
+    filename = paste0("StepReg_report_", input$type, "_", format(Sys.time(), "%Y%m%d%H%M%S"), ".html"),
+    content = function(file) {
+      # Copy the report file to a temporary directory before processing it, in
+      # case we don't have write permissions to the current working dir (which
+      # can happen when deployed).
+      tempReport <- file.path(tempdir(), "report.Rmd")
+      file.copy("bin/report.Rmd", tempReport, overwrite = TRUE)
+      
+      # Set up parameters to pass to Rmd document
+      params <- list(modelSelection = stepwiseModel())
+      
+      # Knit the document, passing in the `params` list, and eval it in a
+      # child of the global environment (this isolates the code in the document
+      # from the code in this app).
+      rmarkdown::render(tempReport, output_file = file,
+                        params = params,
+                        envir = new.env(parent = globalenv())
+      )
+    }
+  )
+  session$onSessionEnded(function() { stopApp() })
 }

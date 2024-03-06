@@ -46,7 +46,7 @@ outputStepReg <- function(x,text){
   
   side <- rep("both",ncol(x))
   list(colnames(x),lengths,side) %>% pmap_chr(str_pad) -> dfHeader
-  side <- rep("right",ncol(x))
+  side <- rep("both",ncol(x))
   list(x,lengths,side) %>% pmap_dfc(str_pad) -> dataFrame
   cat(format(text, width = sum(lengths), justify = "left"));cat("\n")
   cat(paste0(rep("\u2017",sum(lengths)),collapse=""));cat("\n")

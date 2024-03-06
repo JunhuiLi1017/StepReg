@@ -35,12 +35,12 @@ Model selection is the process of choosing the most relevant features from a set
 
 StepReg simplifies model selection tasks by providing a unified programming interface. It currently supports model buildings for five distinct response variable types (section \@ref(regressioncategories)), four model selection strategies (section \@ref(modelselectionstrategies)) including the best subsets algorithm, and a variety of selection metrics (section \@ref(selectionmetrics)). Moreover, StepReg detects and addresses the multicollinearity issues if they exist (section \@ref(multicollinearity)). The output of StepReg includes multiple tables summarizing the final model and the variable selection procedures. Additionally, StepReg offers a plot function to visualize the selection steps (section \@ref(stepregoutput)). For demonstration, the vignettes include four use cases covering distinct regression scenarios (section \@ref(usecases)). Non-programmers can access the tool through the iterative Shiny app detailed in section \@ref(shinyapp).
 
-# Quick demo
+# Quick demo {#quickdemo}
 
 The following example selects an optimal linear regression model with the `mtcars` dataset.
 ```{r, message = FALSE}
 library(StepReg)
-devtools::load_all("~/GitHub/StepReg/")
+#devtools::load_all("~/GitHub/StepReg/")
 
 data(mtcars)
 formula <- mpg ~ .
@@ -234,21 +234,8 @@ In StepReg, [QC Matrix Decomposition](https://towardsdatascience.com/qr-matrix-f
 
 StepReg provides multiple functions for summarizing the model building results. The function `stepwise()` generates a list of tables that describe the feature selection steps and the final model. To facilitate collaborations, you can redirect the tables into various formats such as "xlsx", "html", "docx", etc. with the function `report()`. Furthermore, you can easily compare the variable selection procedures for multiple selection metrics by visualizing the steps with the function `plot()`. Details see below.
 
-Depending on the number of selected regression strategies and metrics, you can expect to receive at least four tables from `stepwise()`. The following example uses two strategies (`strategy = c("forward", "bidirection")`) and two metrics (`metric = c("AIC", "BIC")`), and ten tables are generated.
-```{r, message = FALSE}
-data(mtcars)
+Depending on the number of selected regression strategies and metrics, you can expect to receive at least four tables from `stepwise()`. Below describes the content of each of 4 tables from Quick Demo \@ref(quickdemo).
 
-formula <- mpg ~ .
-res <- stepwise(formula = formula,
-                data = mtcars,
-                type = "linear",
-                include = c("qsec"),
-                strategy = c("forward", "bidirection"),
-                metric = c("AIC", "BIC"))
-res
-```
-
-Below describes the content of each table.
 ```{r, echo = FALSE}
 Table_Name <- c("Summary of arguments for model selection",
                 "Summary of variables in dataset",
@@ -275,7 +262,7 @@ Please choose the regression model that best suits the type of response variable
 
 ## Linear regression with the _mtcars_ dataset
 
-In this section, we'll demonstrate how to perform linear regression analysis using the [`mtcars`](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html) dataset, showcasing different scenarios with varying numbers of predictors and dependent variables. We set `type = "linear"` to direct the function to perform linear regression. 
+In this section, we'll demonstrate how to perform linear regression analysis using the [mtcars](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html) dataset, showcasing different scenarios with varying numbers of predictors and dependent variables. We set `type = "linear"` to direct the function to perform linear regression. 
 
 **Description of the `mtcars` dataset**
 
@@ -329,6 +316,12 @@ To limit the model to a specific subset of predictors, adjust the formula as fol
 formula <- mpg ~ cyl + disp + hp + wt + vs + am + 0
 ```
 
+Another way is to use minus symbol(`"-"`) to exclude some predictors for variable selection. For example, include all variables except "disp", "wt", and intercept.
+
+```{r, eval = FALSE}
+formula <- mpg ~ . - 1 - disp -wt
+```
+
 You can simultaneously provide multiple selection strategies and metrics. For example, the following code snippet employs both "forward" and "backward" strategies using metrics "AIC", "BIC", and "SL". It's worth mentioning that when "SL" is specified, you may also want to set the significance level for entry ("sle") and stay ("sls"), both of which default to 0.15.
 ```{r, message = FALSE, warning = FALSE}
 formula <- mpg ~ .
@@ -361,7 +354,7 @@ In this example, we'll showcase logistic regression using the `remission` datase
 
 **Description of the `remission` dataset**
 
-The `[remission](https://online.stat.psu.edu/stat501/book/export/html/1011)` dataset, obtained from the online course STAT501 at Penn State University, has been integrated into StepReg. It consists of 27 observations across seven variables, including a binary variable named "remiss":
+The [remission](https://online.stat.psu.edu/stat501/book/export/html/1011) dataset, obtained from the online course STAT501 at Penn State University, has been integrated into StepReg. It consists of 27 observations across seven variables, including a binary variable named "remiss":
 
 1. remiss: whether leukemia remission occurred, a value of 1 indicates occurrence while 0 means non-occurrence
 2. cell: cellularity of the marrow clot section
@@ -425,6 +418,7 @@ Cox regression, also termed the Cox proportional hazards model, is specifically 
 
 In this example, we employ a "forward" strategy with "AICc" as the selection criteria.
 ```{r, message = FALSE}
+library(dplyr)
 # Preprocess:
 lung <- survival::lung %>%
   mutate(sex = factor(sex, levels = c(1,2))) %>% # make sex as factor

@@ -37,7 +37,13 @@ Imports:
     shiny,
     gridExtra,
     DT,
-    rlang
+    rlang,
+    GGally,
+    ggcorrplot,
+    tidyr,
+    summarytools,
+    shinythemes,
+    rmarkdown
 Encoding: UTF-8
 RoxygenNote: 7.3.1
 NeedsCompilation: no

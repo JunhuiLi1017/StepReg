@@ -326,7 +326,7 @@ getTable1SummaryOfParameters <- function(data, type, x_name, y_name, merged_mult
 									"multicollinearity variable", 
 									"intercept"), 
 		Value = c(merged_include, 
-							strategy, 
+		          paste0(strategy, collapse=" & "), 
 							paste0(metric, collapse=" & "), 
 							sle, 
 							sls, 
@@ -337,22 +337,21 @@ getTable1SummaryOfParameters <- function(data, type, x_name, y_name, merged_mult
 	)
 	if(type == 'cox') {
 	  # "intercept" is not relevant
-	  table_1_summary_of_parameters <- table_1_summary_of_parameters[ - 9, ]
+	  table_1_summary_of_parameters <- table_1_summary_of_parameters[-9, ]
 	}
 	# get rid of unrelevant variables from table 1:
 	if(any(metric %in% "SL")) {
-		if(strategy == "forward") {
-			# "sls" is not relevant
-			table_1_summary_of_parameters <- table_1_summary_of_parameters[ - 5, ]
-		}else if(strategy == "backward") {
-			# "sle" is not relevant
-			table_1_summary_of_parameters <- table_1_summary_of_parameters[ - 4, ]
-		}else if(strategy == "subset") {
-			# "sle" and "sls" are not relevant
-			table_1_summary_of_parameters <- table_1_summary_of_parameters[ - c(4:5), ]
-		}
-	}else if(!any(metric %in% "SL") & type != 'cox'){
-		table_1_summary_of_parameters <- table_1_summary_of_parameters[ - c(4:6), ]
+	  if(any(strategy == "bidirection") | (any(strategy == "forward") & any(strategy == "backward"))) {
+	    table_1_summary_of_parameters <- table_1_summary_of_parameters
+	  }else if(any(strategy == "forward") & (!any(strategy == "bidirection") & !any(strategy == "backward"))) {
+	    table_1_summary_of_parameters <- table_1_summary_of_parameters[-5, ]
+	  }else if(any(strategy == "backward") & (!any(strategy == "bidirection") & !any(strategy == "forward"))) {
+	    table_1_summary_of_parameters <- table_1_summary_of_parameters[-4, ]
+	  }else{
+	    table_1_summary_of_parameters <- table_1_summary_of_parameters[-c(4:5), ]
+	  }
+	}else if(!any(metric %in% "SL") & type != 'cox') {
+		table_1_summary_of_parameters <- table_1_summary_of_parameters[-c(4:6), ]
 	}
 	return(table_1_summary_of_parameters)
 }
@@ -410,7 +409,7 @@ getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced,
     ptype <- colnames(stat_table)[colnames(stat_table) %in% ptype]
     
     xlevels <- fit_full$xlevels
-    if(length(xlevels)>0) {
+    if(length(xlevels) > 0) {
       xlevels <- xlevels[which(!names(xlevels) %in% include)]
       factor_min_name <- vector( "character", length(xlevels))
       names(factor_min_name) <- names(xlevels)
@@ -435,7 +434,7 @@ getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced,
     pic_set <- stat_table[, ptype]
     names(pic_set) <- rownames(stat_table)
     if(intercept == "1" & length(xlevels) == 0) {
-      pic_set <- pic_set[ - 1]
+      pic_set <- pic_set[-1]
     }
     #maxPVar <- rownames(stat_table)[which.max(pic_set)]
     pic_set <- pic_set[!names(pic_set) %in% include]
@@ -551,11 +550,12 @@ getInitialStepwise <- function(data, type, strategy, metric, intercept, include,
       fit_include <- getModel(data = data, type = type, intercept = intercept, x_name = include, y_name = y_name, weight = weight, method = test_method)
       pic <- getInitStepModelStat(fit_intercept = fit_intercept, fit_fm = fit_include, type = type, strategy = strategy, metric = metric, intercept = intercept, include = include, test_method = test_method, sigma_value)
       num_eff_para_in <- getNumberEffect(fit = fit_include, type = type)
-      sub_init_process_table[1, ] <- c("", paste0(include, collapse = " "), "", abs(anova(fit_include, fit_intercept)[2, 'Df']), num_eff_para_in[ - 1], pic)
+      #sub_init_process_table[1, ] <- c("", paste0(include, collapse = " "), "", abs(anova(fit_include, fit_intercept)[2, 'Df']), num_eff_para_in[-1], pic)
+      sub_init_process_table[1, ] <- c("", paste0(include, collapse = " "), "", num_eff_para_in, pic)
       process_table <- rbind(process_table, sub_init_process_table)
     }
   }
-  process_table$Step <- 0
+  process_table$Step <- c(1:nrow(process_table))
   return(list("add_or_remove" = add_or_remove, "x_in_model" = x_in_model, "x_notin_model" = x_notin_model, "process_table" = process_table))
 }
 
