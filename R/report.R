@@ -31,27 +31,29 @@
 #' report(x,report_name = "report", format = c("html","docx"))
 #' }
 
-report <- function(x, report_name, format=c('html', 'docx', 'rtf', 'pptx', 'xlsx')) {
+report <- function(x, report_name, format = c('html', 'docx', 'rtf', 'pptx', 'xlsx')) {
   format <- match.arg(format, several.ok = TRUE)
+  
   if(!is.null(report_name)) {
-    if(any('xlsx' %in% format)) {
+    if ('xlsx' %in% format) {
       wb <- createWorkbook()
-      sheet <- createSheet(wb,"StepReg")
-      currRow <- 1
-      for(i in 1:length(x)){
-        cs <- CellStyle(wb) + Font(wb, isBold=TRUE) + Border(position=c("BOTTOM", "LEFT", "TOP", "RIGHT"))
-        addDataFrame(x[[i]],
-                     sheet=sheet,
-                     startRow=currRow,
-                     row.names=FALSE,
-                     colnamesStyle=cs)
-        currRow <- currRow + nrow(x[[i]]) + 2 
+      cs <- CellStyle(wb) + Font(wb, isBold = TRUE)
+      
+      for (i in 1:length(x)) {
+        x[[i]] <- as.data.frame(x[[i]]) # tbl won't work properly when addDataFrame
+        x[[i]] <- x[[i]] %>% mutate(across(where(is.numeric), as.character)) # Inf will not display properly in excel, so convert numeric to character
+        
+        sheet <- createSheet(wb, paste0("table", i))
+        # Add sheet title and content:
+        addDataFrame(data.frame(Title = names(x)[[i]]), sheet, startRow = 1, startColumn = 1, col.names = FALSE, row.names = FALSE)
+        addDataFrame(x[[i]], sheet, startRow = 2, row.names = FALSE, colnamesStyle = cs)
       }
-      saveWorkbook(wb, file = paste0(report_name,".xlsx"))
-      #write.xlsx(x = x,  file = paste0(report_name,".xlsx"))
-    }else if(any(c('html', 'docx', 'rtf', 'pptx') %in% format)) {
+      saveWorkbook(wb, file = paste0(report_name, ".xlsx"))
+    }
+    
+    if (any(c('html', 'docx', 'rtf', 'pptx') %in% format)) {
       results <- list()
-      for(j in seq_along(x)) {
+      for (j in seq_along(x)) {
         tb <- x[[j]] %>% 
           as.data.frame() %>%
           flextable() %>% 
@@ -59,19 +61,19 @@ report <- function(x, report_name, format=c('html', 'docx', 'rtf', 'pptx', 'xlsx
           align(align = "center", part = "all")
         results[names(x)[j]] <- list(tb)
       }
-      for(i in format) {
-        if(i %in% 'html') {
-          save_as_html(values=results,
+      for (i in format) {
+        if (i %in% 'html') {
+          save_as_html(values = results,
                        path = paste0(report_name,".html"))
-        }else if (i %in% 'docx') {
-          save_as_docx(values=results,
-                       path = paste0(report_name,".docx"))
-        }else if (i %in% 'rtf') {
-          save_as_rtf(values=results,
-                      path = paste0(report_name,".rtf"))
-        }else if (i %in% 'pptx') {
-          save_as_pptx(values=results,
-                       path = paste0(report_name,".pptx"))
+          } else if (i %in% 'docx') {
+            save_as_docx(values = results,
+                         path = paste0(report_name,".docx"))
+            } else if (i %in% 'rtf') {
+              save_as_rtf(values=results,
+                          path = paste0(report_name,".rtf"))
+              } else if (i %in% 'pptx') {
+                save_as_pptx(values = results,
+                             path = paste0(report_name,".pptx"))
         }
       }
     }
