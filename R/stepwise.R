@@ -121,6 +121,7 @@
 #' @importFrom rmarkdown render
 #' @importFrom shinythemes shinytheme
 #' 
+#' @importFrom stringr str_replace
 #' 
 #' @importFrom utils combn
 #' 
@@ -155,8 +156,6 @@ stepwise <- function(formula,
   type <- match.arg(type)
   strategy <- arg_match(strategy, c("forward", "backward", "bidirection", "subset") ,multiple = TRUE)
   metric <- arg_match(metric, c("AIC", "AICc", "BIC", "CP", "HQ", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)") ,multiple = TRUE)
-  
-  
   
   test_method_linear <- match.arg(test_method_linear)
   test_method_glm <- match.arg(test_method_glm)
@@ -205,19 +204,20 @@ stepwise <- function(formula,
         table3_process_table <- out_final_stepwise$process_table
         remove_col <- NULL
         if(stra == "forward") {
-          remove_col <- "RemovedEffect"
+          remove_col <- "Remove_effect"
         } else if(stra == "backward") {
-          remove_col <- "EnteredEffect"
+          remove_col <- "Enter_effect"
         }
         table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% remove_col]
-        if(all(table3_process_table[,"NumberEffectIn"] == table3_process_table[,"NumberParmsIn"])){
-          table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% "NumberEffectIn"]
+        if(all(table3_process_table[,"Number_effect"] == table3_process_table[,"Number_parms"])){
+          table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% "Number_effect"]
         }
         x_in_model <- out_final_stepwise$x_in_model
         x_final_model <- c(include, x_in_model)
       }
-      table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric() %>% round(num_digits) %>% as.character()
-      result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table
+      #table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric() %>% round(num_digits) %>% as.character()
+      table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric()
+      result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table %>% mutate_if(is.numeric, round, num_digits)
       x_final_model_metric[[stra]][[met]] <- x_final_model
     }
     ##table4
@@ -226,6 +226,7 @@ stepwise <- function(formula,
     for(met in metric){
       table4_coef_model <- table4_coef_model_metric[[stra]][[met]]
       for(i in names(table4_coef_model)) {
+        colnames(table4_coef_model[[i]]) %>% str_replace(" ", "_") -> colnames(table4_coef_model[[i]])
         result[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table4_coef_model[[i]] %>% mutate_if(is.numeric, round, num_digits)
       }
     }

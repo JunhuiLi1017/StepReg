@@ -31,8 +31,7 @@ server <- function(input, output, session) {
       data(CreditCard, package = 'AER')
       data(remission,package="StepReg")
       survival::lung %>%
-        dplyr::mutate(sex = factor(sex, levels = c(1,2))) %>% # make sex as factor
-        dplyr::mutate(status = ifelse(status == 1, 0, 1)) %>% # recode status: 0 means cencored, 1 means dead
+        mutate(sex = factor(sex, levels = c(1,2))) %>% # make sex as factor
         na.omit() -> lung# get rid of incomplete records
       
       
@@ -147,22 +146,33 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$run_analysis, {
-    # Define the action you want to perform when the button is clicked
     output$modelSelection <- renderPrint({
       withProgress(
-        message = 'Calculation in progress', 
+        message = 'Calculation of variable selection in progress', 
+        detail = "Please wait...",
         value = 0, 
         {
+          # Perform the stepwise model selection
+          stepwiseResult <- stepwiseModel()
           incProgress(1/2)
-          #Sys.sleep(2)
-        })
-      stepwiseModel()
+          stepwiseResult
+        }
+      )
     })
     
     # Display plots of stepwise regression results
     output$selectionPlot <- renderPlot({
-      plotList <- plot(stepwiseModel())
-      gridExtra::grid.arrange(grobs = plotList)
+      withProgress(
+        message = 'Visualization of variable selecion in progress', 
+        detail = "Please wait...",
+        value = 0, 
+        {
+          # Perform the stepwise model selection
+          plotList <- plot(stepwiseModel())
+          grid.arrange(grobs = plotList)
+          incProgress(1/2)
+        }
+      )
     })
     
     output$selectionPlotText <- renderText({
@@ -178,7 +188,7 @@ server <- function(input, output, session) {
   # Output Data
   output$tbl = renderDataTable({
     req(dataset())
-    DT::datatable(dataset())
+    DT::datatable(dataset(), options = list(scrollX = TRUE))
   })
   
   output$summaryText <- renderDataTable({
@@ -206,34 +216,28 @@ server <- function(input, output, session) {
     observeEvent(input$plot_type, {
       # Define plot rendering logic here
       req(input$var_plot)
-      plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
+      
       if (input$plot_type == "Pairs plot") {
         output$Plot <- renderPlot({
           withProgress(
-            message = 'Calculation in progress', 
+            message = 'Plots in progress', 
             value = 0, 
             {
-              #sampleSize <- nrow(dataset())
-              #for(i in 1:(length(input$var_plot)*sampleSize)){
+              plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
               incProgress(1/2)
-              Sys.sleep(0.5)
-              #}
+              plot_type
             })
-          plot_type
         })
       } else {
         output$Plot <- renderPlot({
           withProgress(
-            message = 'Calculation in progress', 
+            message = 'Plots in progress', 
             value = 0, 
             {
-              #sampleSize <- nrow(dataset())
-              #for(i in 1:(length(input$var_plot)*sampleSize)){
+              plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
               incProgress(1/2)
-              Sys.sleep(0.25)
-              #}
             })
-          gridExtra::grid.arrange(grobs = plot_type)
+          grid.arrange(grobs = plot_type)
         })
       }
     })
@@ -241,7 +245,7 @@ server <- function(input, output, session) {
   
   output$report <- downloadHandler(
     # For PDF output, change this to "report.pdf"
-    filename = paste0("StepReg_report_", input$type, "_", format(Sys.time(), "%Y%m%d%H%M%S"), ".html"),
+    filename = paste0("StepReg_report_",format(Sys.time(), "%Y%m%d%H%M%S"),".html"),
     content = function(file) {
       # Copy the report file to a temporary directory before processing it, in
       # case we don't have write permissions to the current working dir (which
@@ -261,5 +265,5 @@ server <- function(input, output, session) {
       )
     }
   )
-  session$onSessionEnded(function() { stopApp() })
+  session$onSessionEnded(function() { stopApp() }) 
 }

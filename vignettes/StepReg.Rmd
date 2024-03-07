@@ -319,7 +319,7 @@ formula <- mpg ~ cyl + disp + hp + wt + vs + am + 0
 Another way is to use minus symbol(`"-"`) to exclude some predictors for variable selection. For example, include all variables except "disp", "wt", and intercept.
 
 ```{r, eval = FALSE}
-formula <- mpg ~ . - 1 - disp -wt
+formula <- mpg ~ . - 1 - disp - wt
 ```
 
 You can simultaneously provide multiple selection strategies and metrics. For example, the following code snippet employs both "forward" and "backward" strategies using metrics "AIC", "BIC", and "SL". It's worth mentioning that when "SL" is specified, you may also want to set the significance level for entry ("sle") and stay ("sls"), both of which default to 0.15.
@@ -332,6 +332,7 @@ res2 <- stepwise(formula = formula,
                  metric = c("AIC", "BIC", "SL"),
                  sle = 0.05,
                  sls = 0.05)
+res2
 plot(res2)
 ```
 
@@ -345,6 +346,7 @@ res3 <- stepwise(formula = formula,
                  type = "linear",
                  strategy = "forward",
                  metric = c("AIC", "HQ"))
+res3
 plot(res3)
 ```
 
@@ -402,6 +404,8 @@ res5
 plot(res5)
 ```
 
+Here, the `0` in the above plot means that there is no intercept in the model.
+
 ## Cox regression with the `lung` dataset
 
 In this example, we'll demonstrate how to perform Cox regression analysis using the [`lung`](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html) dataset. By setting `type = "cox"`, we instruct the function to conduct Cox regression.
@@ -421,8 +425,7 @@ In this example, we employ a "forward" strategy with "AICc" as the selection cri
 library(dplyr)
 # Preprocess:
 lung <- survival::lung %>%
-  mutate(sex = factor(sex, levels = c(1,2))) %>% # make sex as factor
-  mutate(status = ifelse(status == 1, 0, 1)) %>% # recode status: 0 means cencored, 1 means dead
+  mutate(sex = factor(sex, levels = c(1, 2))) %>% # make sex as factor
   na.omit() # get rid of incomplete records
 
 formula  =  Surv(time, status) ~ .

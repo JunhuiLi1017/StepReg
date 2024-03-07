@@ -119,9 +119,8 @@ ui <- navbarPage(
           
           tabPanel(
             "Data",
-            div(style = "width: 100%;",
-                DT::dataTableOutput('tbl'))
-          ),# Data dalam tabel
+            DT::dataTableOutput('tbl', width = 750)
+          ),
           
           #tabPanel("stat.desc()", dataTableOutput("summaryText")),
           
@@ -406,7 +405,6 @@ ui <- navbarPage(
       ),
       
       mainPanel(
-        textOutput("Metric_value"),
         textOutput("selectionStatText"),
         verbatimTextOutput("modelSelection"),
         textOutput("selectionPlotText"),
@@ -451,7 +449,6 @@ server <- function(input, output, session) {
       data(remission,package="StepReg")
       survival::lung %>%
         mutate(sex = factor(sex, levels = c(1,2))) %>% # make sex as factor
-        mutate(status = ifelse(status == 1, 0, 1)) %>% # recode status: 0 means cencored, 1 means dead
         na.omit() -> lung# get rid of incomplete records
       
       
@@ -566,22 +563,31 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$run_analysis, {
-    # Define the action you want to perform when the button is clicked
     output$modelSelection <- renderPrint({
       withProgress(
         message = 'Calculation in progress', 
         value = 0, 
         {
-        incProgress(1/2)
-        #Sys.sleep(2)
-        })
-      stepwiseModel()
+          # Perform the stepwise model selection
+          stepwiseResult <- stepwiseModel()
+          incProgress(1/2)
+          stepwiseResult
+        }
+      )
     })
     
     # Display plots of stepwise regression results
     output$selectionPlot <- renderPlot({
-      plotList <- plot(stepwiseModel())
-      grid.arrange(grobs = plotList)
+      withProgress(
+        message = 'Calculation in progress', 
+        value = 0.5, 
+        {
+          # Perform the stepwise model selection
+          plotList <- plot(stepwiseModel())
+          grid.arrange(grobs = plotList)
+          incProgress(1)
+        }
+      )
     })
     
     output$selectionPlotText <- renderText({
@@ -597,7 +603,7 @@ server <- function(input, output, session) {
   # Output Data
   output$tbl = renderDataTable({
     req(dataset())
-    DT::datatable(dataset())
+    DT::datatable(dataset(), options = list(scrollX = TRUE))
   })
   
   output$summaryText <- renderDataTable({
@@ -625,20 +631,17 @@ server <- function(input, output, session) {
     observeEvent(input$plot_type, {
       # Define plot rendering logic here
       req(input$var_plot)
-      plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
+      
       if (input$plot_type == "Pairs plot") {
         output$Plot <- renderPlot({
           withProgress(
             message = 'Calculation in progress', 
             value = 0, 
             {
-              #sampleSize <- nrow(dataset())
-              #for(i in 1:(length(input$var_plot)*sampleSize)){
-                incProgress(1/2)
-                Sys.sleep(0.5)
-              #}
+            plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
+            incProgress(1/2)
+            plot_type
             })
-          plot_type
         })
       } else {
         output$Plot <- renderPlot({
@@ -646,13 +649,13 @@ server <- function(input, output, session) {
             message = 'Calculation in progress', 
             value = 0, 
             {
-              #sampleSize <- nrow(dataset())
-              #for(i in 1:(length(input$var_plot)*sampleSize)){
-                incProgress(1/2)
-                Sys.sleep(0.25)
-              #}
+            plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
+           
+            incProgress(1/2)
+            
             })
-          grid.arrange(grobs = plot_type)
+          p <- grid.arrange(grobs = plot_type)
+          print(p)
         })
       }
     })

@@ -98,7 +98,7 @@ ui <- navbarPage(
           tabPanel(
             "Data",
             div(style = "width: 100%;",
-                DT::dataTableOutput('tbl'))
+                DT::dataTableOutput('tbl', width = 750))
           ),# Data dalam tabel
           
           #tabPanel("stat.desc()", dataTableOutput("summaryText")),

@@ -4,14 +4,14 @@
 
 getXname <- function(formula, data) {
 	term_form <- terms(formula, data = data)
-	vars <- as.character(attr(term_form, "variables"))[ - 1]
+	vars <- as.character(attr(term_form, "variables"))[ -1 ]
 	x_name <- attr(term_form, "term.labels")
 	return(x_name)
 }
 
 getYname <- function(formula, data) {
 	term_form <- terms(formula, data = data)
-	vars <- as.character(attr(term_form, "variables"))[ - 1]
+	vars <- as.character(attr(term_form, "variables"))[ -1 ]
 	y_name <- vars[attr(term_form, "response")]
 	return(y_name)
 }
@@ -130,7 +130,7 @@ getModelFitStat <- function(metric = c("AIC", "AICc", "BIC", "CP", "HQ", "HQc", 
 		p <- fit$rank
 		n <- nrow(resMatrix)
 		#yName <- rownames(attr(fit$terms, "factors"))[1]
-		vars <- as.character(attr(fit$terms, "variables"))[ - 1]
+		vars <- as.character(attr(fit$terms, "variables"))[ -1 ]
 		yName <- vars[attr(fit$terms, "response")]
 		Y <- as.matrix(fit$model[, yName])
 		nY <- ncol(Y)
@@ -365,17 +365,17 @@ getTable2TypeOfVariables <- function(model) {
   table2_class_table <- cbind(NA, class_table)
   table2_class_table[class_table[, 1] %in% y_name, 1] <- "Dependent"
   table2_class_table[!class_table[, 1] %in% y_name, 1] <- "Independent"
-  colnames(table2_class_table) <- c("Variable type", "Variable name", "Variable class")
+  colnames(table2_class_table) <- c("Variable_type", "Variable_name", "Variable_class")
   rownames(table2_class_table) <- NULL
   return(as.data.frame(table2_class_table))
 }
 
-#note1: test_method_linear should be 'F' for univariate and c(“Pillai”, “Wilks”, “Hotelling - Lawley”, “Roy”) for multivariates
+#note1: test_method_linear should be 'F' for univariate and c(“Pillai”, “Wilks”, “Hotelling-Lawley”, “Roy”) for multivariates
 #getAnovaStat(fit_reduced = x_fit_list[[1]], fit_full = fit_x_in_model, type = type, test_method = test_method)
 getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced, fit_full, type, test_method) {
   if (type == "linear") {
     ptype <- 'Pr(>F)'
-    if(test_method %in% c("Pillai", "Wilks", "Hotelling - Lawley", "Roy")) {
+    if(test_method %in% c("Pillai", "Wilks", "Hotelling-Lawley", "Roy")) {
       stattype <- 'approx F'
     }else{
       stattype <- 'F'
@@ -515,10 +515,10 @@ getNumberEffect <- function(fit, type) {
 
 initialProcessTable <- function(metric) {
   sub_init_process_table <- data.frame(Step = numeric(), 
-                               EnteredEffect = character(), 
-                               RemovedEffect = character(), 
-                               NumberEffectIn = numeric(), 
-                               NumberParmsIn = numeric(), 
+                               Enter_effect = character(), 
+                               Remove_effect = character(), 
+                               Number_effect = numeric(), 
+                               Number_parms = numeric(), 
                                metric = numeric())
   colnames(sub_init_process_table)[ncol(sub_init_process_table)] <- metric
   return(sub_init_process_table)
@@ -733,7 +733,7 @@ getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, 
     #       x1(stop here)
     # x1
     if(nrow(process_table)>1) {
-      last2_step <- process_table[nrow(process_table) - 1, ]
+      last2_step <- process_table[nrow(process_table) -1 , ]
       last1_step <- process_table[nrow(process_table), ]
       if(last2_step[, 2] != "" & last2_step[, 2] == last1_step[, 3]) {
         break
@@ -765,7 +765,8 @@ getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, 
   }
   
   if(type == "cox" && strategy != "backward") {
-    process_table <- process_table[ - 1, ]
+    process_table <- process_table[-1, ]
+    process_table$Step <- as.numeric(process_table$Step) - 1
   }
   return(list("process_table" = process_table, "x_in_model" = x_in_model))
 }
