@@ -148,8 +148,8 @@ server <- function(input, output, session) {
   observeEvent(input$run_analysis, {
     output$modelSelection <- renderPrint({
       withProgress(
-        message = 'Calculation of variable selection in progress', 
-        detail = "Please wait...",
+        message = 'Selecting Variables', 
+        #detail = "Please wait...",
         value = 0, 
         {
           # Perform the stepwise model selection
@@ -163,8 +163,8 @@ server <- function(input, output, session) {
     # Display plots of stepwise regression results
     output$selectionPlot <- renderPlot({
       withProgress(
-        message = 'Visualization of variable selecion in progress', 
-        detail = "Please wait...",
+        message = 'Visualizing', 
+        #detail = "Please wait...",
         value = 0, 
         {
           # Perform the stepwise model selection
@@ -226,7 +226,8 @@ server <- function(input, output, session) {
               plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
               incProgress(1/2)
               plot_type
-            })
+            }
+          )
         })
       } else {
         output$Plot <- renderPlot({
@@ -236,8 +237,9 @@ server <- function(input, output, session) {
             {
               plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
               incProgress(1/2)
-            })
-          grid.arrange(grobs = plot_type)
+              grid.arrange(grobs = plot_type)
+            }
+          )
         })
       }
     })

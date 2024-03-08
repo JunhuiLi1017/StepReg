@@ -27,14 +27,14 @@ ui <- navbarPage(
     
     title = "File", 
     
-    p("On this page, you can conduct exploratory data analysis. In the dataset 
-      panel, you have the option to explore either an example dataset or upload 
-      your own dataset. In the main panel, you can delve into the data itself, 
-      examine summary statistics and descriptive analysis, and visualize the 
-      dataset using a variety of plots."),
+    # p("On this page, you can conduct exploratory data analysis. In the dataset 
+    #   panel, you have the option to explore either an example dataset or upload 
+    #   your own dataset. In the main panel, you can delve into the data itself, 
+    #   examine summary statistics and descriptive analysis, and visualize the 
+    #   dataset using a variety of plots."),
     
     # add title
-    titlePanel("Dataset"),
+    #titlePanel("Dataset"),
     
     # Sidebar layout with input and output definitions ----
     sidebarLayout(
@@ -160,11 +160,11 @@ ui <- navbarPage(
   ),
   tabPanel(
     "Analysis",
-    p("To perform stepwise regression, you need to first specify the type of 
-      stepwise procedure, which involves determining the dependent variables by 
-      defining the scope of both dependent and independent variables. Next, 
-      select one or more selection strategies and metrics to guide the stepwise 
-      regression process."),
+    # p("To perform stepwise regression, you need to first specify the type of 
+    #   stepwise procedure, which involves determining the dependent variables by 
+    #   defining the scope of both dependent and independent variables. Next, 
+    #   select one or more selection strategies and metrics to guide the stepwise 
+    #   regression process."),
     sidebarLayout(
       sidebarPanel(
         # Select type (linear, logit, cox, poisson, or gamma)
@@ -256,9 +256,6 @@ ui <- navbarPage(
             choices = c("AIC", 
                         "AICc",
                         "HQ",
-                        "IC(1)",
-                        "IC(3/2)",
-                        "SBC",
                         "SL"),
             selected = "AIC"
           )
@@ -393,26 +390,19 @@ ui <- navbarPage(
       )
     )
   ),
-  tabPanel(
-    title = "Help", 
-    # Main panel for displaying outputs ----
-    mainPanel(
-      tabsetPanel(
-        tabPanel(
-          "Q & A",
-        ),
-        tabPanel(
-          "Report Bug",
-          tags$p("Please report bugs "),
-          tags$a(href = "https://github.com/JunhuiLi1017/StepReg/issues/new", "here")
-        ),
-        tabPanel(
-          "Citation",
-          tags$p("If you think 'StepReg' R package is helpful to your research, please cite:"),
-          tags$ul(
-            tags$li("Junhui Li (2024). StepReg: Stepwise Regression Analysis. R package version 1.5.0, https://CRAN.R-project.org/package=StepReg")
-          )
-        )
+  navbarMenu(
+    title = "Help",
+    tabPanel(
+      tags$a(href = "https://mccbbioinfo.github.io/tutorials/StepReg","Tutorial")
+    ),
+    tabPanel(
+      tags$a(href = "https://github.com/JunhuiLi1017/StepReg/issues/new","Report Bug")
+    ),
+    tabPanel(
+      "Citation",
+      tags$p("If you think 'StepReg' R package is helpful to your research, please cite:"),
+      tags$ul(
+        tags$li("Junhui Li (2024). StepReg: Stepwise Regression Analysis. R package version 1.5.0, https://CRAN.R-project.org/package=StepReg")
       )
     )
   )

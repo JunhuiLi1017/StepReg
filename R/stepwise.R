@@ -217,7 +217,7 @@ stepwise <- function(formula,
       }
       #table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric() %>% round(num_digits) %>% as.character()
       table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric()
-      result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table %>% mutate_if(is.numeric, round, num_digits)
+      result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character) # to keep digits as we expected, convert numeric to character for html output.
       x_final_model_metric[[stra]][[met]] <- x_final_model
     }
     ##table4
@@ -226,8 +226,8 @@ stepwise <- function(formula,
     for(met in metric){
       table4_coef_model <- table4_coef_model_metric[[stra]][[met]]
       for(i in names(table4_coef_model)) {
-        colnames(table4_coef_model[[i]]) %>% str_replace(" ", "_") -> colnames(table4_coef_model[[i]])
-        result[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table4_coef_model[[i]] %>% mutate_if(is.numeric, round, num_digits)
+        #colnames(table4_coef_model[[i]]) %>% str_replace(" ", "_") -> colnames(table4_coef_model[[i]])
+        result[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table4_coef_model[[i]] %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character)
       }
     }
   }
