@@ -18,7 +18,6 @@ require("tidyr") || stop("unable to load tidyr")
 require("GGally") || stop("unable to load GGally")
 
 ui <- navbarPage(
-  
   title = tags$a(href = "https://cran.r-project.org/web/packages/StepReg/index.html", "StepReg"),
   theme = shinythemes::shinytheme("flatly"),
   
@@ -390,13 +389,16 @@ ui <- navbarPage(
       )
     )
   ),
+  #https://stackoverflow.com/questions/55987238/add-external-hyperlink-to-tabpanel-or-navbarmenu-in-r-shiny
+  #https://stackoverflow.com/questions/48307652/display-list-of-downloads-in-navbarmenu-in-shiny
+  # empty line between Tutorial and Report Bug in ui
   navbarMenu(
     title = "Help",
     tabPanel(
-      tags$a(href = "https://mccbbioinfo.github.io/tutorials/StepReg","Tutorial")
+      tags$a(href = "https://mccbbioinfo.github.io/tutorials/StepReg","Tutorial",target="_blank")
     ),
     tabPanel(
-      tags$a(href = "https://github.com/JunhuiLi1017/StepReg/issues/new","Report Bug")
+      tags$a(href = "https://github.com/JunhuiLi1017/StepReg/issues/new","Report Bug",target="_blank")
     ),
     tabPanel(
       "Citation",
