@@ -7,6 +7,9 @@
 
 require("shiny") || stop("unable to load shiny")
 require("StepReg") || stop("unable to load StepReg")
+if(packageVersion("StepReg") < "1.5.0") {
+  stop("Need to wait until package:StepReg 1.5.0 is installed!")
+}
 require("gridExtra") || stop("unable to load gridExtra")
 require("DT") || stop("unable to load DT")
 require("shinythemes") || stop("unable to load shinythemes")

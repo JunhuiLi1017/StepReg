@@ -473,9 +473,11 @@ We have developed an interactive Shiny application to simplify model selection t
 
 1. Rstudio url:
 
-https://junhuili1017.shinyapps.io/StepRegShinyApp/
+https://junhuili1017.shinyapps.io/StepReg/
 
 2. MCCB url:
+
+http://172.26.240.36:3838/shiny/StepReg/
 
 Alternatively, you can also access the Shiny app directly from within RStudio:
 ```{r, eval = FALSE}

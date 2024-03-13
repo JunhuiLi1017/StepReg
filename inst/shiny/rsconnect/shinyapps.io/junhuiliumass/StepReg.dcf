@@ -1,12 +1,12 @@
-name: shiny
-title: shiny
+name: StepReg
+title: StepReg
 username: junhuiliumass
 account: junhuiliumass
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 11454071
+appId: 11481026
 bundleId:
-url: https://junhuiliumass.shinyapps.io/shiny/
+url: https://junhuili1017.shinyapps.io/StepReg/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
