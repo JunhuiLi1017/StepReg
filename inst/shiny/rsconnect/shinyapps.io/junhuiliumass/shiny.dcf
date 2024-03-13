@@ -1,0 +1,12 @@
+name: shiny
+title: shiny
+username: junhuiliumass
+account: junhuiliumass
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11454071
+bundleId:
+url: https://junhuiliumass.shinyapps.io/shiny/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

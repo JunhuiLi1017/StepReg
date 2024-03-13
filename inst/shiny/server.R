@@ -16,6 +16,8 @@ require("summarytools") || stop("unable to load summarytools")
 require("ggcorrplot") || stop("unable to load ggcorrplot")
 require("tidyr") || stop("unable to load tidyr")
 require("GGally") || stop("unable to load GGally")
+require("shinyjs") || stop("unable to load shinyjs")
+require("AER") || stop("AER")
 
 #source("bin/upload_or_select_dataset.R") #can not select example dataset
 source("bin/plot_data_func.R")

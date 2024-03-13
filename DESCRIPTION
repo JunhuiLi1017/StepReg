@@ -23,7 +23,6 @@ VignetteBuilder: knitr
 Suggests: 
     knitr,
     testthat,
-    AER,
     kableExtra
 Imports:
     dplyr,
@@ -43,7 +42,9 @@ Imports:
     tidyr,
     summarytools,
     shinythemes,
-    rmarkdown
+    rmarkdown,
+    AER,
+    shinyjs
 Encoding: UTF-8
 RoxygenNote: 7.3.1
 NeedsCompilation: no
