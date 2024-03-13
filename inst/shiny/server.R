@@ -25,71 +25,69 @@ source("bin/plot_data_func.R")
 # Define server logic
 server <- function(input, output, session) {
   # Function to read uploaded dataset
-  dataset <- reactive({
+  dataset <- reactiveVal(NULL)
+  
+  observeEvent(input$example_dataset, {
     req(input$example_dataset)
+    # Read the selected example dataset
+    data(CreditCard, package = 'AER')
+    data(remission, package = "StepReg")
+    survival::lung %>%
+      mutate(sex = factor(sex, levels = c(1, 2))) %>% 
+      na.omit() -> lung # get rid of incomplete records
     
-    if (input$example_dataset != " ") {
-      # Read the selected example dataset
-      data(CreditCard, package = 'AER')
-      data(remission,package="StepReg")
-      survival::lung %>%
-        mutate(sex = factor(sex, levels = c(1,2))) %>% # make sex as factor
-        na.omit() -> lung# get rid of incomplete records
-      
-      
-      df <- switch(input$example_dataset,
-                   "base::mtcars" = mtcars,
-                   "StepReg::remission" = remission,
-                   "survival::lung" = lung,
-                   "AER::CreditCard" = CreditCard)
-    }
-    if (!is.null(input$upload_file)) {
-      req(input$upload_file)
-      # Read the uploaded file
-      df <- read.table(input$upload_file$datapath,
-                       header = input$header,
-                       sep = input$sep,
-                       quote = input$quote)
-    }
     
-    # df <- upload_or_select_dataset(input$example_dataset, 
-    #                                input$upload_file,
-    #                                input$header,
-    #                                input$sep,
-    #                                input$quote)
+    df <- switch(input$example_dataset,
+                 "base::mtcars" = mtcars,
+                 "StepReg::remission" = remission,
+                 "survival::lung" = lung,
+                 "AER::CreditCard" = CreditCard)
+    
+    dataset(df)
+  })
+  
+  observeEvent(c(input$upload_file,input$header,input$sep,input$quote), {
+    req(input$upload_file)
+    # Read the uploaded file
+    df <- read.table(input$upload_file$datapath,
+                     header = input$header,
+                     sep = input$sep,
+                     quote = input$quote)
+    
+    dataset(df)
+  })
+  
+  observe({
+    req(dataset())
     
     # Update select input for distribution plot
-    updateSelectInput(session, "distribution_plot", choices = names(df))
+    updateSelectInput(session, "distribution_plot", choices = names(dataset()))
     
     # Update select inputs based on regression type
-    
-    updateSelectInput(session, "dependent_linear", choices = names(df))
-    updateSelectInput(session, "status", choices = names(df))
-    updateSelectInput(session, "time", choices = names(df))
-    updateSelectInput(session, "dependent_glm", choices = names(df))
+    updateSelectInput(session, "dependent_linear", choices = names(dataset()))
+    updateSelectInput(session, "status", choices = names(dataset()))
+    updateSelectInput(session, "time", choices = names(dataset()))
+    updateSelectInput(session, "dependent_glm", choices = names(dataset()))
     
     observeEvent(input$dependent_linear, {
-      updateSelectInput(session, "independent", choices = setdiff(names(df), input$dependent_linear))
+      updateSelectInput(session, "independent", choices = setdiff(names(dataset()), input$dependent_linear))
     })
     
     observeEvent(input$status, {
-      updateSelectInput(session, "time", choices = setdiff(names(df), input$status))
+      updateSelectInput(session, "time", choices = setdiff(names(dataset()), input$status))
     })
     
     observeEvent(c(input$status, input$time), {
-      updateSelectInput(session, "independent", choices = setdiff(names(df), c(input$status, input$time)))
+      updateSelectInput(session, "independent", choices = setdiff(names(dataset()), c(input$status, input$time)))
     })
     
     observeEvent(input$dependent_glm, {
-      updateSelectInput(session, "independent", choices = setdiff(names(df), input$dependent_glm))
+      updateSelectInput(session, "independent", choices = setdiff(names(dataset()), input$dependent_glm))
     })
     
     observeEvent(input$independent, {
       updateSelectInput(session, "include", choices = input$independent)
     })
-    
-    # Return the dataframe
-    return(df)
   })
   
   # Perform stepwise regression based on uploaded dataset
