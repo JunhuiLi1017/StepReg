@@ -49,14 +49,14 @@ outputStepReg <- function(x, text){
   side <- rep("left", ncol(x))
   list(x, lengths, side) %>% pmap_dfc(str_pad) -> dataFrame
   cat(format(text,  width = sum(lengths),  justify = "left")); cat("\n")
-  #cat(paste0(rep("\u2017", sum(lengths)), collapse="")); cat("\n")
-  cat(paste0(rep("‗", sum(lengths)), collapse="")); cat("\n")
+  cat(paste0(rep("\u2017", sum(lengths)), collapse="")); cat("\n")
+  #cat(paste0(rep("‗", sum(lengths)), collapse="")); cat("\n")
   cat(paste0(dfHeader, collapse="")); cat("\n")
-  #cat(paste0(rep("\u2014", sum(lengths)), collapse="")); cat("\n")
-  cat(paste0(rep("—", sum(lengths)), collapse="")); cat("\n")
+  cat(paste0(rep("\u2014", sum(lengths)), collapse="")); cat("\n")
+  #cat(paste0(rep("—", sum(lengths)), collapse="")); cat("\n")
   for(i in 1:nrow(dataFrame)){
     cat(paste0(dataFrame[i, ], collapse=""), "\n")
   }
-  #cat(paste0(rep("\u2017", sum(lengths)), collapse="")); cat("\n"); cat("\n")
-  cat(paste0(rep("‗", sum(lengths)), collapse="")); cat("\n"); cat("\n")
+  cat(paste0(rep("\u2017", sum(lengths)), collapse="")); cat("\n"); cat("\n")
+  #cat(paste0(rep("‗", sum(lengths)), collapse="")); cat("\n"); cat("\n")
 }

@@ -16,7 +16,7 @@ require("summarytools") || stop("unable to load summarytools")
 require("ggcorrplot") || stop("unable to load ggcorrplot")
 require("tidyr") || stop("unable to load tidyr")
 require("GGally") || stop("unable to load GGally")
-require("shinyjs") || stop("unable to load shinyjs")
+#require("shinyjs") || stop("unable to load shinyjs")
 require("AER") || stop("AER")
 
 #source("bin/upload_or_select_dataset.R") #can not select example dataset
@@ -91,8 +91,9 @@ server <- function(input, output, session) {
   })
   
   # Perform stepwise regression based on uploaded dataset
-  stepwiseModel <- reactive({
+  stepwiseModel <- eventReactive(input$run_analysis, {
     req(dataset())
+    
     if (input$intercept == TRUE) {
       intercept <- 1
     } else {
@@ -142,47 +143,40 @@ server <- function(input, output, session) {
       test_method_glm = input$glm_test,
       test_method_cox = input$cox_test
     )
-    return(res)
+    res
   })
   
-  observeEvent(input$run_analysis, {
-    output$modelSelection <- renderPrint({
-      withProgress(
-        message = 'Selecting Variables', 
-        #detail = "Please wait...",
-        value = 0, 
-        {
-          # Perform the stepwise model selection
-          stepwiseResult <- stepwiseModel()
-          incProgress(1/2)
-          stepwiseResult
-        }
-      )
-    })
-    
-    # Display plots of stepwise regression results
-    output$selectionPlot <- renderPlot({
-      withProgress(
-        message = 'Visualizing', 
-        #detail = "Please wait...",
-        value = 0, 
-        {
-          # Perform the stepwise model selection
-          plotList <- plot(stepwiseModel())
-          grid.arrange(grobs = plotList)
-          incProgress(1/2)
-        }
-      )
-    })
-    
-    output$selectionPlotText <- renderText({
-      "Visualization of Variable Selection:"
-    })
-    output$selectionStatText <- renderText({
-      "Statistics of Variable Selection:"
-    })
-    
-    shinyjs::enable("report")
+  output$modelSelection <- renderPrint({
+    withProgress(
+      message = 'Selecting Variables', 
+      value = 0, 
+      {
+        # Perform the stepwise model selection
+        stepwiseResult <- stepwiseModel()
+        incProgress(1/2)
+        stepwiseResult
+      }
+    )
+  })
+  
+  output$selectionPlot <- renderPlot({
+    withProgress(
+      message = 'Visualizing', 
+      value = 0, 
+      {
+        # Perform the stepwise model selection
+        plotList <- plot(stepwiseModel())
+        grid.arrange(grobs = plotList)
+        incProgress(1/2)
+      }
+    )
+  })
+  
+  output$selectionPlotText <- renderText({
+    "Visualization of Variable Selection:"
+  })
+  output$selectionStatText <- renderText({
+    "Statistics of Variable Selection:"
   })
   
   # Output Data
@@ -212,38 +206,27 @@ server <- function(input, output, session) {
     updateSelectInput(session, "var_plot", choices = colnames(dataset()))
   })
   
-  observeEvent(input$make_plot, {
-    # Render plots based on user selection
-    observeEvent(input$plot_type, {
-      # Define plot rendering logic here
-      req(input$var_plot)
-      
-      if (input$plot_type == "Pairs plot") {
-        output$Plot <- renderPlot({
-          withProgress(
-            message = 'Plots in progress', 
-            value = 0, 
-            {
-              plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
-              incProgress(1/2)
-              plot_type
-            }
-          )
-        })
-      } else {
-        output$Plot <- renderPlot({
-          withProgress(
-            message = 'Plots in progress', 
-            value = 0, 
-            {
-              plot_type <- plot_data_func(input$plot_type,input$var_plot,dataset())
-              incProgress(1/2)
-              grid.arrange(grobs = plot_type)
-            }
-          )
-        })
+  plot_data <- eventReactive(input$make_plot, {
+    req(input$plot_type, input$var_plot)
+    
+    withProgress(
+      message = 'Plots in progress', 
+      value = 0, 
+      {
+        plot_type <- plot_data_func(input$plot_type, input$var_plot, dataset())
+        incProgress(1/2)
+        
+        if (input$plot_type == "Pairs plot") {
+          plot_type
+        } else {
+          grid.arrange(grobs = plot_type)
+        }
       }
-    })
+    )
+  })
+  
+  output$Plot <- renderPlot({
+    plot_data()
   })
   
   output$report <- downloadHandler(

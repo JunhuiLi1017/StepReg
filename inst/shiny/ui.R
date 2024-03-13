@@ -16,7 +16,7 @@ require("summarytools") || stop("unable to load summarytools")
 require("ggcorrplot") || stop("unable to load ggcorrplot")
 require("tidyr") || stop("unable to load tidyr")
 require("GGally") || stop("unable to load GGally")
-require("shinyjs") || stop("unable to load shinyjs")
+#require("shinyjs") || stop("unable to load shinyjs")
 require("AER") || stop("AER")
 
 js <- "
@@ -394,9 +394,15 @@ ui <- tagList(
         ),
         
         mainPanel(
-          textOutput("selectionStatText"),
+          conditionalPanel(
+            condition = "input.run_analysis",
+            textOutput("selectionStatText")
+          ),
           verbatimTextOutput("modelSelection"),
-          textOutput("selectionPlotText"),
+          conditionalPanel(
+            condition = "input.run_analysis",
+            textOutput("selectionPlotText")
+          ),
           plotOutput("selectionPlot")
         )
       )
