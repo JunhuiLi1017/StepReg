@@ -485,6 +485,10 @@ library(StepReg)
 StepRegShinyApp()
 ```
 
+The user interface of this R shiny App is described below,
+
+![](src/StepReg_shiny_UI_description.png)
+
 # Session info
 
 ```{r sessionInfo, echo = FALSE}
