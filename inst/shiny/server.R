@@ -193,15 +193,18 @@ server <- function(input, output, session) {
   })
   
   # Render the appropriate summary based on the selected type
-  output$summary <- renderPrint({
-    pdf(file = NULL)
-    summary_type = summarytools::dfSummary(dataset())
-    # summary_type <- switch(input$summary_type,
-    #                        "dfSummary" = summarytools::dfSummary(dataset()),
-    #                        "base::summary" = summary(dataset()),
-    #                        "base::str" = str(dataset()),
-    #                        "pastecs::stat.desc" = pastecs::stat.desc(dataset()))
-    summary_type
+  observe({
+    req(dataset())
+    output$summary <- renderPrint({
+      pdf(file = NULL)
+      summary_type = summarytools::dfSummary(dataset())
+      # summary_type <- switch(input$summary_type,
+      #                        "dfSummary" = summarytools::dfSummary(dataset()),
+      #                        "base::summary" = summary(dataset()),
+      #                        "base::str" = str(dataset()),
+      #                        "pastecs::stat.desc" = pastecs::stat.desc(dataset()))
+      summary_type
+    })
   })
   
   observe({
