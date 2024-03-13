@@ -17,6 +17,7 @@
 #' @export
 #' 
 print.StepReg <- function(x,  ...){
+  Sys.setlocale("LC_CTYPE", "en_US.UTF-8")
   for(i in 1:length(x)){
     y <- x[[i]]
     yName <- names(x)[i]
