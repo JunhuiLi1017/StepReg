@@ -113,6 +113,9 @@
 #' 
 #' @import survival
 #' 
+#' @import AER
+#' @import shiny
+#' @import DT
 #' @importFrom gridExtra grid.arrange
 #' @importFrom summarytools dfSummary
 #' @importFrom ggcorrplot ggcorrplot
