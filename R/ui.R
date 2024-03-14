@@ -1,20 +1,20 @@
-require("shiny") || stop("unable to load shiny")
-require("StepReg") || stop("unable to load StepReg")
-if(packageVersion("StepReg") < "1.5.0") {
-  stop("Need to wait until package:StepReg 1.5.0 is installed!")
-}
-require("gridExtra") || stop("unable to load gridExtra")
-require("DT") || stop("unable to load DT")
-require("shinythemes") || stop("unable to load shinythemes")
-require("shinycssloaders") || stop("unable to laod shinycssloaders")
-require("ggplot2") || stop("unable to load ggplot2")
-require("dplyr") || stop("unable to load dplyr")
-require("summarytools") || stop("unable to load summarytools")
-require("ggcorrplot") || stop("unable to load ggcorrplot")
-require("tidyr") || stop("unable to load tidyr")
-require("GGally") || stop("unable to load GGally")
-require("AER") || stop("AER")
-require("shinycssloaders")
+# require("shiny") || stop("unable to load shiny")
+# require("StepReg") || stop("unable to load StepReg")
+# if(packageVersion("StepReg") < "1.5.0") {
+#   stop("Need to wait until package:StepReg 1.5.0 is installed!")
+# }
+# require("gridExtra") || stop("unable to load gridExtra")
+# require("DT") || stop("unable to load DT")
+# require("shinythemes") || stop("unable to load shinythemes")
+# require("shinycssloaders") || stop("unable to laod shinycssloaders")
+# require("ggplot2") || stop("unable to load ggplot2")
+# require("dplyr") || stop("unable to load dplyr")
+# require("summarytools") || stop("unable to load summarytools")
+# require("ggcorrplot") || stop("unable to load ggcorrplot")
+# require("tidyr") || stop("unable to load tidyr")
+# require("GGally") || stop("unable to load GGally")
+# require("AER") || stop("AER")
+# require("shinycssloaders")
 
 js <- "
 $(document).ready(function() {
@@ -361,9 +361,18 @@ ui <- tagList(
               max = 1, 
               value = 0.05)
           ),
-          actionButton("run_analysis", "Run", class = "btn-lg btn-success", icon = icon("chart-line")),
-          tags$hr(),
-          downloadButton("report", "Generate report", icon = icon("download"))
+          tags$div(
+            style = "display: flex; justify-content: space-between;",
+            actionButton("run_analysis", 
+                         "Run", 
+                         icon = icon("chart-line"), 
+                         style = "width: 130px; font-size: 12px;"),
+            downloadButton("report", 
+                           "Download", 
+                           icon = icon("download"),
+                           style = "width: 130px; font-size: 12px;",
+                           disabled = TRUE)
+          )
         ),
         
         mainPanel(

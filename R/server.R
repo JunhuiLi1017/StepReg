@@ -1,23 +1,23 @@
-require("shiny") || stop("unable to load shiny")
-require("StepReg") || stop("unable to load StepReg")
-if(packageVersion("StepReg") < "1.5.0") {
-  stop("Need to wait until package:StepReg 1.5.0 is installed!")
-}
-require("gridExtra") || stop("unable to load gridExtra")
-require("DT") || stop("unable to load DT")
-require("shinythemes") || stop("unable to load shinythemes")
-require("shinycssloaders") || stop("unable to laod shinycssloaders")
-require("ggplot2") || stop("unable to load ggplot2")
-require("dplyr") || stop("unable to load dplyr")
-require("summarytools") || stop("unable to load summarytools")
-require("ggcorrplot") || stop("unable to load ggcorrplot")
-require("tidyr") || stop("unable to load tidyr")
-require("GGally") || stop("unable to load GGally")
-require("AER") || stop("AER")
-require("shinycssloaders")
+# require("shiny") || stop("unable to load shiny")
+# require("StepReg") || stop("unable to load StepReg")
+# if(packageVersion("StepReg") < "1.5.0") {
+#   stop("Need to wait until package:StepReg 1.5.0 is installed!")
+# }
+# require("gridExtra") || stop("unable to load gridExtra")
+# require("DT") || stop("unable to load DT")
+# require("shinythemes") || stop("unable to load shinythemes")
+# require("shinycssloaders") || stop("unable to laod shinycssloaders")
+# require("ggplot2") || stop("unable to load ggplot2")
+# require("dplyr") || stop("unable to load dplyr")
+# require("summarytools") || stop("unable to load summarytools")
+# require("ggcorrplot") || stop("unable to load ggcorrplot")
+# require("tidyr") || stop("unable to load tidyr")
+# require("GGally") || stop("unable to load GGally")
+# require("AER") || stop("AER")
+# require("shinycssloaders")
 
 #source("bin/upload_or_select_dataset.R") #can not select example dataset
-source("bin/plot_data_func.R")
+#source("bin/createPlot.R")
 
 # Define server logic
 server <- function(input, output, session) {
@@ -146,6 +146,7 @@ server <- function(input, output, session) {
     res
   })
   
+  
   output$modelSelection <- renderPrint({
     stepwiseModel()
   })
@@ -198,7 +199,7 @@ server <- function(input, output, session) {
   
   plot_data <- eventReactive(input$make_plot, {
     req(input$plot_type, input$var_plot)
-    plot_type <- plot_data_func(input$plot_type, input$var_plot, dataset())
+    plot_type <- createPlot(input$plot_type, input$var_plot, dataset())
     
     if (input$plot_type == "Pairs plot") {
       plot_type
@@ -219,7 +220,7 @@ server <- function(input, output, session) {
       # case we don't have write permissions to the current working dir (which
       # can happen when deployed).
       tempReport <- file.path(tempdir(), "report.Rmd")
-      file.copy("bin/report.Rmd", tempReport, overwrite = TRUE)
+      file.copy(system.file('shiny/bin/report.Rmd', package='StepReg'), tempReport, overwrite = TRUE)
       
       # Set up parameters to pass to Rmd document
       params <- list(modelSelection = stepwiseModel())

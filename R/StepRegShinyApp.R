@@ -25,6 +25,6 @@
 #' 
 #' @export
 #' 
-StepRegShinyApp <- function() {
-  shiny::runApp(appDir = system.file('shiny', package='StepReg'))
+StepRegShinyApp <- function(ui, server) {
+  runApp(appDir = system.file('R', package='StepReg'))
 }
