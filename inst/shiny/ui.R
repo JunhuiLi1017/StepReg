@@ -217,7 +217,7 @@ ui <- tagList(
               choices = c("AIC", 
                           "AICc",
                           "BIC", 
-                          "Cp",
+                          "CP",
                           "HQ",
                           "IC(1)",
                           "IC(3/2)",
