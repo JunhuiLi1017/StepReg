@@ -148,7 +148,7 @@ ui <- tagList(
       sidebarLayout(
         sidebarPanel(
           # Select type (linear, logit, cox, poisson, or gamma)
-          radioButtons(
+          selectInput(
             "type",
             "Regression type:",
             choices = c("linear",
@@ -197,20 +197,21 @@ ui <- tagList(
           ),
           
           # Select method (forward, backward, or both)
-          checkboxGroupInput(
+          selectInput(
             "strategy", 
             "Stepwise Strategy:",
             choices = c("forward", 
                         "backward",
                         "bidirection", 
                         "subset"),
-            selected = "bidirection"
+            selected = "bidirection",
+            multiple = TRUE
           ),
           
           # Select metric
           conditionalPanel(
             condition = "input.type === 'linear' && input.dependent_linear.length == 1",
-            checkboxGroupInput(
+            selectInput(
               "metric_univariate_linear", 
               "Selection Metric:",
               choices = c("AIC", 
@@ -224,26 +225,28 @@ ui <- tagList(
                           "SL",
                           "Rsq",
                           "adjRsq"),
-              selected = "AIC"
+              selected = "AIC",
+              multiple = TRUE
             )
           ),
           
           conditionalPanel(
             condition = "input.type === 'linear' && input.dependent_linear.length > 1",
-            checkboxGroupInput(
+            selectInput(
               "metric_multivariate_linear", 
               "Selection Metric:",
               choices = c("AIC", 
                           "AICc",
                           "HQ",
                           "SL"),
-              selected = "AIC"
+              selected = "AIC",
+              multiple = TRUE
             )
           ),
           
           conditionalPanel(
             condition = "input.type !== 'linear'",
-            checkboxGroupInput(
+            selectInput(
               "metric_glm_cox", 
               "Selection Metric:",
               choices = c("AIC", 
@@ -253,14 +256,15 @@ ui <- tagList(
                           "IC(3/2)",
                           "SBC",
                           "SL"),
-              selected = "AIC"
+              selected = "AIC",
+              multiple = TRUE
             )
           ),
           
           # Display sliderInput for significant level only when SL is selected
           conditionalPanel(
             condition = "input.type === 'linear' && input.metric_multivariate_linear.indexOf('SL') != -1",
-            radioButtons(
+            selectInput(
               "Approx_F", 
               label = "Approx F test statistic:",
               choices = c("Pillai", 
@@ -273,7 +277,7 @@ ui <- tagList(
           
           conditionalPanel(
             condition = "input.type === 'logit' || input.type === 'Gamma' || input.type === 'poisson'",
-            radioButtons(
+            selectInput(
               "glm_test", 
               label = "Test Method",
               choices = c("Rao", 
@@ -284,7 +288,7 @@ ui <- tagList(
           
           conditionalPanel(
             condition = "input.type === 'cox'",
-            radioButtons(
+            selectInput(
               "cox_test", 
               label = "Test Method",
               choices = c('efron',

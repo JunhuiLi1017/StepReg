@@ -11,8 +11,8 @@
 #' significant levels for entry and stay in the stepwise process. Finally, they 
 #' can run the analysis to obtain stepwise regression results and visualize them
 #' through summary outputs and plots.
-#' @import shiny 
 #' @import AER
+#' @rawNamespace import(shiny, except=c(dataTableOutput, renderDataTable))
 #' @importFrom DT dataTableOutput
 #' @importFrom gridExtra grid.arrange
 #' @importFrom summarytools dfSummary
