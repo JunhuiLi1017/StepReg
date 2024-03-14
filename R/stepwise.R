@@ -112,26 +112,10 @@
 #' @keywords stepwise regression
 #' 
 #' @import survival
-#' 
-#' @import AER
-#' @import shiny
-#' @import DT
-#' @importFrom gridExtra grid.arrange
-#' @importFrom summarytools dfSummary
-#' @importFrom ggcorrplot ggcorrplot
-#' @importFrom tidyr gather
-#' @importFrom GGally ggpairs
-#' @importFrom rmarkdown render
-#' @importFrom shinythemes shinytheme
-#' 
 #' @importFrom stringr str_replace
-#' 
 #' @importFrom utils combn
-#' 
-#' @importFrom dplyr `%>%` mutate_if mutate
-#' 
+#' @importFrom dplyr %>% mutate_if mutate
 #' @importFrom rlang arg_match
-#' 
 #' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms deviance df.residual formula model.frame
 #' 
 #' @param num_digits (numeric(integer)) The number of digits to keep when rounding the results. Default is 6.

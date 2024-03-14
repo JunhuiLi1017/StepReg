@@ -1,0 +1,10 @@
+name: shiny
+title:
+username: hukai916
+account: hukai916
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11482845
+bundleId: 8371882
+url: https://hukai916.shinyapps.io/shiny/
+version: 1

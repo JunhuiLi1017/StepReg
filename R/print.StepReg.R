@@ -12,7 +12,7 @@
 #' 
 #' @importFrom stringr str_pad
 #' 
-#' @importFrom dplyr `%>%` mutate_if
+#' @importFrom dplyr %>% mutate_if
 #' 
 #' @export
 #' 

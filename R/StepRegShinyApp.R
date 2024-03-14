@@ -11,6 +11,17 @@
 #' significant levels for entry and stay in the stepwise process. Finally, they 
 #' can run the analysis to obtain stepwise regression results and visualize them
 #' through summary outputs and plots.
+#' @import shiny 
+#' @import AER
+#' @importFrom DT dataTableOutput
+#' @importFrom gridExtra grid.arrange
+#' @importFrom summarytools dfSummary
+#' @importFrom ggcorrplot ggcorrplot
+#' @importFrom tidyr gather
+#' @importFrom GGally ggpairs
+#' @importFrom rmarkdown render
+#' @importFrom shinythemes shinytheme
+#' @importFrom shinycssloaders withSpinner
 #' 
 #' @export
 #' 

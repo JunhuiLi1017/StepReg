@@ -1,26 +1,20 @@
-# importFrom gridExtra grid.arrange
-# importFrom dplyr %>% mutate
-# importFrom summarytools dfSummary
-# importFrom ggcorrplot ggcorrplot
-# importFrom tidyr %>% 
-# importFrom GGally ggpairs
-
-require("shiny") || stop("unable to load shiny")
-require("StepReg") || stop("unable to load StepReg")
-if(packageVersion("StepReg") < "1.5.0") {
-  stop("Need to wait until package:StepReg 1.5.0 is installed!")
-}
-require("gridExtra") || stop("unable to load gridExtra")
-require("DT") || stop("unable to load DT")
-require("shinythemes") || stop("unable to load shinythemes")
-require("ggplot2") || stop("unable to load ggplot2")
-require("dplyr") || stop("unable to load dplyr")
-require("summarytools") || stop("unable to load summarytools")
-require("ggcorrplot") || stop("unable to load ggcorrplot")
-require("tidyr") || stop("unable to load tidyr")
-require("GGally") || stop("unable to load GGally")
-#require("shinyjs") || stop("unable to load shinyjs")
-require("AER") || stop("AER")
+# require("shiny") || stop("unable to load shiny")
+# require("StepReg") || stop("unable to load StepReg")
+# if(packageVersion("StepReg") < "1.5.0") {
+#   stop("Need to wait until package:StepReg 1.5.0 is installed!")
+# }
+# require("gridExtra") || stop("unable to load gridExtra")
+# require("DT") || stop("unable to load DT")
+# require("shinythemes") || stop("unable to load shinythemes")
+# require("shinycssloaders") || stop("unable to laod shinycssloaders")
+# require("ggplot2") || stop("unable to load ggplot2")
+# require("dplyr") || stop("unable to load dplyr")
+# require("summarytools") || stop("unable to load summarytools")
+# require("ggcorrplot") || stop("unable to load ggcorrplot")
+# require("tidyr") || stop("unable to load tidyr")
+# require("GGally") || stop("unable to load GGally")
+# #require("shinyjs") || stop("unable to load shinyjs")
+# require("AER") || stop("AER")
 
 #source("bin/upload_or_select_dataset.R") #can not select example dataset
 source("bin/plot_data_func.R")
@@ -52,11 +46,14 @@ server <- function(input, output, session) {
   observeEvent(c(input$upload_file,input$header,input$sep,input$quote), {
     req(input$upload_file)
     # Read the uploaded file
-    df <- read.table(input$upload_file$datapath,
-                     header = input$header,
-                     sep = input$sep,
-                     quote = input$quote)
-    
+    tryCatch(df <- read.table(input$upload_file$datapath,
+                              header = input$header,
+                              sep = input$sep,
+                              quote = input$quote),
+             error = function(e) {
+               warning("An error occurred uploading dataset:", e$message)
+               return(NULL)
+             })
     dataset(df)
   })
   
@@ -150,29 +147,13 @@ server <- function(input, output, session) {
   })
   
   output$modelSelection <- renderPrint({
-    withProgress(
-      message = 'Selecting Variables', 
-      value = 0, 
-      {
-        # Perform the stepwise model selection
-        stepwiseResult <- stepwiseModel()
-        incProgress(1/2)
-        stepwiseResult
-      }
-    )
+    stepwiseModel()
   })
   
   output$selectionPlot <- renderPlot({
-    withProgress(
-      message = 'Visualizing', 
-      value = 0, 
-      {
-        # Perform the stepwise model selection
-        plotList <- plot(stepwiseModel())
-        grid.arrange(grobs = plotList)
-        incProgress(1/2)
-      }
-    )
+    # Perform the stepwise model selection
+    plotList <- plot(stepwiseModel())
+    grid.arrange(grobs = plotList)
   })
   
   output$selectionPlotText <- renderText({
@@ -196,6 +177,7 @@ server <- function(input, output, session) {
   observe({
     req(dataset())
     output$summary <- renderPrint({
+      Sys.sleep(2)
       pdf(file = NULL)
       summary_type = summarytools::dfSummary(dataset())
       # summary_type <- switch(input$summary_type,
@@ -205,6 +187,8 @@ server <- function(input, output, session) {
       #                        "pastecs::stat.desc" = pastecs::stat.desc(dataset()))
       summary_type
     })
+    
+    
   })
   
   observe({
@@ -214,21 +198,13 @@ server <- function(input, output, session) {
   
   plot_data <- eventReactive(input$make_plot, {
     req(input$plot_type, input$var_plot)
+    plot_type <- plot_data_func(input$plot_type, input$var_plot, dataset())
     
-    withProgress(
-      message = 'Plots in progress', 
-      value = 0, 
-      {
-        plot_type <- plot_data_func(input$plot_type, input$var_plot, dataset())
-        incProgress(1/2)
-        
-        if (input$plot_type == "Pairs plot") {
-          plot_type
-        } else {
-          grid.arrange(grobs = plot_type)
-        }
-      }
-    )
+    if (input$plot_type == "Pairs plot") {
+      plot_type
+    } else {
+      grid.arrange(grobs = plot_type)
+    }
   })
   
   output$Plot <- renderPlot({

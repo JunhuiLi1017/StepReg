@@ -35,7 +35,6 @@ Imports:
     xlsx,
     shiny,
     gridExtra,
-    DT,
     rlang,
     GGally,
     ggcorrplot,
@@ -43,7 +42,9 @@ Imports:
     summarytools,
     shinythemes,
     rmarkdown,
-    AER
+    DT,
+    AER,
+    shinycssloaders
 Encoding: UTF-8
 RoxygenNote: 7.3.1
 NeedsCompilation: no

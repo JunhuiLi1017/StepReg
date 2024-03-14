@@ -1,26 +1,20 @@
-# importFrom gridExtra grid.arrange
-# importFrom dplyr %>% mutate
-# importFrom summarytools dfSummary
-# importFrom ggcorrplot ggcorrplot
-# importFrom tidyr %>% 
-# importFrom GGally ggpairs
-
-require("shiny") || stop("unable to load shiny")
-require("StepReg") || stop("unable to load StepReg")
-if(packageVersion("StepReg") < "1.5.0") {
-  stop("Need to wait until package:StepReg 1.5.0 is installed!")
-}
-require("gridExtra") || stop("unable to load gridExtra")
-require("DT") || stop("unable to load DT")
-require("shinythemes") || stop("unable to load shinythemes")
-require("ggplot2") || stop("unable to load ggplot2")
-require("dplyr") || stop("unable to load dplyr")
-require("summarytools") || stop("unable to load summarytools")
-require("ggcorrplot") || stop("unable to load ggcorrplot")
-require("tidyr") || stop("unable to load tidyr")
-require("GGally") || stop("unable to load GGally")
-#require("shinyjs") || stop("unable to load shinyjs")
-require("AER") || stop("AER")
+# require("shiny") || stop("unable to load shiny")
+# require("StepReg") || stop("unable to load StepReg")
+# if(packageVersion("StepReg") < "1.5.0") {
+#   stop("Need to wait until package:StepReg 1.5.0 is installed!")
+# }
+# require("gridExtra") || stop("unable to load gridExtra")
+# require("DT") || stop("unable to load DT")
+# require("shinythemes") || stop("unable to load shinythemes")
+# require("shinycssloaders") || stop("unable to load shinycssloaders")
+# require("ggplot2") || stop("unable to load ggplot2")
+# require("dplyr") || stop("unable to load dplyr")
+# require("summarytools") || stop("unable to load summarytools")
+# require("ggcorrplot") || stop("unable to load ggcorrplot")
+# require("tidyr") || stop("unable to load tidyr")
+# require("GGally") || stop("unable to load GGally")
+# #require("shinyjs") || stop("unable to load shinyjs")
+# require("AER") || stop("AER")
 
 js <- "
 $(document).ready(function() {
@@ -40,16 +34,7 @@ ui <- tagList(
     tabPanel(
       
       title = "File", 
-      
-      # p("On this page, you can conduct exploratory data analysis. In the dataset 
-      #   panel, you have the option to explore either an example dataset or upload 
-      #   your own dataset. In the main panel, you can delve into the data itself, 
-      #   examine summary statistics and descriptive analysis, and visualize the 
-      #   dataset using a variety of plots."),
-      
-      # add title
-      #titlePanel("Dataset"),
-      
+  
       # Sidebar layout with input and output definitions ----
       sidebarLayout(
         
@@ -112,30 +97,11 @@ ui <- tagList(
             tabPanel(
               "Data",
               div(style = "width: 100%;",
-                  DT::dataTableOutput('tbl', width = 750))
-            ),# Data dalam tabel
-            
-            #tabPanel("stat.desc()", dataTableOutput("summaryText")),
-            
+                  withSpinner(DT::dataTableOutput('tbl', width = 750)))
+            ), # Data dalam tabel
             tabPanel(
               "Summary",
-              verbatimTextOutput("summary")
-              # fluidPage(
-              #   sidebarLayout(
-              #     sidebarPanel(
-              #       selectInput(
-              #         "summary_type",
-              #         "select type of summary:",
-              #         choices = c("dfSummary",
-              #                     "base::summary",
-              #                     "base::str",
-              #                     "pastecs::stat.desc"),
-              #         selected = "dfSummary"
-              #       ),
-              #     ),
-              #     verbatimTextOutput("str")
-              #   )
-              # )
+              withSpinner(verbatimTextOutput("summary"))
             ),
             tabPanel(
               title = "Plot",
@@ -163,7 +129,7 @@ ui <- tagList(
                     actionButton("make_plot", "Make plot")
                   ),
                   mainPanel(
-                    plotOutput("Plot")
+                    withSpinner(plotOutput("Plot"))
                   )
                 )
               )
@@ -173,7 +139,7 @@ ui <- tagList(
       )
     ),
     tabPanel(
-      "Analysis",
+      "Analyze",
       # p("To perform stepwise regression, you need to first specify the type of 
       #   stepwise procedure, which involves determining the dependent variables by 
       #   defining the scope of both dependent and independent variables. Next, 
@@ -391,7 +357,7 @@ ui <- tagList(
               max = 1, 
               value = 0.05)
           ),
-          actionButton("run_analysis", "Run Analysis", class = "btn-lg btn-success", icon = icon("chart-line")),
+          actionButton("run_analysis", "Run", class = "btn-lg btn-success", icon = icon("chart-line")),
           tags$hr(),
           downloadButton("report", "Generate report", icon = icon("download"))
         ),
@@ -399,14 +365,14 @@ ui <- tagList(
         mainPanel(
           conditionalPanel(
             condition = "input.run_analysis",
-            textOutput("selectionStatText")
-          ),
-          verbatimTextOutput("modelSelection"),
-          conditionalPanel(
-            condition = "input.run_analysis",
             textOutput("selectionPlotText")
           ),
-          plotOutput("selectionPlot")
+          withSpinner(plotOutput("selectionPlot")),
+          conditionalPanel(
+            condition = "input.run_analysis",
+            textOutput("selectionStatText")
+          ),
+          withSpinner(verbatimTextOutput("modelSelection"))
         )
       )
     ),
