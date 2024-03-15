@@ -9,6 +9,7 @@ $(document).ready(function() {
 "
 
 ui <- tagList(
+  useShinyjs(),
   tags$script(HTML(js)),
   navbarPage(
     title = tags$a(href = "https://cran.r-project.org/web/packages/StepReg/index.html", "StepReg"),

@@ -73,8 +73,9 @@ server <- function(input, output, session) {
   
   # Perform stepwise regression based on uploaded dataset
   stepwiseModel <- eventReactive(input$run_analysis, {
+    message("disable")
+    disable("report")
     req(dataset())
-    
     if (input$intercept == TRUE) {
       intercept <- 1
     } else {
@@ -127,19 +128,16 @@ server <- function(input, output, session) {
     res
   })
   
-  
   output$modelSelection <- renderPrint({
     stepwiseModel()
   })
-  
   output$selectionPlot <- renderPlot({
     # Perform the stepwise model selection
     plotList <- plot(stepwiseModel())
     grid.arrange(grobs = plotList)
   })
-  
   output$selectionPlotText <- renderText({
-    "<b>Visualization of Variable Selection:</b>"
+    "Visualization of Variable Selection:"
   })
   output$selectionStatText <- renderText({
     "Statistics of Variable Selection:"
@@ -150,23 +148,14 @@ server <- function(input, output, session) {
     req(dataset())
     DT::datatable(dataset(), options = list(scrollX = TRUE))
   })
-  
+
   # Render the appropriate summary based on the selected type
   observe({
     req(dataset())
     output$summary <- renderPrint({
-      Sys.sleep(2)
       pdf(file = NULL)
-      summary_type = summarytools::dfSummary(dataset())
-      # summary_type <- switch(input$summary_type,
-      #                        "dfSummary" = summarytools::dfSummary(dataset()),
-      #                        "base::summary" = summary(dataset()),
-      #                        "base::str" = str(dataset()),
-      #                        "pastecs::stat.desc" = pastecs::stat.desc(dataset()))
-      summary_type
+      summarytools::dfSummary(dataset())
     })
-    
-    
   })
   
   observe({
@@ -197,7 +186,7 @@ server <- function(input, output, session) {
       # case we don't have write permissions to the current working dir (which
       # can happen when deployed).
       tempReport <- file.path(tempdir(), "report.Rmd")
-      file.copy(system.file('report.Rmd', package='StepReg'), tempReport, overwrite = TRUE)
+      file.copy(system.file('shiny/report.Rmd', package='StepReg'), tempReport, overwrite = TRUE)
       
       # Set up parameters to pass to Rmd document
       params <- list(modelSelection = stepwiseModel())

@@ -15,6 +15,7 @@
 ## update import here and require in utils simutaniously
 #' @import AER
 #' @rawNamespace import(shiny, except=c(dataTableOutput, renderDataTable))
+#' @importFrom shinyjs disable enable
 #' @importFrom DT dataTableOutput datatable renderDataTable
 #' @importFrom gridExtra grid.arrange
 #' @importFrom summarytools dfSummary
