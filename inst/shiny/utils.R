@@ -1,6 +1,24 @@
-# Define the plot_data_func function
 
-plot_data_func <- function(plot_type_value, var_plot_value, data_value) {
+require("shiny") || stop("unable to load shiny")
+require("StepReg") || stop("unable to load StepReg")
+if(packageVersion("StepReg") < "1.5.0") {
+  stop("Need to wait until package:StepReg 1.5.0 is installed!")
+}
+require("gridExtra") || stop("unable to load gridExtra")
+require("DT") || stop("unable to load DT")
+require("shinythemes") || stop("unable to load shinythemes")
+require("shinycssloaders") || stop("unable to laod shinycssloaders")
+require("ggplot2") || stop("unable to load ggplot2")
+require("dplyr") || stop("unable to load dplyr")
+require("summarytools") || stop("unable to load summarytools")
+require("ggcorrplot") || stop("unable to load ggcorrplot")
+require("tidyr") || stop("unable to load tidyr")
+require("GGally") || stop("unable to load GGally")
+require("AER") || stop("AER")
+require("shinycssloaders")
+
+
+createPlot <- function(plot_type_value, var_plot_value, data_value) {
   plot_type <- switch(
     plot_type_value,
     "Bar plot" = {
@@ -90,3 +108,30 @@ plot_data_func <- function(plot_type_value, var_plot_value, data_value) {
   )
   return(plot_type)
 }
+
+# prepData <- function(example_dataset, upload_file, header_value, sep_value, quote_value){
+#   if (example_dataset != " ") {
+#     # Read the selected example dataset
+#     data(CreditCard, package = 'AER')
+#     data(remission,package="StepReg")
+#     survival::lung %>%
+#       mutate(sex = factor(sex, levels = c(1,2))) %>% # make sex as factor
+#       mutate(status = ifelse(status == 1, 0, 1)) %>% # recode status: 0 means cencored, 1 means dead
+#       na.omit() -> lung# get rid of incomplete records
+#     
+#     
+#     df <- switch(example_dataset,
+#                  "base::mtcars" = mtcars,
+#                  "StepReg::remission" = remission,
+#                  "survival::lung" = lung,
+#                  "AER::CreditCard" = CreditCard)
+#   }
+#   if (!is.null(upload_file)) {
+#     # Read the uploaded file
+#     df <- read.table(upload_file$datapath,
+#                      header = header_value,
+#                      sep = sep_value,
+#                      quote = quote_value)
+#   }
+#   return(df)
+# }

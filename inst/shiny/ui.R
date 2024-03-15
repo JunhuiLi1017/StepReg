@@ -1,20 +1,4 @@
-# require("shiny") || stop("unable to load shiny")
-# require("StepReg") || stop("unable to load StepReg")
-# if(packageVersion("StepReg") < "1.5.0") {
-#   stop("Need to wait until package:StepReg 1.5.0 is installed!")
-# }
-# require("gridExtra") || stop("unable to load gridExtra")
-# require("DT") || stop("unable to load DT")
-# require("shinythemes") || stop("unable to load shinythemes")
-# require("shinycssloaders") || stop("unable to laod shinycssloaders")
-# require("ggplot2") || stop("unable to load ggplot2")
-# require("dplyr") || stop("unable to load dplyr")
-# require("summarytools") || stop("unable to load summarytools")
-# require("ggcorrplot") || stop("unable to load ggcorrplot")
-# require("tidyr") || stop("unable to load tidyr")
-# require("GGally") || stop("unable to load GGally")
-# require("AER") || stop("AER")
-# require("shinycssloaders")
+source("utils.R")
 
 js <- "
 $(document).ready(function() {
@@ -97,7 +81,8 @@ ui <- tagList(
             tabPanel(
               "Data",
               div(style = "width: 100%;",
-                  withSpinner(DT::dataTableOutput('tbl', width = 750)))
+                  withSpinner(DT::dataTableOutput('tbl', width = 750))
+                  )
             ), # Data dalam tabel
             tabPanel(
               "Summary",

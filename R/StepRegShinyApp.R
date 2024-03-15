@@ -11,9 +11,11 @@
 #' significant levels for entry and stay in the stepwise process. Finally, they 
 #' can run the analysis to obtain stepwise regression results and visualize them
 #' through summary outputs and plots.
+#' 
+## update import here and require in utils simutaniously
 #' @import AER
 #' @rawNamespace import(shiny, except=c(dataTableOutput, renderDataTable))
-#' @importFrom DT dataTableOutput
+#' @importFrom DT dataTableOutput datatable renderDataTable
 #' @importFrom gridExtra grid.arrange
 #' @importFrom summarytools dfSummary
 #' @importFrom ggcorrplot ggcorrplot
@@ -22,9 +24,12 @@
 #' @importFrom rmarkdown render
 #' @importFrom shinythemes shinytheme
 #' @importFrom shinycssloaders withSpinner
-#' 
+#' @importFrom grDevices pdf
+#' @importFrom stats as.formula cor na.omit
+#' @importFrom utils data read.table
+#' @importFrom dplyr select all_of
 #' @export
 #' 
-StepRegShinyApp <- function(ui, server) {
-  runApp(appDir = system.file('R', package='StepReg'))
+StepRegShinyApp <- function() {
+  runApp(appDir = system.file('shiny', package='StepReg'))
 }
