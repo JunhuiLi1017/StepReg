@@ -70,11 +70,45 @@ server <- function(input, output, session) {
       updateSelectInput(session, "include", choices = input$independent)
     })
   })
+
+  run_analysis_enabled <- reactive({
+    !is.null(input$type) && input$type != "" &&
+      (
+        (!is.null(input$dependent_linear) && input$dependent_linear != "") ||
+          (!is.null(input$dependent_glm) && input$dependent_glm != "") ||
+          (!is.null(input$status) && input$status != "" && !is.null(input$time) && input$time != "")
+      ) &&
+      !is.null(input$independent) && input$independent != "" &&
+      !is.null(input$strategy) && input$strategy != "" &&
+      (
+        (
+          !is.null(input$metric_univariate_linear) && input$metric_univariate_linear != ""
+        ) ||
+          (
+            !is.null(input$metric_multivariate_linear) && input$metric_multivariate_linear != ""
+          ) ||
+          (
+            !is.null(input$metric_glm_cox) && input$metric_glm_cox != ""
+          )
+      )
+  })
+  
+  observe({
+    if (run_analysis_enabled()) {
+      shinyjs::enable("run_analysis")
+    } else {
+      shinyjs::disable("run_analysis")
+    }
+  })
+  
+  shinyjs::disable("download")
+  observeEvent(input$run_analysis,{
+    shinyjs::enable("download")
+  })
+  
   
   # Perform stepwise regression based on uploaded dataset
   stepwiseModel <- eventReactive(input$run_analysis, {
-    message("disable")
-    disable("report")
     req(dataset())
     if (input$intercept == TRUE) {
       intercept <- 1
@@ -136,11 +170,11 @@ server <- function(input, output, session) {
     plotList <- plot(stepwiseModel())
     grid.arrange(grobs = plotList)
   })
-  output$selectionPlotText <- renderText({
-    "Visualization of Variable Selection:"
+  output$selectionPlotText <- renderUI({
+    HTML("<b>Visualization of Variable Selection:</b>")
   })
   output$selectionStatText <- renderText({
-    "Statistics of Variable Selection:"
+    HTML("<b>Statistics of Variable Selection:</b>")
   })
   
   # Output Data
@@ -151,8 +185,8 @@ server <- function(input, output, session) {
 
   # Render the appropriate summary based on the selected type
   observe({
-    req(dataset())
     output$summary <- renderPrint({
+      req(dataset())
       pdf(file = NULL)
       summarytools::dfSummary(dataset())
     })
@@ -178,7 +212,7 @@ server <- function(input, output, session) {
     plot_data()
   })
   
-  output$report <- downloadHandler(
+  output$download <- downloadHandler(
     # For PDF output, change this to "report.pdf"
     filename = paste0("StepReg_report_",format(Sys.time(), "%Y%m%d%H%M%S"),".html"),
     content = function(file) {

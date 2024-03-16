@@ -142,36 +142,38 @@ ui <- tagList(
                         "cox",
                         "poisson",
                         "Gamma"),
-            selected = "linear"
+            selected = ""
           ),
           # Select dependent variable
           conditionalPanel(
             condition = "input.type === 'cox'",
-            selectInput("status", "Status variable:", choices = NULL),
-            selectInput("time", "Time Variable:", choices = NULL)
+            selectInput("status", "Status variable:", choices = NULL, selected = NULL),
+            selectInput("time", "Time Variable:", choices = NULL, selected = NULL)
           ),
           
           conditionalPanel(
             condition = "input.type === 'linear'",
-            selectInput("dependent_linear", "Dependent variable:", choices = NULL, multiple = TRUE)
+            selectInput("dependent_linear", "Dependent variable:", choices = NULL, multiple = TRUE, selected = NULL)
           ),
           
           conditionalPanel(
             condition = "input.type === 'logit' || input.type === 'poisson' || input.type === 'Gamma'",
-            selectInput("dependent_glm", "Dependent variable:", choices = NULL)
+            selectInput("dependent_glm", "Dependent variable:", choices = NULL, selected = NULL)
           ),
           
           selectInput(
             "independent",
             "Independent Variables:",
             choices = NULL,
-            multiple = TRUE
+            multiple = TRUE,
+            selected = NULL
           ),
           selectInput(
             "include", 
             "Include Variables:",
             choices = NULL,
-            multiple = TRUE
+            multiple = TRUE,
+            selected = NULL
           ),
           conditionalPanel(
             condition = "input.type !== 'cox'",
@@ -190,7 +192,7 @@ ui <- tagList(
                         "backward",
                         "bidirection", 
                         "subset"),
-            selected = "bidirection",
+            selected = NULL,
             multiple = TRUE
           ),
           
@@ -211,7 +213,7 @@ ui <- tagList(
                           "SL",
                           "Rsq",
                           "adjRsq"),
-              selected = "AIC",
+              selected = NULL,
               multiple = TRUE
             )
           ),
@@ -225,7 +227,7 @@ ui <- tagList(
                           "AICc",
                           "HQ",
                           "SL"),
-              selected = "AIC",
+              selected = NULL,
               multiple = TRUE
             )
           ),
@@ -242,7 +244,7 @@ ui <- tagList(
                           "IC(3/2)",
                           "SBC",
                           "SL"),
-              selected = "AIC",
+              selected = NULL,
               multiple = TRUE
             )
           ),
@@ -353,23 +355,22 @@ ui <- tagList(
                          "Run", 
                          icon = icon("chart-line"), 
                          style = "width: 130px; font-size: 12px;"),
-            downloadButton("report", 
+            downloadButton("download", 
                            "Download", 
                            icon = icon("download"),
-                           style = "width: 130px; font-size: 12px;",
-                           disabled = TRUE)
+                           style = "width: 130px; font-size: 12px;")
           )
         ),
         
         mainPanel(
           conditionalPanel(
             condition = "input.run_analysis",
-            textOutput("selectionPlotText")
+            htmlOutput("selectionPlotText")
           ),
           withSpinner(plotOutput("selectionPlot")),
           conditionalPanel(
             condition = "input.run_analysis",
-            textOutput("selectionStatText")
+            htmlOutput("selectionStatText")
           ),
           withSpinner(verbatimTextOutput("modelSelection"))
         )
