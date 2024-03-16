@@ -38,8 +38,7 @@ createPlot <- function(plot_type_value, var_plot_value, data_value) {
           ggplot(aes(y = .data[[var]])) +
           geom_boxplot() +
           labs(title = paste("Box Plot of", var), x = var) + 
-          scale_y_continuous(labels = NULL)
-      })
+          scale_y_continuous(labels = NULL)})
     },
     "Correlation plot" = {
       # Create a Correlation plot for each selected variable

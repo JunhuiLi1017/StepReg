@@ -27,14 +27,15 @@ server <- function(input, output, session) {
   observeEvent(c(input$upload_file,input$header,input$sep,input$quote), {
     req(input$upload_file)
     # Read the uploaded file
-    tryCatch(df <- read.table(input$upload_file$datapath,
-                              header = input$header,
-                              sep = input$sep,
-                              quote = input$quote),
-             error = function(e) {
-               warning("An error occurred uploading dataset:", e$message)
-               return(NULL)
-             })
+    tryCatch(
+      df <- read.table(input$upload_file$datapath,
+                       header = input$header,
+                       sep = input$sep,
+                       quote = input$quote),
+      error = function(e) {
+        warning("An error occurred uploading dataset:", e$message)
+        return(NULL)
+      })
     dataset(df)
   })
   
@@ -201,15 +202,27 @@ server <- function(input, output, session) {
     req(input$plot_type, input$var_plot)
     plot_type <- createPlot(input$plot_type, input$var_plot, dataset())
     
-    if (input$plot_type == "Pairs plot") {
-      plot_type
-    } else {
-      grid.arrange(grobs = plot_type)
-    }
+    #tryCatch(
+      if (input$plot_type == "Pairs plot") {
+        plot_type
+      } else {
+        grid.arrange(grobs = plot_type)
+      } #,
+    #   error = function(e) {
+    #     warning("An error occurred making plot:", e$message)
+    #     return(NULL)
+    #     error_message(message)  
+    #   }
+    # )
   })
   
   output$Plot <- renderPlot({
     plot_data()
+  })
+  
+  # Render the error message in the main panel
+  output$error_message <- renderText({
+    error_message()  # Display the stored error message
   })
   
   output$download <- downloadHandler(

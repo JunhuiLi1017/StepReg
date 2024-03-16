@@ -5,6 +5,8 @@ account: junhuiliumass
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 11481026
-bundleId: 8377533
+bundleId: 8378448
 url: https://junhuili1017.shinyapps.io/StepReg/
 version: 1
+asMultiple: FALSE
+asStatic: FALSE
