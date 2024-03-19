@@ -262,7 +262,7 @@ Please choose the regression model that best suits the type of response variable
 
 ## Linear regression with the _mtcars_ dataset
 
-In this section, we'll demonstrate how to perform linear regression analysis using the [mtcars](https://cran.r-project.org/web/packages/explore/vignettes/explore_mtcars.html) dataset, showcasing different scenarios with varying numbers of predictors and dependent variables. We set `type = "linear"` to direct the function to perform linear regression. 
+In this section, we'll demonstrate how to perform linear regression analysis using the [mtcars](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html) dataset, showcasing different scenarios with varying numbers of predictors and dependent variables. We set `type = "linear"` to direct the function to perform linear regression. 
 
 **Description of the `mtcars` dataset**
 
@@ -438,27 +438,27 @@ res6
 plot(res6)
 ```
 
-## Poisson regression with the `CreditCard` dataset
+## Poisson regression with the `creditCard` dataset
 
-In this example, we'll demonstrate how to perform Poisson regression analysis using the [`CreditCard`](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html) dataset.  We set `type = "poisson"` to direct the function to perform Poisson regression.
+In this example, we'll demonstrate how to perform Poisson regression analysis using the [`creditCard`](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html) dataset.  We set `type = "poisson"` to direct the function to perform Poisson regression.
 
-**Descprition of the `CreditCard` dataset**
+**Descprition of the `creditCard` dataset**
 
-The `CreditCard` dataset contains credit history information for a sample of applicants for a specific type of credit card, included in the `r CRANpkg("AER")` package. It encompasses 1319 observations across 12 variables, including "reports", "age", "income", among others. The "reports" variable represents the number of major derogatory reports. For detailed information, refer to `?AER::CreditCard`.
+The `creditCard` dataset contains credit history information for a sample of applicants for a specific type of credit card, included in the `r CRANpkg("AER")` package. It encompasses 1319 observations across 12 variables, including "reports", "age", "income", among others. The "reports" variable represents the number of major derogatory reports. For detailed information, refer to `?AER::CreditCard`.
 
 **Why choose Poisson regression**
 
-Poisson regression is frequently employed method for analyzing count data, where the response variable represents the occurrences of an event within a defined time or space frame. In the context of the `CreditCard` dataset, Poisson regression can model the count of major derogatory reports ("reports"), enabling assessment of predictors' impact on this variable.
+Poisson regression is frequently employed method for analyzing count data, where the response variable represents the occurrences of an event within a defined time or space frame. In the context of the `creditCard` dataset, Poisson regression can model the count of major derogatory reports ("reports"), enabling assessment of predictors' impact on this variable.
 
 ### Example1: using "forward" strategy
 
 In this example, we employ a "forward" strategy with "SL" as the selection criteria. We set the significance level for entry to 0.05 (`sle = 0.05`).
 ```{r, message = FALSE}
-data(CreditCard, package = 'AER')
+data(creditCard)
 
 formula  = reports ~ .
 res7 <- stepwise(formula = formula,
-                 data = CreditCard,
+                 data = creditCard,
                  type = "poisson",
                  strategy = "forward",
                  metric = "SL",

@@ -15,7 +15,6 @@ require("summarytools") || stop("unable to load summarytools")
 require("ggcorrplot") || stop("unable to load ggcorrplot")
 require("tidyr") || stop("unable to load tidyr")
 require("GGally") || stop("unable to load GGally")
-require("AER") || stop("AER")
 require("shinycssloaders")
 
 

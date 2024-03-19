@@ -8,7 +8,7 @@ server <- function(input, output, session) {
   observeEvent(input$example_dataset, {
     req(input$example_dataset)
     # Read the selected example dataset
-    data(CreditCard, package = 'AER')
+    data(creditCard, package = 'StepReg')
     data(remission, package = "StepReg")
     survival::lung %>%
       mutate(sex = factor(sex, levels = c(1, 2))) %>% 
@@ -19,7 +19,7 @@ server <- function(input, output, session) {
                  "base::mtcars" = mtcars,
                  "StepReg::remission" = remission,
                  "survival::lung" = lung,
-                 "AER::CreditCard" = CreditCard)
+                 "StepReg::creditCard" = creditCard)
     
     dataset(df)
   })

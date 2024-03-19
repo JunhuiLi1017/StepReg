@@ -16,13 +16,14 @@ Authors@R: c(
     person("Lihua", "Julie Zhu", , role = c("aut")),
     person("Wenxin", "Liu", , role = c("aut"))
   )
-Date: 2024-01-27
-Description: The package provides functions to perform Stepwise Regression using various algorithms, e.g., Forward Selection, Backward Elimination, and Bidirectional Elimination. It also supports the Best Subset method. Various types of models are supported such as "linear", "logit", "cox", and "poisson" regression. Users can choose from a wide range of selection criteria (stopping criteria) including AIC, AICc, BIC, HQ, and more.
+Date: 2024-03-17
+Description: The stepwise regression analysis is a statistical technique used to identify a subset of predictor variables essential for constructing predictive models. StepReg is a comprehensive tool for stepwise regression analysis by supportting various regression models such as linear, logistic, Cox proportional hazards, Poisson, and gamma regression. It incorporates diverse stepwise regression algorithms like forward selection, backward elimination, and bidirectional elimination alongside the best subset method.  Additionally, it offers a wide range of selection criteria, including Akaike Information Criterion (AIC), AICc (corrected AIC), Bayesian Information Criterion (BIC), Hannan-Quinn Criterion (HQ), among others. StepReg facilitates the concurrent selection of multiple methods and criteria for variable selection. For interactive exploration of datasets, StepReg provides an intuitive R Shiny app, enhancing user experience and facilitating efficient analysis.
 License: MIT + file LICENSE
 VignetteBuilder: knitr
 Suggests: 
     knitr,
     testthat,
+    BiocStyle,
     kableExtra
 Imports:
     dplyr,
@@ -43,7 +44,6 @@ Imports:
     shinythemes,
     rmarkdown,
     DT,
-    AER,
     shinycssloaders,
     shinyjs
 Encoding: UTF-8

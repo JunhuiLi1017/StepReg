@@ -33,7 +33,7 @@ ui <- tagList(
               "base::mtcars", 
               "StepReg::remission", 
               "survival::lung",
-              "AER::CreditCard"),
+              "StepReg::creditCard"),
             selected = NULL
           ),
           # Horizontal line ----

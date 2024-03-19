@@ -347,15 +347,15 @@
         "RemoteRepo": "StepReg",
         "RemoteUsername": "JunhuiLi1017",
         "RemoteRef": "dev",
-        "RemoteSha": "655026405ce8409d1aa639ef341837c1496c981a",
+        "RemoteSha": "83c29970389c5425e671717e6bf909aa9a8eae63",
         "GithubRepo": "StepReg",
         "GithubUsername": "JunhuiLi1017",
         "GithubRef": "dev",
-        "GithubSHA1": "655026405ce8409d1aa639ef341837c1496c981a",
-        "Packaged": "2024-03-16 04:54:22 UTC; lij11",
+        "GithubSHA1": "83c29970389c5425e671717e6bf909aa9a8eae63",
+        "Packaged": "2024-03-16 05:38:42 UTC; lij11",
         "Author": "Junhui Li [cre] (<https://orcid.org/0000-0003-3973-1700>),\n  Junhui Li [aut] (<https://orcid.org/0000-0003-3973-1700>),\n  Kai Hu [aut],\n  Xiaohuan Lu [aut],\n  Kun Cheng [ctb],\n  Sushmita Nayak [ctb],\n  Cesar Bautista Sotelo [ctb],\n  Michael Lodato [ctb],\n  Robert H Brown [ctb],\n  Lihua Julie Zhu [aut],\n  Wenxin Liu [aut]",
         "Maintainer": "Junhui Li <junhui.li11@umassmed.edu>",
-        "Built": "R 4.1.3; ; 2024-03-16 04:54:22 UTC; unix"
+        "Built": "R 4.1.3; ; 2024-03-16 05:38:43 UTC; unix"
       }
     },
     "abind": {
@@ -4592,13 +4592,13 @@
       "checksum": "01c680a8b59c00301c8767e407547397"
     },
     "server.R": {
-      "checksum": "d19073a5e58285532c14eabfa8cfbf42"
+      "checksum": "84520b30e6950d9954f24e528127834e"
     },
     "ui.R": {
       "checksum": "3c8d66e8058b3c178a23230fe9306fb1"
     },
     "utils.R": {
-      "checksum": "7f8ed2fe87d4e03a9af81c3af76e0e6f"
+      "checksum": "0a83e7a8f1375d8668dd32b6e50617e0"
     }
   },
   "users": null
