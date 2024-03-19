@@ -487,7 +487,8 @@ StepRegShinyApp()
 
 The user interface of this R shiny App is described below,
 
-![](src/StepReg_shiny_UI_description.png)
+![](src/StepReg_shiny_UI_description_1.png)
+![](src/StepReg_shiny_UI_description_2.png)
 
 # Session info
 

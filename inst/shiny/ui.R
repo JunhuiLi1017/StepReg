@@ -363,16 +363,24 @@ ui <- tagList(
         ),
         
         mainPanel(
-          conditionalPanel(
-            condition = "input.run_analysis",
-            htmlOutput("selectionPlotText")
-          ),
-          withSpinner(plotOutput("selectionPlot")),
-          conditionalPanel(
-            condition = "input.run_analysis",
-            htmlOutput("selectionStatText")
-          ),
-          withSpinner(verbatimTextOutput("modelSelection"))
+          tabsetPanel(
+            tabPanel(
+              "Statistics",
+              conditionalPanel(
+                condition = "input.run_analysis",
+                htmlOutput("selectionStatText")
+              ),
+              withSpinner(verbatimTextOutput("modelSelection"))
+            ),
+            tabPanel(
+              "Visualization",
+              conditionalPanel(
+                condition = "input.run_analysis",
+                htmlOutput("selectionPlotText")
+              ),
+              withSpinner(plotOutput("selectionPlot"))
+            )
+          )
         )
       )
     ),
