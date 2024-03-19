@@ -3,21 +3,22 @@ title: "StepReg report"
 output: html_document
 params:
   modelSelection: NA
+  selectionPlot: NA
 ---
 
 ```{r include = FALSE}
 knitr::opts_chunk$set(echo=FALSE)
 ```
 
-Statistics of Variable Selection:
+**Statistics of Variable Selection:**
 
 ```{r}
 # The `params` object is available in the document.
 params$modelSelection
 ```
 
-Visualization of Variable Selection:
+**Visualization of Variable Selection:**
 
 ```{r}
-plot(params$modelSelection)
+gridExtra::grid.arrange(grobs = params$selectionPlot)
 ```

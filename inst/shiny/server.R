@@ -166,10 +166,13 @@ server <- function(input, output, session) {
   output$modelSelection <- renderPrint({
     stepwiseModel()
   })
+  
+  stepwisePlot <- reactive({
+    plot(stepwiseModel())
+  })
+  
   output$selectionPlot <- renderPlot({
-    # Perform the stepwise model selection
-    plotList <- plot(stepwiseModel())
-    grid.arrange(grobs = plotList)
+    grid.arrange(grobs = stepwisePlot())
   })
   output$selectionPlotText <- renderUI({
     HTML("<b>Visualization of Variable Selection:</b>")
@@ -202,18 +205,11 @@ server <- function(input, output, session) {
     req(input$plot_type, input$var_plot)
     plot_type <- createPlot(input$plot_type, input$var_plot, dataset())
     
-    #tryCatch(
-      if (input$plot_type == "Pairs plot") {
-        plot_type
-      } else {
-        grid.arrange(grobs = plot_type)
-      } #,
-    #   error = function(e) {
-    #     warning("An error occurred making plot:", e$message)
-    #     return(NULL)
-    #     error_message(message)  
-    #   }
-    # )
+    if (input$plot_type == "Pairs plot") {
+      plot_type
+    } else {
+      grid.arrange(grobs = plot_type)
+    }
   })
   
   output$Plot <- renderPlot({
@@ -227,20 +223,14 @@ server <- function(input, output, session) {
   
   output$download <- downloadHandler(
     # For PDF output, change this to "report.pdf"
-    filename = paste0("StepReg_report_",format(Sys.time(), "%Y%m%d%H%M%S"),".html"),
-    content = function(file) {
-      # Copy the report file to a temporary directory before processing it, in
-      # case we don't have write permissions to the current working dir (which
-      # can happen when deployed).
+    filename <- paste0("StepReg_report_",format(Sys.time(), "%Y%m%d%H%M%S"),".html"),
+    content <- function(file) {
       tempReport <- file.path(tempdir(), "report.Rmd")
       file.copy(system.file('shiny/report.Rmd', package='StepReg'), tempReport, overwrite = TRUE)
       
       # Set up parameters to pass to Rmd document
-      params <- list(modelSelection = stepwiseModel())
+      params <- list(modelSelection = stepwiseModel(), selectionPlot = stepwisePlot())
       
-      # Knit the document, passing in the `params` list, and eval it in a
-      # child of the global environment (this isolates the code in the document
-      # from the code in this app).
       rmarkdown::render(tempReport, output_file = file,
                         params = params,
                         envir = new.env(parent = globalenv())

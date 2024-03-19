@@ -471,11 +471,11 @@ plot(res7)
 
 We have developed an interactive Shiny application to simplify model selection tasks for non-programmers. You can access the app through the following URLs:
 
-1. Rstudio url:
+url1:
 
 https://junhuili1017.shinyapps.io/StepReg/
 
-2. MCCB url:
+url2:
 
 http://172.26.240.36:3838/shiny/StepReg/
 
