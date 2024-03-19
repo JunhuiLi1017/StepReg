@@ -17,43 +17,44 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' data(mtcars)
-#' mtcars$yes <- mtcars$wt
 #' formula <- mpg ~ . + 0
 #' p <- stepwise(formula = formula,
 #'               data = mtcars,
 #'               type = "linear",
-#'               strategy = c("forward","bidirection"),
-#'               metric = c("AIC", "BIC"))
+#'               strategy = c("forward","bidirection","subset"),
+#'               metric = c("AIC", "BIC"),
+#'               best_n = 3)
 #' plot(p)
+#' }
 
-plot.StepReg <- function(x, ...){
+plot.StepReg <- function(x, ...) {
   x1 <- x[which(str_starts(names(x), "Summary of selection process under"))]
   # Combine tables if multiple of them
   plot_list <- list()
-  for(n in class(x)[!class(x) %in% c("StepReg","list")]){
+  #n="forward"
+  for(n in class(x)[!class(x) %in% c("StepReg","list")]) {
     process_table <- x1[which(str_starts(names(x1), paste0("Summary of selection process under ",n)))]
     plot_data <- NULL
-    if ("subset" %in% class(x)){
-      for (i in 1:length(process_table)){
-        for (i in 1:length(process_table)){
-          sub_table <- process_table[[i]]
-          sub_plot_data <- cbind(sub_table, colnames(sub_table)[2])
-          colnames(sub_plot_data) <- c("Step", "IC", "Variable", "Metric")
-          plot_data <- rbind(plot_data, sub_plot_data)
-        }
+    if ("subset" == n) {
+      for (i in 1:length(process_table)) {
+        sub_table <- process_table[[i]]
+        sub_plot_data <- cbind(sub_table, colnames(sub_table)[2])
+        colnames(sub_plot_data) <- c("Step", "IC", "Variable", "Metric")
+        plot_data <- rbind(plot_data, sub_plot_data)
       }
     } else{
-      for (i in 1:length(process_table)){
+      for (i in 1:length(process_table)) {
         sub_table <- process_table[[i]]
         var_plus <- var_minus <- NULL
         var_sym <- rep(NA, nrow(sub_table))
-        if ("Enter_effect" %in% colnames(sub_table)){
+        if ("Enter_effect" %in% colnames(sub_table)) {
           var_plus <- paste0("(+)", sub_table[, colnames(sub_table) %in% "Enter_effect"])
           index_plus <- which(!sub_table[, colnames(sub_table) %in% "Enter_effect"] %in% "")
           var_sym[index_plus] <- var_plus[!var_plus %in% "(+)"]
         }
-        if ("Remove_effect" %in% colnames(sub_table)){
+        if ("Remove_effect" %in% colnames(sub_table)) {
           var_minus <- paste0("(-)", sub_table[, colnames(sub_table) %in% "Remove_effect"])
           index_minus <- which(!sub_table[, colnames(sub_table) %in% "Remove_effect"] %in% "")
           var_sym[index_minus] <- var_minus[!var_minus %in% "(-)"]
@@ -81,7 +82,7 @@ plot.StepReg <- function(x, ...){
       labs(title = paste0("Summary of selection process under ",n)) + 
       theme_minimal()
     
-    if (!"subset" %in% class(x)){ # check if stepwise or best_subset
+    if ("subset" != n) { # check if stepwise or best_subset
       p <- p + 
         geom_line(aes(linetype = .data$Metric,
                       color = .data$Metric)) + 

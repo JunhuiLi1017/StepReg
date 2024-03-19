@@ -18,13 +18,15 @@ line and point plot for summary of selection process.
 plot.StepReg visualizes the variable selection procedure using a StepReg object
 }
 \examples{
+\dontrun{
 data(mtcars)
-mtcars$yes <- mtcars$wt
 formula <- mpg ~ . + 0
 p <- stepwise(formula = formula,
               data = mtcars,
               type = "linear",
-              strategy = c("forward","bidirection"),
-              metric = c("AIC", "BIC"))
+              strategy = c("forward","bidirection","subset"),
+              metric = c("AIC", "BIC"),
+              best_n = 3)
 plot(p)
+}
 }
