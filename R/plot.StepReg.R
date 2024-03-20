@@ -12,6 +12,8 @@
 #' 
 #' @importFrom stringr str_starts
 #' 
+#' @importFrom cowplot plot_grid
+#' 
 #' @importFrom ggrepel geom_label_repel
 #' 
 #' @export
@@ -81,5 +83,6 @@ plot.StepReg <- function(x, ...) {
     }
     plot_list[n] <- list(p)
   }
-  grid.arrange(grobs = plot_list, ncol = 1)
+  combined_plot <- plot_grid(plotlist = plot_list, ncol = 1)
+  print(combined_plot)
 }

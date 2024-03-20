@@ -8,11 +8,12 @@ params:
 
 ```{r include = FALSE}
 knitr::opts_chunk$set(echo=FALSE)
+library(ggplot2)
 ```
 
 **Statistics of Variable Selection:**
 
-```{r}
+```{r comment = NA}
 # The `params` object is available in the document.
 params$modelSelection
 ```

@@ -35,7 +35,7 @@ Imports:
     flextable,
     xlsx,
     shiny,
-    gridExtra,
+    cowplot,
     rlang,
     GGally,
     ggcorrplot,

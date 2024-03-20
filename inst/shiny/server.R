@@ -173,7 +173,6 @@ server <- function(input, output, session) {
   
   output$selectionPlot <- renderPlot({
     stepwisePlot()
-    #grid.arrange(grobs = stepwisePlot())
   })
   output$selectionPlotText <- renderUI({
     HTML("<b>Visualization of Variable Selection:</b>")
@@ -209,7 +208,8 @@ server <- function(input, output, session) {
     if (input$plot_type == "Pairs plot") {
       plot_type
     } else {
-      grid.arrange(grobs = plot_type)
+      #grid.arrange(grobs = plot_type)
+      print(plot_grid(plotlist = plot_type))
     }
   })
   
@@ -224,11 +224,10 @@ server <- function(input, output, session) {
   
   output$download <- downloadHandler(
     # For PDF output, change this to "report.pdf"
-    filename <- paste0("StepReg_report_",format(Sys.time(), "%Y%m%d%H%M%S"),".html"),
-    content <- function(file) {
+    filename = paste0("StepReg_report_",format(Sys.time(), "%Y%m%d%H%M%S"),".html"),
+    content = function(file) {
       tempReport <- file.path(tempdir(), "report.Rmd")
       file.copy(system.file('shiny/report.Rmd', package='StepReg'), tempReport, overwrite = TRUE)
-      
       # Set up parameters to pass to Rmd document
       params <- list(modelSelection = stepwiseModel(), selectionPlot = stepwisePlot())
       

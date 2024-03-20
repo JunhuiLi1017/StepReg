@@ -16,7 +16,7 @@
 #' @rawNamespace import(shiny, except=c(dataTableOutput, renderDataTable))
 #' @importFrom shinyjs disable enable
 #' @importFrom DT dataTableOutput datatable renderDataTable
-#' @importFrom gridExtra grid.arrange
+#' @importFrom cowplot plot_grid
 #' @importFrom summarytools dfSummary
 #' @importFrom ggcorrplot ggcorrplot
 #' @importFrom tidyr gather
