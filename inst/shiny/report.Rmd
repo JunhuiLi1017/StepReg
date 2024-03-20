@@ -20,5 +20,5 @@ params$modelSelection
 **Visualization of Variable Selection:**
 
 ```{r}
-gridExtra::grid.arrange(grobs = params$selectionPlot)
+params$selectionPlot
 ```

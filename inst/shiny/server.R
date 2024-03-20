@@ -172,7 +172,8 @@ server <- function(input, output, session) {
   })
   
   output$selectionPlot <- renderPlot({
-    grid.arrange(grobs = stepwisePlot())
+    stepwisePlot()
+    #grid.arrange(grobs = stepwisePlot())
   })
   output$selectionPlotText <- renderUI({
     HTML("<b>Visualization of Variable Selection:</b>")

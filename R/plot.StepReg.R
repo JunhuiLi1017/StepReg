@@ -30,43 +30,35 @@
 #' }
 
 plot.StepReg <- function(x, ...) {
-  x1 <- x[which(str_starts(names(x), "Summary of selection process under"))]
-  # Combine tables if multiple of them
+  process_list <- x[which(str_starts(names(x), "Summary of selection process under"))]
+  strategy_vec <- class(x)[!class(x) %in% c("StepReg","list")]
   plot_list <- list()
-  #n="forward"
-  for(n in class(x)[!class(x) %in% c("StepReg","list")]) {
-    process_table <- x1[which(str_starts(names(x1), paste0("Summary of selection process under ",n)))]
-    plot_data <- NULL
+  #n="subset"
+  for(n in strategy_vec) {
+    process_table <- process_list[which(str_starts(names(process_list), paste0("Summary of selection process under ",n)))]
     if ("subset" == n) {
-      for (i in 1:length(process_table)) {
-        sub_table <- process_table[[i]]
-        sub_plot_data <- cbind(sub_table, colnames(sub_table)[2])
-        colnames(sub_plot_data) <- c("Step", "IC", "Variable", "Metric")
-        plot_data <- rbind(plot_data, sub_plot_data)
-      }
-    } else{
-      for (i in 1:length(process_table)) {
-        sub_table <- process_table[[i]]
-        var_plus <- var_minus <- NULL
-        var_sym <- rep(NA, nrow(sub_table))
-        if ("Enter_effect" %in% colnames(sub_table)) {
-          var_plus <- paste0("(+)", sub_table[, colnames(sub_table) %in% "Enter_effect"])
-          index_plus <- which(!sub_table[, colnames(sub_table) %in% "Enter_effect"] %in% "")
-          var_sym[index_plus] <- var_plus[!var_plus %in% "(+)"]
-        }
-        if ("Remove_effect" %in% colnames(sub_table)) {
-          var_minus <- paste0("(-)", sub_table[, colnames(sub_table) %in% "Remove_effect"])
-          index_minus <- which(!sub_table[, colnames(sub_table) %in% "Remove_effect"] %in% "")
-          var_sym[index_minus] <- var_minus[!var_minus %in% "(-)"]
-        }
-        ic_index <- which(colnames(sub_table) %in% constant_metrics) # constant_metrics in constants.R
-        IC <- sub_table[, c(1, ic_index)]
-        colnames(IC) <- NULL
-        sub_plot_data <- data.frame(IC, var_sym, colnames(sub_table)[ic_index])
-        plot_data <- rbind(plot_data, sub_plot_data)
-      }
+      process_table_reformat <- lapply(process_table, function(df) {
+        df <- cbind(df,colnames(df)[2])
+        colnames(df) <- c("Step", "Metric_value", "Variable", "Metric")
+        return(df)
+      })
+    } else {
+      process_table_reformat <- lapply(process_table, function(df) {
+        df <- cbind(df,colnames(df)[ncol(df)])
+        var_sym <- rep(NA, nrow(df))
+        var_plus <- paste0("(+)", df[, colnames(df) %in% "Enter_effect"])
+        index_plus <- which(!var_plus %in% "(+)")
+        var_minus <- paste0("(-)", df[, colnames(df) %in% "Remove_effect"])
+        index_minus <- which(!var_minus %in% "(-)")
+        var_sym[index_plus] <- var_plus[index_plus]
+        var_sym[index_minus] <- var_minus[index_minus]
+        df <- cbind(df[,c(1,ncol(df)-1,ncol(df))],var_sym)
+        colnames(df) <- c("Step", "Metric_value", "Metric", "Variable")
+        return(df)
+      })
     }
-    colnames(plot_data) <- c("Step", "Metric_value", "Variable", "Metric")
+    names(process_table_reformat) <- NULL
+    plot_data <- do.call(rbind, process_table_reformat)
     plot_data$Step <- as.factor(as.numeric(plot_data$Step))
     plot_data$Metric_value <- as.numeric(plot_data$Metric_value)
     
@@ -83,16 +75,11 @@ plot.StepReg <- function(x, ...) {
       theme_minimal()
     
     if ("subset" != n) { # check if stepwise or best_subset
-      p <- p + 
-        geom_line(aes(linetype = .data$Metric,
-                      color = .data$Metric)) + 
-        xlab("Step")
-      
+      p <- p + geom_line(aes(linetype = .data$Metric, color = .data$Metric)) +  xlab("Step")
     } else{
-      p <- p + 
-        xlab("Variable Number")
+      p <- p + xlab("Variable Number")
     }
     plot_list[n] <- list(p)
   }
-  print(plot_list)
+  grid.arrange(grobs = plot_list, ncol = 1)
 }
