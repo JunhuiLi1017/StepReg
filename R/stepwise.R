@@ -28,7 +28,7 @@
 #' 
 #' @param test_method_cox (character) Test method for cox regression analysis, choose from 'efron', 'breslow', 'exact'. Default is 'efron'.
 #' 
-#' @param best_n (numeric(integer)) The number of models to keep in the final output. Default is Inf, which means that all models will be displayed.
+#' @param best_n (numeric(integer)) The number of models to be retained in the process output. Default is 3, indicating that only the top 3 best models with the same number of variables are displayed. If all models are displayed, set it to Inf.
 #'  
 #' @param num_digits (numeric(integer)) The number of digits to keep when rounding the results. Default is 6.
 #' 
@@ -135,7 +135,7 @@ stepwise <- function(formula,
                      test_method_cox = c("efron", "breslow", "exact"),
                      tolerance = 1e-7,
                      weight = NULL,
-                     best_n = Inf,
+                     best_n = 3,
                      num_digits = 6) {
   ## validate input:
   ## check required parameters

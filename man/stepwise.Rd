@@ -19,7 +19,7 @@ stepwise(
   test_method_cox = c("efron", "breslow", "exact"),
   tolerance = 1e-07,
   weight = NULL,
-  best_n = Inf,
+  best_n = 3,
   num_digits = 6
 )
 }
@@ -50,7 +50,7 @@ stepwise(
 
 \item{weight}{(numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weight reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weight should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is NULL, which means that all weight are set equal.}
 
-\item{best_n}{(numeric(integer)) The number of models to keep in the final output. Default is Inf, which means that all models will be displayed.}
+\item{best_n}{(numeric(integer)) The number of models to be retained in the process output. Default is 3, indicating that only the top 3 best models with the same number of variables are displayed. If all models are displayed, set it to Inf.}
 
 \item{num_digits}{(numeric(integer)) The number of digits to keep when rounding the results. Default is 6.}
 }
