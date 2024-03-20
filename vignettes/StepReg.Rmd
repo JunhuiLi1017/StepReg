@@ -471,15 +471,14 @@ plot(res7)
 
 We have developed an interactive Shiny application to simplify model selection tasks for non-programmers. You can access the app through the following URLs:
 
-url1:
-
 https://junhuili1017.shinyapps.io/StepReg/
 
-url2:
+or
 
 http://172.26.240.36:3838/shiny/StepReg/
 
-Alternatively, you can also access the Shiny app directly from within RStudio:
+Alternatively, you can also access the Shiny app directly with the following code:
+
 ```{r, eval = FALSE}
 library(StepReg)
 StepRegShinyApp()
@@ -487,8 +486,9 @@ StepRegShinyApp()
 
 The user interface of this R shiny App is described below,
 
-![](src/StepReg_shiny_UI_description_1.png)
-![](src/StepReg_shiny_UI_description_2.png)
+![](src/StepReg_shiny_UI_description_raw_1.png)
+
+![](src/StepReg_shiny_UI_description_raw_2.png)
 
 # Session info
 
