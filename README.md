@@ -16,7 +16,7 @@ install_github("JunhuiLi1017/StepReg")
 ```
 
 ## Detailed usage
-For released version, refer to CRAN [vignettes](https://cran.r-project.org/web/packages/StepReg/vignettes/StepReg.html).
+For released version, refer to CRAN [vignettes](https://CRAN.R-project.org/package=StepReg/vignettes/StepReg.html).
 
 For development version, refer to this [vignettes](https://mccbbioinfo.github.io/tutorials/StepReg).
 

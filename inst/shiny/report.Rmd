@@ -14,7 +14,6 @@ library(ggplot2)
 **Statistics of Variable Selection:**
 
 ```{r comment = NA}
-# The `params` object is available in the document.
 params$modelSelection
 ```
 
