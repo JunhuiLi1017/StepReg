@@ -384,10 +384,6 @@ ui <- tagList(
         )
       )
     ),
-    #https://stackoverflow.com/questions/55987238/add-external-hyperlink-to-tabpanel-or-navbarmenu-in-r-shiny
-    #https://stackoverflow.com/questions/48307652/display-list-of-downloads-in-navbarmenu-in-shiny
-    # empty line between Tutorial and Report Bug in ui
-    
     navbarMenu(
       title = "Help",
       tabPanel(

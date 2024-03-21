@@ -216,7 +216,7 @@
         "License": "MIT + file LICENSE",
         "VignetteBuilder": "knitr",
         "Suggests": "knitr, testthat, BiocStyle, kableExtra",
-        "Imports": "dplyr, ggplot2, ggrepel, purrr, stringr, survival, flextable,\nxlsx, shiny, gridExtra, rlang, GGally, ggcorrplot, tidyr,\nsummarytools, shinythemes, rmarkdown, DT, shinycssloaders,\nshinyjs",
+        "Imports": "dplyr, ggplot2, ggrepel, purrr, stringr, survival, flextable,\nxlsx, shiny, cowplot, rlang, GGally, ggcorrplot, tidyr,\nsummarytools, shinythemes, rmarkdown, DT, shinycssloaders,\nshinyjs",
         "Encoding": "UTF-8",
         "RoxygenNote": "7.3.1",
         "NeedsCompilation": "no",
@@ -226,15 +226,15 @@
         "RemoteRepo": "StepReg",
         "RemoteUsername": "JunhuiLi1017",
         "RemoteRef": "dev",
-        "RemoteSha": "359c1a88d8020bbc35740d78bac58707380fe35e",
+        "RemoteSha": "2b92a396a475d31c24cf0ec2d63b3c5a97d5d373",
         "GithubRepo": "StepReg",
         "GithubUsername": "JunhuiLi1017",
         "GithubRef": "dev",
-        "GithubSHA1": "359c1a88d8020bbc35740d78bac58707380fe35e",
-        "Packaged": "2024-03-20 04:55:33 UTC; lij11",
+        "GithubSHA1": "2b92a396a475d31c24cf0ec2d63b3c5a97d5d373",
+        "Packaged": "2024-03-20 18:10:07 UTC; lij11",
         "Author": "Junhui Li [cre] (<https://orcid.org/0000-0003-3973-1700>),\n  Junhui Li [aut] (<https://orcid.org/0000-0003-3973-1700>),\n  Kai Hu [aut],\n  Xiaohuan Lu [aut],\n  Kun Cheng [ctb],\n  Sushmita Nayak [ctb],\n  Cesar Bautista Sotelo [ctb],\n  Michael Lodato [ctb],\n  Robert H Brown [ctb],\n  Lihua Julie Zhu [aut],\n  Wenxin Liu [aut]",
         "Maintainer": "Junhui Li <junhui.li11@umassmed.edu>",
-        "Built": "R 4.1.3; ; 2024-03-20 04:55:34 UTC; unix"
+        "Built": "R 4.1.3; ; 2024-03-20 18:10:08 UTC; unix"
       }
     },
     "askpass": {
@@ -650,6 +650,35 @@
         "Repository": "CRAN",
         "Date/Publication": "2024-01-30 12:40:02 UTC",
         "Built": "R 4.1.3; x86_64-apple-darwin17.0; 2024-02-22 15:35:53 UTC; unix"
+      }
+    },
+    "cowplot": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com",
+      "description": {
+        "Package": "cowplot",
+        "Title": "Streamlined Plot Theme and Plot Annotations for 'ggplot2'",
+        "Version": "1.1.1",
+        "Authors@R": "\n    person(\n      given = \"Claus O.\",\n      family = \"Wilke\",\n      role = c(\"aut\", \"cre\"),\n      email = \"wilke@austin.utexas.edu\",\n      comment = c(ORCID = \"0000-0002-7470-9261\")\n    )",
+        "Description": "\n    Provides various features that help with creating publication-quality figures\n    with 'ggplot2', such as a set of themes, functions to align plots and arrange\n    them into complex compound figures, and functions that make it easy to annotate\n    plots and or mix plots with images. The package was originally written for\n    internal use in the Wilke lab, hence the name (Claus O. Wilke's plot package).\n    It has also been used extensively in the book Fundamentals of Data\n    Visualization.",
+        "URL": "https://wilkelab.org/cowplot/",
+        "BugReports": "https://github.com/wilkelab/cowplot/issues",
+        "Depends": "R (>= 3.5.0)",
+        "Imports": "ggplot2 (> 2.2.1), grid, gtable, grDevices, methods, rlang,\nscales",
+        "License": "GPL-2",
+        "LazyData": "true",
+        "Suggests": "Cairo, covr, dplyr, forcats, gridGraphics (>= 0.4-0), knitr,\nlattice, magick, maps, PASWR, patchwork, rmarkdown, ragg,\ntestthat (>= 1.0.0), tidyr, vdiffr (>= 0.3.0), VennDiagram",
+        "VignetteBuilder": "knitr",
+        "Collate": "'add_sub.R' 'align_plots.R' 'as_grob.R' 'as_gtable.R'\n'axis_canvas.R' 'cowplot.R' 'draw.R' 'get_plot_component.R'\n'get_axes.R' 'get_titles.R' 'get_legend.R' 'get_panel.R'\n'gtable.R' 'key_glyph.R' 'plot_grid.R' 'save.R'\n'set_null_device.R' 'setup.R' 'stamp.R' 'themes.R'\n'utils_ggplot2.R'",
+        "RoxygenNote": "7.1.1",
+        "Encoding": "UTF-8",
+        "NeedsCompilation": "no",
+        "Packaged": "2020-12-15 18:32:06 UTC; clauswilke",
+        "Author": "Claus O. Wilke [aut, cre] (<https://orcid.org/0000-0002-7470-9261>)",
+        "Maintainer": "Claus O. Wilke <wilke@austin.utexas.edu>",
+        "Repository": "CRAN",
+        "Date/Publication": "2020-12-30 14:30:02 UTC",
+        "Built": "R 4.1.0; ; 2021-05-27 06:29:41 UTC; unix"
       }
     },
     "cpp11": {
@@ -3779,13 +3808,13 @@
   },
   "files": {
     "report.Rmd": {
-      "checksum": "fdd97c481adf78d7bb7aaab841eeaf3e"
+      "checksum": "c6e9cd36cc7bb17946b6f797dfb2dcb0"
     },
     "server.R": {
-      "checksum": "abaa3f03f0a07263c89cf9e7af70302e"
+      "checksum": "c2ff0e6b9586c84220243263c74d7ee3"
     },
     "ui.R": {
-      "checksum": "3a0ef04edee78e09782c2c1fa900245e"
+      "checksum": "49d1fb29de2fcaeac0b38555162d096d"
     },
     "utils.R": {
       "checksum": "52ab7198298550249f870dc4130f1be3"
