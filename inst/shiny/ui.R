@@ -33,8 +33,7 @@ ui <- tagList(
               "base::mtcars", 
               "StepReg::remission", 
               "survival::lung",
-              "StepReg::creditCard"),
-            selected = NULL
+              "StepReg::creditCard")
           ),
           # Horizontal line ----
           tags$hr(),
@@ -67,8 +66,7 @@ ui <- tagList(
           radioButtons("quote", "Quote",
                        choices = c(None = "",
                                    "Double Quote" = '"',
-                                   "Single Quote" = "'"),
-                       selected = ''),
+                                   "Single Quote" = "'")),
           
           # Horizontal line ----
           tags$hr()
@@ -141,39 +139,36 @@ ui <- tagList(
                         "logit",
                         "cox",
                         "poisson",
-                        "Gamma"),
-            selected = ""
+                        "Gamma")
           ),
           # Select dependent variable
           conditionalPanel(
             condition = "input.type === 'cox'",
-            selectInput("status", "Status variable:", choices = NULL, selected = NULL),
-            selectInput("time", "Time Variable:", choices = NULL, selected = NULL)
+            selectInput("status", "Status variable:", choices = NULL),
+            selectInput("time", "Time Variable:", choices = NULL)
           ),
           
           conditionalPanel(
             condition = "input.type === 'linear'",
-            selectInput("dependent_linear", "Dependent variable:", choices = NULL, multiple = TRUE, selected = NULL)
+            selectInput("dependent_linear", "Dependent variable:", choices = NULL, multiple = TRUE)
           ),
           
           conditionalPanel(
             condition = "input.type === 'logit' || input.type === 'poisson' || input.type === 'Gamma'",
-            selectInput("dependent_glm", "Dependent variable:", choices = NULL, selected = NULL)
+            selectInput("dependent_glm", "Dependent variable:", choices = NULL)
           ),
           
           selectInput(
             "independent",
             "Independent Variables:",
             choices = NULL,
-            multiple = TRUE,
-            selected = NULL
+            multiple = TRUE
           ),
           selectInput(
             "include", 
             "Include Variables:",
             choices = NULL,
-            multiple = TRUE,
-            selected = NULL
+            multiple = TRUE
           ),
           conditionalPanel(
             condition = "input.type !== 'cox'",
@@ -192,7 +187,6 @@ ui <- tagList(
                         "backward",
                         "bidirection", 
                         "subset"),
-            selected = NULL,
             multiple = TRUE
           ),
           
@@ -213,7 +207,6 @@ ui <- tagList(
                           "SL",
                           "Rsq",
                           "adjRsq"),
-              selected = NULL,
               multiple = TRUE
             )
           ),
@@ -227,7 +220,6 @@ ui <- tagList(
                           "AICc",
                           "HQ",
                           "SL"),
-              selected = NULL,
               multiple = TRUE
             )
           ),
@@ -244,7 +236,6 @@ ui <- tagList(
                           "IC(3/2)",
                           "SBC",
                           "SL"),
-              selected = NULL,
               multiple = TRUE
             )
           ),

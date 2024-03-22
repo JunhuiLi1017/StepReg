@@ -31,5 +31,5 @@
 #' @export
 #' 
 StepRegShinyApp <- function() {
-  runApp(appDir = system.file('shiny', package='StepReg'))
+  runApp(appDir = system.file('shiny', package = 'StepReg'))
 }

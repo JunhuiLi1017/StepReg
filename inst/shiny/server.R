@@ -2,6 +2,9 @@ source("utils.R")
 
 # Define server logic
 server <- function(input, output, session) {
+  # Disable download button upon page load:
+  shinyjs::disable("download")
+  
   # Function to read uploaded dataset
   dataset <- reactiveVal(NULL)
   
@@ -24,7 +27,8 @@ server <- function(input, output, session) {
     dataset(df)
   })
   
-  observeEvent(c(input$upload_file,input$header,input$sep,input$quote), {
+  # Function to upload user custom dataset:
+  observeEvent(c(input$upload_file, input$header, input$sep, input$quote), {
     req(input$upload_file)
     # Read the uploaded file
     tryCatch(
@@ -39,13 +43,13 @@ server <- function(input, output, session) {
     dataset(df)
   })
   
+  # Update select inputs based on regression type:
   observe({
     req(dataset())
     
     # Update select input for distribution plot
     updateSelectInput(session, "distribution_plot", choices = names(dataset()))
     
-    # Update select inputs based on regression type
     updateSelectInput(session, "dependent_linear", choices = names(dataset()))
     updateSelectInput(session, "status", choices = names(dataset()))
     updateSelectInput(session, "time", choices = names(dataset()))
@@ -72,28 +76,36 @@ server <- function(input, output, session) {
     })
   })
 
+  # Enable run button if all required fields are specified by user:
   run_analysis_enabled <- reactive({
-    !is.null(input$type) && input$type != "" &&
-      (
-        (!is.null(input$dependent_linear) && input$dependent_linear != "") ||
-          (!is.null(input$dependent_glm) && input$dependent_glm != "") ||
-          (!is.null(input$status) && input$status != "" && !is.null(input$time) && input$time != "")
-      ) &&
-      !is.null(input$independent) && input$independent != "" &&
-      !is.null(input$strategy) && input$strategy != "" &&
-      (
-        (
-          !is.null(input$metric_univariate_linear) && input$metric_univariate_linear != ""
-        ) ||
-          (
-            !is.null(input$metric_multivariate_linear) && input$metric_multivariate_linear != ""
-          ) ||
-          (
-            !is.null(input$metric_glm_cox) && input$metric_glm_cox != ""
-          )
-      )
+    ## input$type, status, time: no need to check as selectInput default to use the first one
+
+    ## input$independent:
+    if (length(input$independent) == 0) return(FALSE)
+    ## input$strategy:
+    if (length(input$strategy) == 0) return(FALSE)
+    ## input$metric_xxx:
+    if (input$type == "linear") {
+      if ((length(input$metric_multivariate_linear) == 0) && 
+          (length(input$metric_univariate_linear) == 0)) return(FALSE) 
+    } else if (input$type %in% c("logit", "cox", "poisson", "Gamma")) {
+      if (length(input$metric_glm_cox) == 0) return(FALSE)
+    } else {
+      stop("input$metric_xxx: not a valid input$type!")
+    }
+    ## input$dependent:
+    if (input$type == "linear") {
+      if (length(input$dependent_linear) == 0) return(FALSE)
+    } else if (input$type %in% c("logit", "poisson", "Gamma")) {
+      if (length(input$dependent_glm) == 0) return(FALSE)
+    } else if (input$type == "cox") {
+      # no need to check input$status and input$time as they have default
+    } else {
+      stop("input$dependent: not a valid input$type!")
+    }
+
+    return(TRUE)
   })
-  
   observe({
     if (run_analysis_enabled()) {
       shinyjs::enable("run_analysis")
@@ -102,14 +114,9 @@ server <- function(input, output, session) {
     }
   })
   
-  shinyjs::disable("download")
-  observeEvent(input$run_analysis,{
-    shinyjs::enable("download")
-  })
-  
-  
   # Perform stepwise regression based on uploaded dataset
   stepwiseModel <- eventReactive(input$run_analysis, {
+    disable("download")
     req(dataset())
     if (input$intercept == TRUE) {
       intercept <- 1
@@ -160,20 +167,14 @@ server <- function(input, output, session) {
       test_method_glm = input$glm_test,
       test_method_cox = input$cox_test
     )
-    res
+    results <- list(res, plot(res))
+    enable("download")
+    results
   })
-  
-  output$modelSelection <- renderPrint({
-    stepwiseModel()
-  })
-  
-  stepwisePlot <- reactive({
-    plot(stepwiseModel())
-  })
-  
-  output$selectionPlot <- renderPlot({
-    stepwisePlot()
-  })
+
+  # Generate output and enable download button:
+  output$modelSelection <- renderPrint(stepwiseModel()[[1]])
+  output$selectionPlot <- renderPlot({stepwiseModel()[[2]]})
   output$selectionPlotText <- renderUI({
     HTML("<b>Visualization of Variable Selection:</b>")
   })
@@ -224,14 +225,16 @@ server <- function(input, output, session) {
   
   output$download <- downloadHandler(
     # For PDF output, change this to "report.pdf"
-    filename = paste0("StepReg_report_",format(Sys.time(), "%Y%m%d%H%M%S"),".html"),
+    filename = paste0("StepReg_report_", format(Sys.time(), "%Y%m%d%H%M%S"), ".html"),
     content = function(file) {
       tempReport <- file.path(tempdir(), "report.Rmd")
       file.copy(system.file('shiny/report.Rmd', package='StepReg'), tempReport, overwrite = TRUE)
       # Set up parameters to pass to Rmd document
-      params <- list(modelSelection = stepwiseModel(), selectionPlot = stepwisePlot())
+      params <- list(modelSelection = stepwiseModel()[[1]], 
+                     selectionPlot = stepwiseModel()[[2]])
       
-      rmarkdown::render(tempReport, output_file = file,
+      rmarkdown::render(tempReport, 
+                        output_file = file,
                         params = params,
                         envir = new.env(parent = globalenv())
       )
