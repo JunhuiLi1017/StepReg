@@ -10,7 +10,7 @@ author:
   affiliation: Clark University, Worcester, USA
 - name: Wenxin Liu
   affiliation: China Agricultural University, Beijing, China
-- name: Julie Lihua Zhu
+- name: Lihua Julie Zhu
   affiliation: University of Massachusset Chan Medical School, Worcester, USA
 package: StepReg
 bibliography: bibliography.bib
@@ -43,7 +43,6 @@ StepReg simplifies model selection tasks by providing a unified programming inte
 The following example selects an optimal linear regression model with the `mtcars` dataset.
 ```{r, message = FALSE}
 library(StepReg)
-#devtools::load_all("~/GitHub/StepReg/")
 
 data(mtcars)
 formula <- mpg ~ .
