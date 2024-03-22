@@ -110,7 +110,17 @@ ui <- tagList(
                                 "Select variables for the Plot:", 
                                 choices = "", 
                                 multiple = TRUE),
-                    actionButton("make_plot", "Make plot")
+                    tags$div(
+                      style = "display: flex; justify-content: space-between;",
+                      actionButton("make_plot", 
+                                   "Run", 
+                                   icon = icon("chart-line"), 
+                                   style = "width: 80px; font-size: 10px;"),
+                      downloadButton("downloadPlot", 
+                                     "Download", 
+                                     icon = icon("download"),
+                                     style = "width: 80px; font-size: 10px;")
+                    )
                   ),
                   mainPanel(
                     withSpinner(plotOutput("Plot"))

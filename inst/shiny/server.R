@@ -4,6 +4,7 @@ source("utils.R")
 server <- function(input, output, session) {
   # Disable download button upon page load:
   shinyjs::disable("download")
+  shinyjs::disable("downloadPlot")
   
   # Function to read uploaded dataset
   dataset <- reactiveVal(NULL)
@@ -103,14 +104,28 @@ server <- function(input, output, session) {
     } else {
       stop("input$dependent: not a valid input$type!")
     }
-
     return(TRUE)
   })
+  
+  exploratory_plot_enabled <- reactive({
+    if (length(input$var_plot) == 0){
+      return(FALSE)
+    } else {
+      return(TRUE)
+    }
+  })
+  
   observe({
     if (run_analysis_enabled()) {
       shinyjs::enable("run_analysis")
     } else {
       shinyjs::disable("run_analysis")
+    }
+    
+    if (exploratory_plot_enabled()) {
+      shinyjs::enable("make_plot")
+    } else {
+      shinyjs::disable("make_plot")
     }
   })
   
@@ -203,9 +218,10 @@ server <- function(input, output, session) {
   })
   
   plot_data <- eventReactive(input$make_plot, {
+    disable("downloadPlot")
     req(input$plot_type, input$var_plot)
     plot_type <- createPlot(input$plot_type, input$var_plot, dataset())
-    
+    enable("downloadPlot")
     if (input$plot_type == "Pairs plot") {
       plot_type
     } else {
@@ -222,6 +238,13 @@ server <- function(input, output, session) {
   output$error_message <- renderText({
     error_message()  # Display the stored error message
   })
+  
+  output$downloadPlot <- downloadHandler(
+    filename = function() { paste(input$plot_type, '.png', sep='') },
+    content = function(file) {
+      ggsave(file, plot = plot_data(), device = "png")
+    }
+  )
   
   output$download <- downloadHandler(
     # For PDF output, change this to "report.pdf"
