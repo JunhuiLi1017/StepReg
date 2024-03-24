@@ -221,17 +221,18 @@ server <- function(input, output, session) {
     disable("downloadPlot")
     req(input$plot_type, input$var_plot)
     plot_type <- createPlot(input$plot_type, input$var_plot, dataset())
-    enable("downloadPlot")
     if (input$plot_type == "Pairs plot") {
-      plot_type
+      plot_result <- plot_type
     } else {
       #grid.arrange(grobs = plot_type)
-      print(plot_grid(plotlist = plot_type))
+      plot_result <- plot_grid(plotlist = plot_type)
     }
+    enable("downloadPlot")
+    return(plot_result)
   })
   
   output$Plot <- renderPlot({
-    plot_data()
+   plot_data()
   })
   
   # Render the error message in the main panel
