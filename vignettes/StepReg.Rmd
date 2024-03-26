@@ -425,6 +425,7 @@ Cox regression, also termed the Cox proportional hazards model, is specifically 
 In this example, we employ a "forward" strategy with "AICc" as the selection criteria.
 ```{r, message = FALSE}
 library(dplyr)
+library(survival)
 # Preprocess:
 lung <- survival::lung %>%
   mutate(sex = factor(sex, levels = c(1, 2))) %>% # make sex as factor
