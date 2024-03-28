@@ -141,7 +141,7 @@ ui <- tagList(
       #   regression process."),
       sidebarLayout(
         sidebarPanel(
-          # Select type (linear, logit, cox, poisson, or gamma)
+          # Select type (linear, logit, cox, poisson, gamma, or negbin)
           selectInput(
             "type",
             "Regression type:",
@@ -149,7 +149,8 @@ ui <- tagList(
                         "logit",
                         "cox",
                         "poisson",
-                        "Gamma")
+                        "gamma",
+                        "negbin")
           ),
           # Select dependent variable
           conditionalPanel(
@@ -164,7 +165,7 @@ ui <- tagList(
           ),
           
           conditionalPanel(
-            condition = "input.type === 'logit' || input.type === 'poisson' || input.type === 'Gamma'",
+            condition = "input.type === 'logit' || input.type === 'poisson' || input.type === 'gamma' || input.type === 'negbin'",
             selectInput("dependent_glm", "Dependent variable:", choices = NULL)
           ),
           
@@ -265,7 +266,7 @@ ui <- tagList(
           ),
           
           conditionalPanel(
-            condition = "input.type === 'logit' || input.type === 'Gamma' || input.type === 'poisson'",
+            condition = "input.type === 'logit' || input.type === 'gamma' || input.type === 'poisson' || input.type === 'negbin'",
             selectInput(
               "glm_test", 
               label = "Test Method",
