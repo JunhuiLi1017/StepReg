@@ -320,8 +320,8 @@ getTable1SummaryOfParameters <- function(data, type, x_name, y_name, merged_mult
 		Parameter = c("included variable", 
 									"strategy", 
 									"metric", 
-									"entry significance level (sle)", 
-									"stay significance level (sls)", 
+									"significance level for entry (sle)", 
+									"significance level for stay (sls)", 
 									"test method", 
 									"tolerance of multicollinearity", 
 									"multicollinearity variable", 
@@ -516,12 +516,13 @@ getNumberEffect <- function(fit, type) {
 
 initialProcessTable <- function(metric) {
   sub_init_process_table <- data.frame(Step = numeric(), 
-                               Enter_effect = character(), 
-                               Remove_effect = character(), 
-                               Number_effect = numeric(), 
-                               Number_parms = numeric(), 
+                               EffectEntered = character(), 
+                               EffectRemoved = character(), 
+                               NumberEffect = numeric(), 
+                               NumberParams = numeric(), 
                                metric = numeric())
   colnames(sub_init_process_table)[ncol(sub_init_process_table)] <- metric
+  #colnames(sub_init_process_table)[ncol(sub_init_process_table)] <- ifelse(metric == "SL", "PValue", metric)
   return(sub_init_process_table)
 }
 
@@ -625,7 +626,7 @@ getCandStepModel <- function(add_or_remove, data, type, metric, weight, y_name, 
         BREAK <- TRUE
       }
     }
-    return(list("pic" = pic, "minmax_var" = minmax_var, "best_candidate_model" = best_candidate_model, "BREAK" = BREAK))
+    return(list("pic" = pic, "minmax_var" = minmax_var, "best_candidate_model" = best_candidate_model, "BREAK" = BREAK, "pic_list" = pic_set))
   }else{
     return(list("BREAK" = BREAK))
   }
@@ -682,7 +683,7 @@ checkEnterOrRemove <- function(add_or_remove, best_candidate_model, type, metric
   return(c("indicator" = indicator, "BREAK" = BREAK))
 }
 
-updateXinModel <- function(add_or_remove, indicator, best_candidate_model, type, metric, BREAK, pic, x_in_model, x_notin_model, process_table, minmax_var) {
+updateXinModel <- function(add_or_remove, indicator, best_candidate_model, type, metric, BREAK, pic, x_in_model, x_notin_model, process_table, minmax_var, pic_list) {
   sub_init_process_table <- initialProcessTable(metric)
   if(indicator == TRUE & BREAK == FALSE) {
     if(add_or_remove == "add") {
@@ -696,13 +697,16 @@ updateXinModel <- function(add_or_remove, indicator, best_candidate_model, type,
     }
     process_table <- rbind(process_table, sub_init_process_table)
     #process_table[nrow(process_table), 1] <- as.numeric(process_table[1, nrow(process_table) - 1])  +  1
+    pic_set <- unlist(pic_list)
   }else{
     BREAK <- TRUE
+    pic_set <- NULL
   }
-  return(list("BREAK" = BREAK, "process_table" = process_table, "x_in_model" = x_in_model, "x_notin_model" = x_notin_model))
+  return(list("BREAK" = BREAK, "process_table" = process_table, "x_in_model" = x_in_model, "x_notin_model" = x_notin_model, "pic_set" = pic_set))
 }
 
 getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, sls, weight, y_name, x_in_model, x_notin_model, intercept, include, process_table, test_method, sigma_value) {
+  pic_df <- NULL
   while(TRUE) {
     out_cand_stepwise <- getCandStepModel(add_or_remove, data, type, metric, weight = weight, y_name, x_in_model, x_notin_model, intercept, include, test_method, sigma_value)
     BREAK <- out_cand_stepwise$BREAK
@@ -712,6 +716,7 @@ getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, 
     }
     best_candidate_model <- out_cand_stepwise$best_candidate_model
     pic <- out_cand_stepwise$pic
+    pic_list <- list(sort(out_cand_stepwise$pic_list))
     
     out_check <- checkEnterOrRemove(add_or_remove, best_candidate_model, type, metric, sle, sls, y_name, pic, process_table)
     indicator <- out_check["indicator"]
@@ -720,10 +725,14 @@ getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, 
       break
     }
     
-    out_updateX <- updateXinModel(add_or_remove, indicator, best_candidate_model, type, metric, BREAK, pic, x_in_model, x_notin_model, process_table, minmax_var)
+    out_updateX <- updateXinModel(add_or_remove, indicator, best_candidate_model, type, metric, BREAK, pic, x_in_model, x_notin_model, process_table, minmax_var, pic_list)
     x_in_model <- out_updateX$x_in_model
     x_notin_model <- out_updateX$x_notin_model
     process_table <- out_updateX$process_table
+    pic_set <- out_updateX$pic_set
+    if(!is.null(pic_set)) {
+      pic_df <- rbind(pic_df,data.frame(strategy, metric, step = process_table[nrow(process_table),1], "variable" = names(pic_set), "value" = pic_set))
+    }
     
     # stop stepwise infinite loops
     # enter remove
@@ -769,7 +778,7 @@ getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, 
     process_table <- process_table[-1, ]
     process_table$Step <- as.numeric(process_table$Step) - 1
   }
-  return(list("process_table" = process_table, "x_in_model" = x_in_model))
+  return(list("process_table" = process_table, "x_in_model" = x_in_model, "x_notin_model" = x_notin_model, "pic_df" = pic_df))
 }
 
 getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, test_method, sigma_value) {
@@ -780,8 +789,38 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
   x_notin_model <- out_init_stepwise$x_notin_model
   process_table <- out_init_stepwise$process_table
   
+  pic_df_init <- data.frame(strategy, metric, process_table[,c(1:2,6)])
+  colnames(pic_df_init)[c(3:5)] <- c("step","variable","value")
   ## get final stepwise model
   out_final_stepwise <- getFinalStepModel(add_or_remove, data, type = type, strategy, metric, sle, sls, weight = weight, y_name, x_in_model, x_notin_model, intercept, include, process_table, test_method, sigma_value)
+  
+  if(type == "cox") {
+    pic_df_init <- pic_df_init[-1,]
+    out_final_stepwise$pic_df$step <- as.numeric(out_final_stepwise$pic_df$step) - 1
+    if(nrow(pic_df_init) > 0){
+      selected <- rep("YES",nrow(pic_df_init) - 1)
+    } else {
+      selected <- NULL
+    }
+    
+  } else {
+    selected <- rep("YES",nrow(pic_df_init)) 
+  }
+  for (i in out_final_stepwise$process_table$Step) {
+    sub_process_table <- out_final_stepwise$process_table[out_final_stepwise$process_table$Step %in% i,]
+    sub_pic_df <- out_final_stepwise$pic_df[out_final_stepwise$pic_df$step %in% i,]
+    
+    sub_pic_df$value[sub_pic_df$variable %in% sub_process_table[,c(2,3)][!sub_process_table[,c(2,3)] %in% ""]] <- "YES"
+    sub_pic_df$value[!sub_pic_df$variable %in% sub_process_table[,c(2,3)][!sub_process_table[,c(2,3)] %in% ""]] <- "NO"
+    selected <- append(selected,sub_pic_df$value)
+  }
+  
+  pic_df <- rbind(pic_df_init,out_final_stepwise$pic_df)
+  pic_df$value <- as.numeric(pic_df$value)
+  pic_df$step <- as.numeric(pic_df$step)
+  pic_df$selected <- selected
+
+  out_final_stepwise$pic_df <- pic_df
   return(out_final_stepwise)
 }
 

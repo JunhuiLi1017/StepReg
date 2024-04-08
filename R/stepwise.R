@@ -182,6 +182,8 @@ stepwise <- function(formula,
   ## table3
   table3_process_table_metric <- list()
   x_final_model_metric <- list()
+  pic_df <- NULL
+  vote_df <- NULL
   for(stra in strategy) {
     for(met in metric) {
       if(stra == "subset") {
@@ -190,16 +192,19 @@ stepwise <- function(formula,
         table3_process_table[,met] <- as.numeric(table3_process_table[,met])
       }else{
         out_final_stepwise <- getStepwiseWrapper(data, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
+        
+        pic_df <- rbind(pic_df,out_final_stepwise$pic_df)
+        
         table3_process_table <- out_final_stepwise$process_table
         remove_col <- NULL
         if(stra == "forward") {
-          remove_col <- "Remove_effect"
+          remove_col <- "EffectRemoved"
         } else if(stra == "backward") {
-          remove_col <- "Enter_effect"
+          remove_col <- "EffectEntered"
         }
         table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% remove_col]
-        if(all(table3_process_table[,"Number_effect"] == table3_process_table[,"Number_parms"])) {
-          table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% "Number_effect"]
+        if(all(table3_process_table[,"NumberEffect"] == table3_process_table[,"NumberParams"])) {
+          table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% "NumberEffect"]
         }
         x_in_model <- out_final_stepwise$x_in_model
         x_final_model <- c(include, x_in_model)
@@ -208,6 +213,8 @@ stepwise <- function(formula,
       table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric()
       result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character) # to keep digits as we expected, convert numeric to character for html output.
       x_final_model_metric[[stra]][[met]] <- x_final_model
+      
+      vote_df <- rbind(vote_df,data.frame(deparse(reformulate(x_final_model, y_name)),paste0(stra,":",met)))
     }
     ##table4
     table4_coef_model_metric <- list()
@@ -220,6 +227,11 @@ stepwise <- function(formula,
       }
     }
   }
-  class(result) <- c("StepReg", "list", strategy)
+  colnames(vote_df) <- c("model", "combination")
+  result[['Detail_selection_summary']] <-  pic_df
+  #result[['Final_variable']] <- x_final_model_metric
+  result[['Vote_df']] <- vote_df
+  class(result) <- c("StepReg", "list", strategy, type)
+  #attr(result, "hidden") <- "Detail_selection_summary"
   return(result)
 }

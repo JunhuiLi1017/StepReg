@@ -1,5 +1,5 @@
 Package: StepReg
-Version: 1.5.0
+Version: 1.5.1
 Title: Stepwise Regression Analysis
 Authors@R: c(
     person("Junhui", "Li", , "junhui.li11@umassmed.edu", role = c("cre"),

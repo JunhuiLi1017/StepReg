@@ -4,15 +4,17 @@
 \alias{plot.StepReg}
 \title{Plots from a StepReg object}
 \usage{
-\method{plot}{StepReg}(x, ...)
+\method{plot}{StepReg}(x, num_digits = 6, ...)
 }
 \arguments{
 \item{x}{StepReg object}
 
+\item{num_digits}{The number of digits to keep when rounding the results. Default is 6.}
+
 \item{...}{Not used}
 }
 \value{
-line and point plot for summary of selection process.
+a list of plot with detailed selection in each step
 }
 \description{
 plot.StepReg visualizes the variable selection procedure using a StepReg object
@@ -20,13 +22,13 @@ plot.StepReg visualizes the variable selection procedure using a StepReg object
 \examples{
 \dontrun{
 data(mtcars)
-formula <- mpg ~ . + 0
-p <- stepwise(formula = formula,
+formula <- mpg ~ .
+x <- stepwise(formula = formula,
               data = mtcars,
               type = "linear",
-              strategy = c("forward","bidirection","subset"),
-              metric = c("AIC", "BIC"),
+              strategy = c("forward","bidirection","backward"),
+              metric = c("AIC","BIC","SL"),
               best_n = 3)
-plot(p)
+plot(x)
 }
 }

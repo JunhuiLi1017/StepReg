@@ -5,6 +5,7 @@ server <- function(input, output, session) {
   # Disable download button upon page load:
   shinyjs::disable("download")
   shinyjs::disable("downloadPlot")
+  shinyjs::disable("download_process_plot")
   
   # Function to read uploaded dataset
   dataset <- reactiveVal(NULL)
@@ -89,7 +90,7 @@ server <- function(input, output, session) {
     if (input$type == "linear") {
       if ((length(input$metric_multivariate_linear) == 0) && 
           (length(input$metric_univariate_linear) == 0)) return(FALSE) 
-    } else if (input$type %in% c("logit", "cox", "poisson", "Gamma")) {
+    } else if (input$type %in% c("logit", "cox", "poisson", "gamma")) {
       if (length(input$metric_glm_cox) == 0) return(FALSE)
     } else {
       stop("input$metric_xxx: not a valid input$type!")
@@ -97,7 +98,7 @@ server <- function(input, output, session) {
     ## input$dependent:
     if (input$type == "linear") {
       if (length(input$dependent_linear) == 0) return(FALSE)
-    } else if (input$type %in% c("logit", "poisson", "Gamma")) {
+    } else if (input$type %in% c("logit", "poisson", "gamma")) {
       if (length(input$dependent_glm) == 0) return(FALSE)
     } else if (input$type == "cox") {
       # no need to check input$status and input$time as they have default
@@ -132,6 +133,7 @@ server <- function(input, output, session) {
   # Perform stepwise regression based on uploaded dataset
   stepwiseModel <- eventReactive(input$run_analysis, {
     disable("download")
+    disable("download_process_plot")
     req(dataset())
     if (input$intercept == TRUE) {
       intercept <- 1
@@ -151,7 +153,7 @@ server <- function(input, output, session) {
       "cox" = input$metric_glm_cox,
       "logit" = input$metric_glm_cox,
       "poisson" = input$metric_glm_cox,
-      "Gamma" = input$metric_glm_cox
+      "gamma" = input$metric_glm_cox
     )
     
     formula <- switch(
@@ -166,7 +168,7 @@ server <- function(input, output, session) {
       "cox" = as.formula(paste("Surv(", input$time, ",", input$status, ") ~", paste(input$independent, collapse = "+"))),
       "logit" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+"))),
       "poisson" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+"))),
-      "Gamma" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+")))
+      "gamma" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+")))
     )
     
     res <- stepwise(
@@ -182,23 +184,66 @@ server <- function(input, output, session) {
       test_method_glm = input$glm_test,
       test_method_cox = input$cox_test
     )
-    results <- list(res, plot(res))
+    process_plot <- plot(res)
+    model_vote <- vote(res)
+    results <- list(res, process_plot, model_vote)
     enable("download")
+    enable("download_process_plot")
     results
   })
 
+  observeEvent(input$strategy, {
+    updateSelectInput(
+      session, 
+      "strategy_plot", 
+      choices = input$strategy
+    )
+  })
+  
   # Generate output and enable download button:
   output$modelSelection <- renderPrint(stepwiseModel()[[1]])
-  output$selectionPlot <- renderPlot({stepwiseModel()[[2]]})
+  
+  nmetric <- reactive({
+    metric <- switch(
+      input$type,
+      "linear" = {
+        if (length(input$dependent_linear) > 1) {
+          input$metric_multivariate_linear
+        } else {
+          input$metric_univariate_linear
+        }
+      },
+      "cox" = input$metric_glm_cox,
+      "logit" = input$metric_glm_cox,
+      "poisson" = input$metric_glm_cox,
+      "gamma" = input$metric_glm_cox
+    )
+    length(metric)
+  })
+  
+  output$process_plot <- renderPlot({
+    # Get the selected strategy plot from the list of plots
+    selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]
+    
+    # Render the selected plot
+    selected_plot
+  }, res = 96, 
+  width = function() { (320 * 2) }, 
+  #height = function() { (320 * length(metric)) })
+  height = function() { (320 * nmetric()) })
+  
   output$selectionPlotText <- renderUI({
-    HTML("<b>Visualization of Variable Selection:</b>")
+    HTML("<b>Detailed Variable Selection in Each Step:</b>")
   })
   output$selectionStatText <- renderText({
     HTML("<b>Statistics of Variable Selection:</b>")
   })
   
+  output$modelVote <- renderDataTable({ 
+    DT::datatable(stepwiseModel()[[3]], options = list(scrollX = TRUE))
+  })
   # Output Data
-  output$tbl = renderDataTable({
+  output$tbl <- renderDataTable({
     req(dataset())
     DT::datatable(dataset(), options = list(scrollX = TRUE))
   })
@@ -208,7 +253,7 @@ server <- function(input, output, session) {
     output$summary <- renderPrint({
       req(dataset())
       pdf(file = NULL)
-      summarytools::dfSummary(dataset())
+      summarytools::dfSummary(dataset(),graph.col = FALSE)
     })
   })
   
@@ -244,6 +289,13 @@ server <- function(input, output, session) {
     filename = function() { paste(input$plot_type, '.png', sep='') },
     content = function(file) {
       ggsave(file, plot = plot_data(), device = "png")
+    }
+  )
+  
+  output$download_process_plot <- downloadHandler(
+    filename = function() { paste(input$strategy_plot, '_selection_process.png', sep='') },
+    content = function(file) {
+      ggsave(file, plot = process_plot(), device = "png")
     }
   )
   

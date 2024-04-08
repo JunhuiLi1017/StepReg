@@ -1,5 +1,5 @@
 source("utils.R")
-
+library(shinyhelper)
 js <- "
 $(document).ready(function() {
     $('.navbar .container-fluid .navbar-nav .dropdown .dropdown-menu').prepend(
@@ -11,6 +11,19 @@ $(document).ready(function() {
 ui <- tagList(
   useShinyjs(),
   tags$script(HTML(js)),
+  tags$head(
+    tags$style(HTML("
+      /* this will affect all the pre elements */
+      pre {
+        color: red;
+        background-color: #5ef4fb;
+      }
+      /* this will affect only the pre elements under the class myclass */
+      .textOutput pre {
+        color: black;
+        background-color: white;
+      }"))
+  ),
   navbarPage(
     title = tags$a(href = "https://cran.r-project.org/web/packages/StepReg/index.html", "StepReg"),
     theme = shinythemes::shinytheme("flatly"),
@@ -85,7 +98,9 @@ ui <- tagList(
             ), # Data dalam tabel
             tabPanel(
               "Summary",
-              withSpinner(verbatimTextOutput("summary"))
+              div(class="textOutput",
+                  withSpinner(verbatimTextOutput("summary"))
+                  )
             ),
             tabPanel(
               title = "Plot",
@@ -117,7 +132,7 @@ ui <- tagList(
                                    icon = icon("chart-line"), 
                                    style = "width: 80px; font-size: 10px;"),
                       downloadButton("downloadPlot", 
-                                     "Download", 
+                                     "Save", 
                                      icon = icon("download"),
                                      style = "width: 80px; font-size: 10px;")
                     )
@@ -232,7 +247,9 @@ ui <- tagList(
                           "HQ",
                           "SL"),
               multiple = TRUE
-            )
+            )  %>% helper(type = "inline", 
+                          title="Help for SLE", 
+                          content = "Blah, blah, blah!")
           ),
           
           conditionalPanel(
@@ -293,18 +310,20 @@ ui <- tagList(
             condition = "input.metric_univariate_linear.indexOf('SL') != -1 && (input.strategy.indexOf('forward') != -1 || input.strategy.indexOf('bidirection') != -1) && input.type === 'linear'",
             sliderInput(
               "sle", 
-              label = "significant level for entry",
+              label = "significance level for entry",
               min = 0, 
               max = 1,
               value = 0.05
-            )
+            ) %>% helper(type = "inline", 
+                         title="Help for SLE", 
+                         content = "Blah, blah, blah!")
           ),
           
           conditionalPanel(
             condition = "input.metric_univariate_linear.indexOf('SL') != -1 && (input.strategy.indexOf('backward') != -1 || input.strategy.indexOf('bidirection') != -1) && input.type === 'linear'",
             sliderInput(
               "sls", 
-              label = "significant level for stay", 
+              label = "significance level for stay", 
               min = 0, 
               max = 1, 
               value = 0.05
@@ -358,7 +377,7 @@ ui <- tagList(
                          icon = icon("chart-line"), 
                          style = "width: 130px; font-size: 12px;"),
             downloadButton("download", 
-                           "Download", 
+                           "Report", 
                            icon = icon("download"),
                            style = "width: 130px; font-size: 12px;")
           )
@@ -372,15 +391,47 @@ ui <- tagList(
                 condition = "input.run_analysis",
                 htmlOutput("selectionStatText")
               ),
-              withSpinner(verbatimTextOutput("modelSelection"))
+              div(class="textOutput",
+                  withSpinner(verbatimTextOutput("modelSelection"))
+                  )
             ),
+            
             tabPanel(
-              "Visualization",
-              conditionalPanel(
-                condition = "input.run_analysis",
-                htmlOutput("selectionPlotText")
-              ),
-              withSpinner(plotOutput("selectionPlot"))
+              title = "Visualization",
+              fluidPage(
+                sidebarLayout(
+                  sidebarPanel(
+                    selectInput("strategy_plot",
+                                "Stepwise Strategy:",
+                                choices = c("")
+                                ),
+                    downloadButton("download_process_plot", 
+                                   "Save", 
+                                   icon = icon("download"),
+                                   style = "width: 80px; font-size: 10px;")
+                  ),
+                  mainPanel(
+                    conditionalPanel(
+                      condition = "input.run_analysis",
+                      htmlOutput("selectionPlotText")
+                    ),
+                    withSpinner(plotOutput("process_plot"))
+                  )
+                )
+              )
+            ),
+            
+            # tabPanel(
+            #   "Visualization",
+            #   conditionalPanel(
+            #     condition = "input.run_analysis",
+            #     htmlOutput("selectionPlotText")
+            #   ),
+            #   withSpinner(plotOutput("selectionPlot"))
+            # ),
+            tabPanel(
+              "Model Vote",
+              withSpinner(DT::dataTableOutput("modelVote"))
             )
           )
         )
