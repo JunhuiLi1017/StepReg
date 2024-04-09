@@ -43,10 +43,10 @@ ui <- tagList(
             "Select an example dataset",
             choices = c(
               "",
-              "base::mtcars", 
-              "StepReg::remission", 
-              "survival::lung",
-              "StepReg::creditCard")
+              "mtcars (for Linear regression)", 
+              "remission (for Logistic regression)", 
+              "lung (for Cox regression)",
+              "creditCard (for Poisson regression)")
           ),
           # Horizontal line ----
           tags$hr(),
@@ -316,7 +316,7 @@ ui <- tagList(
               value = 0.05
             ) %>% helper(type = "inline", 
                          title="Help for SLE", 
-                         content = "Blah, blah, blah!")
+                         content = "Blah, blah, blah!"),
           ),
           
           conditionalPanel(
@@ -399,36 +399,54 @@ ui <- tagList(
             tabPanel(
               title = "Visualization",
               fluidPage(
-                sidebarLayout(
-                  sidebarPanel(
-                    selectInput("strategy_plot",
-                                "Stepwise Strategy:",
-                                choices = c("")
-                                ),
-                    downloadButton("download_process_plot", 
-                                   "Save", 
-                                   icon = icon("download"),
-                                   style = "width: 80px; font-size: 10px;")
-                  ),
-                  mainPanel(
-                    conditionalPanel(
-                      condition = "input.run_analysis",
-                      htmlOutput("selectionPlotText")
-                    ),
-                    withSpinner(plotOutput("process_plot"))
+                fluidRow(
+                  column(
+                    width = 12,
+                    sidebarPanel(
+                      selectInput("strategy_plot",
+                                  "Stepwise Strategy:",
+                                  choices = c("")),
+                      downloadButton("download_process_plot",
+                                     "Save",
+                                     icon = icon("download"),
+                                     style = "width: 80px; font-size: 10px;")
+                      )
+                   )
+                ),
+                fluidRow(
+                  column(width = 12,
+                         mainPanel(
+                               conditionalPanel(
+                                 condition = "input.run_analysis",
+                                 htmlOutput("selectionPlotText")
+                               ),
+                               withSpinner(plotOutput("process_plot"))
+                         )
                   )
                 )
+
+                # sidebarLayout(
+                #   sidebarPanel(
+                #     selectInput("strategy_plot",
+                #                 "Stepwise Strategy:",
+                #                 choices = c("")
+                #                 ),
+                #     downloadButton("download_process_plot",
+                #                    "Save",
+                #                    icon = icon("download"),
+                #                    style = "width: 80px; font-size: 10px;")
+                #   ),
+                #   mainPanel(
+                #     conditionalPanel(
+                #       condition = "input.run_analysis",
+                #       htmlOutput("selectionPlotText")
+                #     ),
+                #     withSpinner(plotOutput("process_plot"))
+                #   )
+                # )
               )
             ),
             
-            # tabPanel(
-            #   "Visualization",
-            #   conditionalPanel(
-            #     condition = "input.run_analysis",
-            #     htmlOutput("selectionPlotText")
-            #   ),
-            #   withSpinner(plotOutput("selectionPlot"))
-            # ),
             tabPanel(
               "Model Vote",
               withSpinner(DT::dataTableOutput("modelVote"))

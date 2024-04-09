@@ -21,10 +21,10 @@ server <- function(input, output, session) {
     
     
     df <- switch(input$example_dataset,
-                 "base::mtcars" = mtcars,
-                 "StepReg::remission" = remission,
-                 "survival::lung" = lung,
-                 "StepReg::creditCard" = creditCard)
+                 "mtcars (for Linear regression)" = mtcars,
+                 "remission (for Logistic regression)" = remission,
+                 "lung (for Cox regression)" = lung,
+                 "creditCard (for Poisson regression)" = creditCard)
     
     dataset(df)
   })
@@ -155,6 +155,7 @@ server <- function(input, output, session) {
       "poisson" = input$metric_glm_cox,
       "gamma" = input$metric_glm_cox
     )
+    rv$nmetric <- length(metric)
     
     formula <- switch(
       input$type,
@@ -218,19 +219,24 @@ server <- function(input, output, session) {
       "poisson" = input$metric_glm_cox,
       "gamma" = input$metric_glm_cox
     )
-    length(metric)
+    if (is.null(metric) || length(metric) == 0) {
+      return(1)  # Assign 1 if no metric selected
+    } else {
+      return(length(metric))
+    }
   })
   
+  rv <- reactiveValues()
   output$process_plot <- renderPlot({
+    req(nmetric())  # Ensure nmetric is available before proceeding
     # Get the selected strategy plot from the list of plots
     selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]
-    
-    # Render the selected plot
+    rv$plot <- selected_plot
     selected_plot
-  }, res = 96, 
+  }, res =72, 
   width = function() { (320 * 2) }, 
-  #height = function() { (320 * length(metric)) })
   height = function() { (320 * nmetric()) })
+  
   
   output$selectionPlotText <- renderUI({
     HTML("<b>Detailed Variable Selection in Each Step:</b>")
@@ -295,7 +301,7 @@ server <- function(input, output, session) {
   output$download_process_plot <- downloadHandler(
     filename = function() { paste(input$strategy_plot, '_selection_process.png', sep='') },
     content = function(file) {
-      ggsave(file, plot = process_plot(), device = "png")
+      ggsave(file, plot = rv$plot, device = "png")
     }
   )
   

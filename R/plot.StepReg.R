@@ -48,7 +48,7 @@ plot.StepReg <- function(x, num_digits = 6, ...) {
         geom_tile(aes(fill = .data$selected), width = 0.99, height = 0.95) +
         geom_text(aes(label = round(.data$value, num_digits)),
                   color = "white",
-                  size = 1) +
+                  size = 2) +
         scale_fill_manual(values = c("YES" = "red", "NO" = "black")) +
         theme_light() + 
         scale_x_continuous(breaks = unique(detail_selection$step)) + 
