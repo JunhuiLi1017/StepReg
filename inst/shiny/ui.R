@@ -92,6 +92,38 @@ ui <- tagList(
             
             tabPanel(
               "Data",
+              div(style = "width: 100%",
+                  selectInput(
+                    "data_numeric",
+                    "numeric variable(s):",
+                    choices = NULL,
+                    multiple = TRUE
+                  )
+                  ),
+              div(style = "width: 100%",
+                  selectInput(
+                    "data_character",
+                    "character variable(s):",
+                    choices = NULL,
+                    multiple = TRUE
+                  )
+              ),
+              div(style = "width: 100%",
+                  selectInput(
+                    "data_factor",
+                    "factor variable(s):",
+                    choices = NULL,
+                    multiple = TRUE
+                  )
+              ),
+              div(style = "width: 100%",
+                  selectInput(
+                    "data_other",
+                    "other variable(s):",
+                    choices = NULL,
+                    multiple = TRUE
+                  )
+              ),
               div(style = "width: 100%;",
                   withSpinner(DT::dataTableOutput('tbl', width = 750))
                   )
