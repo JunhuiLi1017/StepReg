@@ -1,5 +1,5 @@
 source("utils.R")
-library(shinyhelper)
+
 js <- "
 $(document).ready(function() {
     $('.navbar .container-fluid .navbar-nav .dropdown .dropdown-menu').prepend(
@@ -279,9 +279,7 @@ ui <- tagList(
                           "HQ",
                           "SL"),
               multiple = TRUE
-            )  %>% helper(type = "inline", 
-                          title="Help for SLE", 
-                          content = "Blah, blah, blah!")
+            )
           ),
           
           conditionalPanel(
@@ -352,9 +350,7 @@ ui <- tagList(
               min = 0, 
               max = 1,
               value = 0.05
-            ) %>% helper(type = "inline", 
-                         title="Help for SLE", 
-                         content = "Blah, blah, blah!"),
+            )
           ),
           
           conditionalPanel(
