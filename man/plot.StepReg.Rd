@@ -14,7 +14,7 @@
 \item{...}{Not used}
 }
 \value{
-a list of plot with detailed selection in each step
+A list of plots comprising the selection detail plot and selection summary plot for each strategy.
 }
 \description{
 plot.StepReg visualizes the variable selection procedure using a StepReg object
@@ -27,8 +27,7 @@ x <- stepwise(formula = formula,
               data = mtcars,
               type = "linear",
               strategy = c("forward","bidirection","backward"),
-              metric = c("AIC","BIC","SL"),
-              best_n = 3)
+              metric = c("AIC","BIC","SL"))
 plot(x)
 }
 }

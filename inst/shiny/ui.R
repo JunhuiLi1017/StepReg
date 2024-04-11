@@ -99,7 +99,7 @@ ui <- tagList(
                     choices = NULL,
                     multiple = TRUE
                   )
-                  ),
+              ),
               div(style = "width: 100%",
                   selectInput(
                     "data_character",
@@ -300,7 +300,7 @@ ui <- tagList(
             )
           ),
           
-          # Display sliderInput for significance level only when SL is selected
+          # Display sliderInput for significant level only when SL is selected
           conditionalPanel(
             condition = "input.type === 'linear' && input.metric_multivariate_linear.indexOf('SL') != -1",
             selectInput(
@@ -367,7 +367,7 @@ ui <- tagList(
                   class = "glyphicon glyphicon-question-sign centered-icon", 
                   style = "color:#0072B2;",
                   title = "Used for the backward process. Depending on the type of regression, different tests — such as the F-test, Wald test, or Rao's test—will be employed to compute the corresponding P-values."
-                )), 
+                )),
               min = 0, 
               max = 1, 
               value = 0.05
@@ -491,6 +491,17 @@ ui <- tagList(
                                withSpinner(plotOutput("process_plot"))
                          )
                   )
+                ),
+                fluidRow(
+                  column(width = 12,
+                         mainPanel(
+                           # conditionalPanel(
+                           #   condition = "input.run_analysis",
+                           #   htmlOutput("selectionPlotText")
+                           # ),
+                           withSpinner(plotOutput("detail_plot"))
+                         )
+                  )
                 )
 
                 # sidebarLayout(
@@ -516,7 +527,11 @@ ui <- tagList(
             ),
             
             tabPanel(
-              "Model Vote",
+              "Models Vote",
+              conditionalPanel(
+                condition = "input.run_analysis",
+                htmlOutput("modelVoteText")
+              ),
               withSpinner(DT::dataTableOutput("modelVote"))
             )
           )

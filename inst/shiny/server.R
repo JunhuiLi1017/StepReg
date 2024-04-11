@@ -15,6 +15,7 @@ server <- function(input, output, session) {
     # Read the selected example dataset
     data(creditCard, package = 'StepReg')
     data(remission, package = "StepReg")
+    data(mtcars)
     survival::lung %>%
       mutate(sex = factor(sex, levels = c(1, 2))) %>% 
       na.omit() -> lung # get rid of incomplete records
@@ -44,7 +45,6 @@ server <- function(input, output, session) {
       })
     dataset(df)
   })
-  
   ## Allow user to specify the variable types
   # First set default variable types according to dataset
   observe({
@@ -97,11 +97,11 @@ server <- function(input, output, session) {
     df[col_numeric] <- lapply(df[col_numeric], as.numeric)
     df[col_character] <- lapply(df[col_character], as.character)
     df[col_factor] <- lapply(df[col_factor], factor)
-
+    
     return(df)
   })
   ## End of "Allow user to specify the variable types"
-  
+
   # Update select inputs based on regression type:
   observe({
     req(dataset())
@@ -285,21 +285,32 @@ server <- function(input, output, session) {
   
   rv <- reactiveValues()
   output$process_plot <- renderPlot({
-    req(nmetric())  # Ensure nmetric is available before proceeding
     # Get the selected strategy plot from the list of plots
-    selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]
-    rv$plot <- selected_plot
+    selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]["summary"]
+    rv$summary_plot <- selected_plot
     selected_plot
   }, res =72, 
   width = function() { (320 * 2) }, 
-  height = function() { (320 * nmetric()) })
-  
+  height = function() { (320) })
+ 
+  output$detail_plot <- renderPlot({
+    req(nmetric())  # Ensure nmetric is available before proceeding
+    # Get the selected strategy plot from the list of plots
+    selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]["detail"]
+    rv$detail_plot <- selected_plot
+    selected_plot
+  }, res =72, 
+  width = function() { (320 * 2) }, 
+  height = function() { (320 * nmetric()) }) 
   
   output$selectionPlotText <- renderUI({
-    HTML("<b>Detailed Variable Selection in Each Step:</b>")
+    HTML("<b>Visualization of Variable Selection:\n</b>")
   })
   output$selectionStatText <- renderText({
-    HTML("<b>Statistics of Variable Selection:</b>")
+    HTML("<b>Statistics of Variable Selection:\n</b>")
+  })
+  output$modelVoteText <- renderText({
+    HTML("<b>Model Selection by Vote Across All Combinations of Strategy and Metric:\n</b>")
   })
   
   output$modelVote <- renderDataTable({ 
@@ -307,8 +318,8 @@ server <- function(input, output, session) {
   })
   # Output Data
   output$tbl <- renderDataTable({
-    req(dataset())
-    DT::datatable(dataset(), options = list(scrollX = TRUE))
+    req(dataset_m())
+    DT::datatable(dataset_m(), options = list(scrollX = TRUE))
   })
 
   # Render the appropriate summary based on the selected type
@@ -321,7 +332,7 @@ server <- function(input, output, session) {
   })
   
   observe({
-    req(dataset())
+    req(dataset_m())
     updateSelectInput(session, "var_plot", choices = colnames(dataset_m()))
   })
   
@@ -358,7 +369,7 @@ server <- function(input, output, session) {
   output$download_process_plot <- downloadHandler(
     filename = function() { paste(input$strategy_plot, '_selection_process.png', sep='') },
     content = function(file) {
-      ggsave(file, plot = rv$plot, device = "png")
+      ggsave(file, plot = rv$summary_plot, device = "png")
     }
   )
   
@@ -370,7 +381,8 @@ server <- function(input, output, session) {
       file.copy(system.file('shiny/report.Rmd', package='StepReg'), tempReport, overwrite = TRUE)
       # Set up parameters to pass to Rmd document
       params <- list(modelSelection = stepwiseModel()[[1]], 
-                     selectionPlot = stepwiseModel()[[2]])
+                     selectionPlot = stepwiseModel()[[2]],
+                     modelVote = stepwiseModel()[[3]])
       
       rmarkdown::render(tempReport, 
                         output_file = file,

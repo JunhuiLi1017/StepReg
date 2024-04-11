@@ -6,7 +6,21 @@
 #' 
 #' @param ... further parameters
 #'
-#' @return formatted dataframe
+#' @return 
+#' A dataframe with column names "model" and combinations of strategy and metric. 
+#' The first column represents the model formula, and a checkmark indicates 
+#' that the corresponding model was supported by the given strategy and metric 
+#' combination.
+#' 
+#' @examples
+#' data(mtcars)
+#' formula <- mpg ~ .
+#' x <- stepwise(formula = formula,
+#'               data = mtcars,
+#'               type = "linear",
+#'               strategy = c("forward","bidirection","backward"),
+#'               metric = c("AIC","BIC","SL"))
+#' vote(x)
 #' 
 #' @export
 #' 

@@ -12,8 +12,22 @@ vote(x, ...)
 \item{...}{further parameters}
 }
 \value{
-formatted dataframe
+A dataframe with column names "model" and combinations of strategy and metric. 
+The first column represents the model formula, and a checkmark indicates 
+that the corresponding model was supported by the given strategy and metric 
+combination.
 }
 \description{
 Votes for all models across all combinations of strategies and metrics
+}
+\examples{
+data(mtcars)
+formula <- mpg ~ .
+x <- stepwise(formula = formula,
+              data = mtcars,
+              type = "linear",
+              strategy = c("forward","bidirection","backward"),
+              metric = c("AIC","BIC","SL"))
+vote(x)
+
 }
