@@ -49,7 +49,6 @@ server <- function(input, output, session) {
   # First set default variable types according to dataset
   observe({
     req(dataset())
-    
     numeric_var <- names(dataset())[sapply(dataset(), class) == "numeric"]
     character_var <- names(dataset())[sapply(dataset(), class) == "character"]
     factor_var <- names(dataset())[sapply(dataset(), class) == "factor"]
@@ -61,8 +60,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "data_character", choices = all_var, selected = character_var)
     updateSelectInput(session, "data_factor", choices = all_var, selected = factor_var)
     updateSelectInput(session, "data_other", choices = all_var, selected = other_var)
-  }
-  )
+  })
   
   # Then, update the selectInput upon user changing any of the four
   observeEvent(input$data_numeric, {
