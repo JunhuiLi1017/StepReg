@@ -300,7 +300,7 @@ ui <- tagList(
             )
           ),
           
-          # Display sliderInput for significant level only when SL is selected
+          # Display sliderInput for significance level only when SL is selected
           conditionalPanel(
             condition = "input.type === 'linear' && input.metric_multivariate_linear.indexOf('SL') != -1",
             selectInput(

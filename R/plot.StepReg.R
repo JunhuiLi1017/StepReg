@@ -85,8 +85,8 @@ plot.StepReg <- function(x, num_digits = 6, ...) {
         ggtitle("Metric values at each step")
     } else {
       plot_data <- plot_data %>%
-        group_by(Step, Metric) %>%
-        filter(MetricValue == min(MetricValue))
+        group_by(.data$Step, .data$Metric) %>%
+        filter(.data$MetricValue == min(.data$MetricValue))
       
       #-------------------------
       #subset works for SL in logit(need to test)

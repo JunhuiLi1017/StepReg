@@ -299,7 +299,7 @@ server <- function(input, output, session) {
     selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]["detail"]
     rv$detail_plot <- selected_plot
     selected_plot
-  }, res =72, 
+  }, res =96, 
   width = function() { (320 * 2) }, 
   height = function() { (320 * nmetric()) }) 
   
