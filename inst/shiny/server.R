@@ -92,10 +92,9 @@ server <- function(input, output, session) {
     col_factor <- input$data_factor
     col_other <- input$data_other
     
-    df[col_numeric] <- lapply(df[col_numeric], as.numeric)
-    df[col_character] <- lapply(df[col_character], as.character)
-    df[col_factor] <- lapply(df[col_factor], factor)
-    
+    df[,col_factor] <- lapply(df[,col_factor], factor)
+    df[,col_numeric] <- lapply(df[,col_numeric], as.numeric)
+    df[,col_character] <- lapply(df[,col_character], as.character)
     return(df)
   })
   ## End of "Allow user to specify the variable types"

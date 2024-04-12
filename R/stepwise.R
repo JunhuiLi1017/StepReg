@@ -32,8 +32,6 @@
 #'  
 #' @param num_digits (numeric(integer)) The number of digits to keep when rounding the results. Default is 6.
 #' 
-# @param report_name (NULL|character) The output report name with extented format, '.html', 'pdf', '.docx', '.pptx', '.xlsx' and '.rtf' are supported. If NULL, do not output report file. Default is NULL.
-#' 
 #' @references
 #' 
 #' Alsubaihi, A. A., Leeuw, J. D., and Zeileis, A. (2002). Variable strategy in multivariable regression using sas/iml. , 07(i12).
@@ -77,7 +75,7 @@
 #' \item Summary of selection process under xxx(strategy) with xxx(metric): Overview of the variable selection process under specified strategy and metric.
 #' \item Summary of coefficients for the selected model with xxx(dependent variable) under xxx(strategy) and xxx(metric): Coefficients for the selected models under specified strategy with metric.
 #' }
-
+#' 
 #' @examples
 #' ## perform multivariate linear stepwise regression with 'bidirection' 
 #' ## strategy and 'AIC' stop rule, excluding intercept.
@@ -117,8 +115,6 @@
 #' @importFrom dplyr %>% mutate_if mutate
 #' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms deviance df.residual formula model.frame
 #' @importFrom MASS glm.nb
-#' 
-#' @param num_digits (numeric(integer)) The number of digits to keep when rounding the results. Default is 6.
 #' 
 #' @export
 

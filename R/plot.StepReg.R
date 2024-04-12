@@ -4,11 +4,13 @@
 #'
 #' @param x StepReg object
 #' 
-#' @param num_digits The number of digits to keep when rounding the results. Default is 6.
+#' @param num_digits The number of digits to keep when rounding the results. 
+#' Default is 6.
 #' 
 #' @param ... Not used
 #'
-#' @return A list of plots comprising the selection detail plot and selection summary plot for each strategy.
+#' @return A list of plots comprising the selection detail plot and selection 
+#' summary plot for each strategy.
 #' 
 #' @import ggplot2
 #' 

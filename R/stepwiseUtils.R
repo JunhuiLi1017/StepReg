@@ -371,7 +371,14 @@ getTable2TypeOfVariables <- function(model) {
   return(as.data.frame(table2_class_table))
 }
 
-#note1: test_method_linear should be 'F' for univariate and c(“Pillai”, “Wilks”, “Hotelling-Lawley”, “Roy”) for multivariates
+#note1: test_method_linear should be 'F' for univariate and c(“Pillai”, “Wilks”, “Hotelling-Lawley”, “Roy”) for multivariates, so cant use summary() to get p value for multivariates.
+#note2: for cox regression, no matter what the parameter is in test="x" of anova(), always return the same p value. 
+# 1) Wald test p value can only obtained from summary(). 
+# 2) cannot select 'Rao' or 'LRT' in anova for effect entered.
+#note3: for logit/poison/gamma regression, 
+#1) Wald test p value obtained from summary(), since we dont know if test='chisq' in anova is for wald test. 
+#2) can select 'Rao' or 'LRT' in anova for effect entered.
+#3) for factor effect in formula, xname1(for example sex) in formula is different with ones(for example sex1 and sex2) in summary(), we need to keep the min p value of paste("set",c(1:2)), and then rename it with 'sex'.
 #getAnovaStat(fit_reduced = x_fit_list[[1]], fit_full = fit_x_in_model, type = type, test_method = test_method)
 getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced, fit_full, type, test_method) {
   if (type == "linear") {
@@ -432,24 +439,30 @@ getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced,
       }
       rownames(stat_table) <- names(select_x)
     }
+    if(intercept == "1" & length(xlevels) == 0) {
+      if(nrow(stat_table) ==2 ) {
+        stat_table <- stat_table[-1, , drop = FALSE]
+      } else {
+        stat_table <- stat_table[-1,]
+      }
+    }
     pic_set <- stat_table[, ptype]
     names(pic_set) <- rownames(stat_table)
-    if(intercept == "1" & length(xlevels) == 0) {
-      pic_set <- pic_set[-1]
-    }
+    statistics <- stat_table[, stattype]
+    names(statistics) <- rownames(stat_table)
     #maxPVar <- rownames(stat_table)[which.max(pic_set)]
-    pic_set <- pic_set[!names(pic_set) %in% include]
-    maxPVar <- names(which.max(pic_set))
-    statistics <- stat_table[maxPVar, stattype]
-    pic <- stat_table[maxPVar, ptype]
+    pic <- list(pic_set[!names(pic_set) %in% include])
+    statistics <- list(statistics[!names(statistics) %in% include])
+    # maxPVar <- names(which.max(pic_set))
+    # statistics <- stat_table[maxPVar, stattype]
+    # pic <- stat_table[maxPVar, ptype]
   }else{
     stat_table <- anova(fit_reduced, fit_full, test = test_method)
     ptype <- names(stat_table)[names(stat_table) %in% ptype]
     statistics <- stat_table[2, stattype]
     pic <- stat_table[2, ptype]
-    maxPVar <- NA
   }
-  return(c("statistics" = statistics, "pic" = pic, "variable" = maxPVar))
+  return(c("statistics" = statistics, "pic" = pic))
 }
 
 ## get pic based on model fit, it needs fit_reduced and fit_full for SL and only fit_formula for other metrics
@@ -586,11 +599,11 @@ getCandStepModel <- function(add_or_remove, data, type, metric, weight, y_name, 
     if(metric == "SL") {
       if(type != "linear" & add_or_remove == "remove") {
         f_pic_vec <- getAnovaStat(add_or_remove = "remove", intercept = intercept, include = include, fit_full = fit_x_in_model, type = type, test_method = test_method)
-        pic_set <- as.numeric(f_pic_vec[2])
-        f_set <- as.numeric(f_pic_vec[1])
-        var_set <- f_pic_vec[3]
-        names(pic_set) <- var_set
-        names(f_set) <- var_set
+        pic_set <- f_pic_vec[[2]]
+        f_set <- f_pic_vec[[1]]
+        # var_set <- f_pic_vec[3]
+        # names(pic_set) <- var_set
+        # names(f_set) <- var_set
       }else{
         f_pic_vec <- sapply(x_fit_list, function(x) {getAnovaStat(add_or_remove = add_or_remove, include = include, fit_reduced = x, fit_full = fit_x_in_model, type = type, test_method = test_method)})
         pic_set <- f_pic_vec[2, ]
@@ -598,7 +611,7 @@ getCandStepModel <- function(add_or_remove, data, type, metric, weight, y_name, 
         names(pic_set) <- colnames(f_pic_vec)
         names(f_set) <- colnames(f_pic_vec)
       }
-    }else{
+    } else {
       if(add_or_remove == "remove" & length(x_test) == 1 & intercept == "0") {
         pic_set <- Inf
         names(pic_set) <- x_test
@@ -610,7 +623,7 @@ getCandStepModel <- function(add_or_remove, data, type, metric, weight, y_name, 
       pic <- max(pic_set)
       minmax_var <- names(which.max(pic_set))
       best_candidate_model <- x_fit_list[[minmax_var]]
-    }else{
+    } else {
       pic <- min(pic_set)
       minmax_var <- names(which.min(pic_set))
       best_candidate_model <- x_fit_list[[minmax_var]]
