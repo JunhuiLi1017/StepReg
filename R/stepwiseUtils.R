@@ -871,7 +871,7 @@ getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weig
       table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric()
       table3[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character) # to keep digits as we expected, convert numeric to character for html output.
       
-      if( stra != "subset" & met != "SL" ) {
+      if(!(stra == "subset" & met == "SL")) {
         x_final_model_metric[[stra]][[met]] <- x_final_model
         vote_df <- rbind(vote_df,data.frame(deparse(reformulate(x_final_model, y_name)),paste0(stra,":",met)))
       }
@@ -886,7 +886,7 @@ getTable4CoefModel <- function(type = type, strategy, metric, intercept, include
   for(stra in strategy) {
     table4_coef_model_metric[[stra]] <- getCoefModel(type = type, intercept, include, x_final_model_metric[[stra]], y_name, n_y, data, weight, test_method_cox)
     for(met in metric) {
-      if(stra != "subset" & met != "SL") {
+      if(!(stra == "subset" & met == "SL")) {
         table4_coef_model <- table4_coef_model_metric[[stra]][[met]]
         for(i in names(table4_coef_model)) {
           table4[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table4_coef_model[[i]] %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character)
