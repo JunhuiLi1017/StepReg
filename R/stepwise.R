@@ -172,58 +172,16 @@ stepwise <- function(formula,
   result$'Summary of variables in dataset' <- table2_class_table
   
   ## table3
-  table3_process_table_metric <- list()
-  x_final_model_metric <- list()
-  pic_df <- NULL
-  vote_df <- NULL
-  for(stra in strategy) {
-    for(met in metric) {
-      if(stra == "subset") {
-        table3_process_table <- getSubsetWrapper(data, type, met, x_name, y_name, intercept, include, weight = weight, best_n, test_method, sigma_value)
-        if(met != "SL"){
-          x_final_model <- getXNameSelected(table3_process_table,met)
-        }
-        #table3_process_table[,met] <- as.numeric(table3_process_table[,met])
-      } else {
-        out_final_stepwise <- getStepwiseWrapper(data, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
-        
-        pic_df <- rbind(pic_df,out_final_stepwise$pic_df)
-        
-        table3_process_table <- out_final_stepwise$process_table
-        remove_col <- NULL
-        if(stra == "forward") {
-          remove_col <- "EffectRemoved"
-        } else if(stra == "backward") {
-          remove_col <- "EffectEntered"
-        }
-        table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% remove_col]
-        if(all(table3_process_table[,"NumberEffect"] == table3_process_table[,"NumberParams"])) {
-          table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% "NumberEffect"]
-        }
-        x_in_model <- out_final_stepwise$x_in_model
-        x_final_model <- c(include, x_in_model)
-      }
-      #table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric() %>% round(num_digits) %>% as.character()
-      table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric()
-      result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character) # to keep digits as we expected, convert numeric to character for html output.
-      
-      if( stra != "subset" & met != "SL" ) {
-        x_final_model_metric[[stra]][[met]] <- x_final_model
-        vote_df <- rbind(vote_df,data.frame(deparse(reformulate(x_final_model, y_name)),paste0(stra,":",met)))
-      }
-    }
-    ##table4
-    table4_coef_model_metric <- list()
-    table4_coef_model_metric[[stra]] <- getTable4CoefModel(type = type, intercept, include, x_final_model_metric[[stra]] , y_name, n_y, data, weight, test_method_cox)
-    for(met in metric) {
-      if(stra != "subset" & met != "SL") {
-        table4_coef_model <- table4_coef_model_metric[[stra]][[met]]
-        for(i in names(table4_coef_model)) {
-          result[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table4_coef_model[[i]] %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character)
-        }
-      }
-    }
-  }
+  table3_list <- getTable3ProcessSummary(data, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, best_n, test_method, sigma_value, num_digits)
+  table3 <- table3_list$table3
+  vote_df <- table3_list$vote_df
+  pic_df <- table3_list$pic_df
+  final_variable <- table3_list$final_variable
+  result <- append(result,table3)
+  
+  table4 <- getTable4CoefModel(type = type, strategy, metric, intercept, include, final_variable, y_name, n_y, data, weight, test_method_cox, num_digits)
+  result <- append(result,table4)
+  
   if(!is.null(vote_df)) {
     colnames(vote_df) <- c("model", "combination")
   }

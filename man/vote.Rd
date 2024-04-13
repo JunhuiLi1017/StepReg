@@ -15,7 +15,11 @@ vote(x, ...)
 A dataframe with column names "model" and combinations of strategy and metric. 
 The first column represents the model formula, and a checkmark indicates 
 that the corresponding model was supported by the given strategy and metric 
-combination.
+combination. Please note that for the subset strategy, the "vote" will report
+the single best model across all numbers of variables under Information 
+Criteria (IC). However, this rule should not be applied to Significance Level
+(SL) because the F/Rao value is only comparable for models with the same 
+number of variables.
 }
 \description{
 Votes for all models across all combinations of strategies and metrics

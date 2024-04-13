@@ -60,7 +60,7 @@ A list containing multiple tables will be returned.
 \item Summary of arguments for model selection: Arguments used in the stepwise function, either default or user-supplied values.
 \item Summary of variables in dataset: Variable names, types, and classes in dataset.
 \item Summary of selection process under xxx(strategy) with xxx(metric): Overview of the variable selection process under specified strategy and metric.
-\item Summary of coefficients for the selected model with xxx(dependent variable) under xxx(strategy) and xxx(metric): Coefficients for the selected models under specified strategy with metric.
+\item Summary of coefficients for the selected model with xxx(dependent variable) under xxx(strategy) and xxx(metric): Coefficients for the selected models under specified strategy with metric. Please note that this table will not be generated for the strategy 'subset' when using the metric 'SL'.
 }
 }
 \description{

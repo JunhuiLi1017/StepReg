@@ -837,11 +837,12 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
   return(out_final_stepwise)
 }
 
-getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, best_n, test_method, sigma_value, result) {
+getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, best_n, test_method, sigma_value, num_digits) {
   table3_process_table_metric <- list()
   x_final_model_metric <- list()
   pic_df <- NULL
   vote_df <- NULL
+  table3 <- list()
   
   for(stra in strategy) {
     for(met in metric) {
@@ -868,7 +869,7 @@ getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weig
       }
       #table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric() %>% round(num_digits) %>% as.character()
       table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric()
-      result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character) # to keep digits as we expected, convert numeric to character for html output.
+      table3[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character) # to keep digits as we expected, convert numeric to character for html output.
       
       if( stra != "subset" & met != "SL" ) {
         x_final_model_metric[[stra]][[met]] <- x_final_model
@@ -876,7 +877,24 @@ getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weig
       }
     }
   }
-  return(list('final_variable' = x_final_model_metric, 'vote_df' = vote_df, 'result' = result))
+  return(list('final_variable' = x_final_model_metric, 'vote_df' = vote_df, 'table3' = table3, "pic_df" = pic_df))
+}
+
+getTable4CoefModel <- function(type = type, strategy, metric, intercept, include, x_final_model_metric, y_name, n_y, data, weight, test_method_cox, num_digits) {
+  table4_coef_model_metric <- list()
+  table4 <- list()
+  for(stra in strategy) {
+    table4_coef_model_metric[[stra]] <- getCoefModel(type = type, intercept, include, x_final_model_metric[[stra]], y_name, n_y, data, weight, test_method_cox)
+    for(met in metric) {
+      if(stra != "subset" & met != "SL") {
+        table4_coef_model <- table4_coef_model_metric[[stra]][[met]]
+        for(i in names(table4_coef_model)) {
+          table4[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table4_coef_model[[i]] %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character)
+        }
+      }
+    }
+  }
+  return(table4)
 }
 
 # not called:
@@ -889,7 +907,7 @@ getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weig
 #   return(table4)
 # }
 
-getTable4CoefModel <- function(type, intercept, include, x_in_model_metric, y_name, n_y, data, weight, test_method) {
+getCoefModel <- function(type, intercept, include, x_in_model_metric, y_name, n_y, data, weight, test_method) {
   table4 <- list()
   for(met in names(x_in_model_metric)) {
     x_in_model <- x_in_model_metric[[met]]

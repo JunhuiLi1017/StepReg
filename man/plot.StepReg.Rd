@@ -9,12 +9,14 @@
 \arguments{
 \item{x}{StepReg object}
 
-\item{num_digits}{The number of digits to keep when rounding the results. Default is 6.}
+\item{num_digits}{The number of digits to keep when rounding the results. 
+Default is 6.}
 
 \item{...}{Not used}
 }
 \value{
-A list of plots comprising the selection detail plot and selection summary plot for each strategy.
+A list of plots comprising the selection detail plot and selection 
+summary plot for each strategy.
 }
 \description{
 plot.StepReg visualizes the variable selection procedure using a StepReg object
