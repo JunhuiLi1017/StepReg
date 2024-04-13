@@ -837,6 +837,48 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
   return(out_final_stepwise)
 }
 
+getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, best_n, test_method, sigma_value, result) {
+  table3_process_table_metric <- list()
+  x_final_model_metric <- list()
+  pic_df <- NULL
+  vote_df <- NULL
+  
+  for(stra in strategy) {
+    for(met in metric) {
+      if(stra == "subset") {
+        table3_process_table <- getSubsetWrapper(data, type = type, met, x_name, y_name, intercept, include, weight = weight, best_n, test_method, sigma_value)
+        if(met != "SL"){
+          x_final_model <- getXNameSelected(table3_process_table,met)
+        }
+      } else {
+        out_final_stepwise <- getStepwiseWrapper(data, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
+        pic_df <- rbind(pic_df, out_final_stepwise$pic_df)
+        table3_process_table <- out_final_stepwise$process_table
+        remove_col <- NULL
+        if(stra == "forward") {
+          remove_col <- "EffectRemoved"
+        } else if(stra == "backward") {
+          remove_col <- "EffectEntered"
+        }
+        table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% remove_col]
+        if(all(table3_process_table[,"NumberEffect"] == table3_process_table[,"NumberParams"])) {
+          table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% "NumberEffect"]
+        }
+        x_final_model <- c(include, out_final_stepwise$x_in_model)
+      }
+      #table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric() %>% round(num_digits) %>% as.character()
+      table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric()
+      result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character) # to keep digits as we expected, convert numeric to character for html output.
+      
+      if( stra != "subset" & met != "SL" ) {
+        x_final_model_metric[[stra]][[met]] <- x_final_model
+        vote_df <- rbind(vote_df,data.frame(deparse(reformulate(x_final_model, y_name)),paste0(stra,":",met)))
+      }
+    }
+  }
+  return(list('final_variable' = x_final_model_metric, 'vote_df' = vote_df, 'result' = result))
+}
+
 # not called:
 # getTable4FinalVariable <- function(all_x_in_model) {
 #   variables <- as.data.frame(t(data.frame(all_x_in_model)))

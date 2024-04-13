@@ -73,7 +73,7 @@
 #' \item Summary of arguments for model selection: Arguments used in the stepwise function, either default or user-supplied values.
 #' \item Summary of variables in dataset: Variable names, types, and classes in dataset.
 #' \item Summary of selection process under xxx(strategy) with xxx(metric): Overview of the variable selection process under specified strategy and metric.
-#' \item Summary of coefficients for the selected model with xxx(dependent variable) under xxx(strategy) and xxx(metric): Coefficients for the selected models under specified strategy with metric.
+#' \item Summary of coefficients for the selected model with xxx(dependent variable) under xxx(strategy) and xxx(metric): Coefficients for the selected models under specified strategy with metric. Please note that this table will not be generated for the strategy 'subset' when using the metric 'SL'.
 #' }
 #' 
 #' @examples
@@ -133,14 +133,10 @@ stepwise <- function(formula,
                      weight = NULL,
                      best_n = 3,
                      num_digits = 6) {
-  ## validate input:
-  ## check required parameters
-  ## place match.arg() in the main function because validationUtils.R can't return type even with <<-, and type represents all values in c().
+
   type <- match.arg(type)
   strategy <- match_multiple_args(strategy, c("forward", "backward", "bidirection", "subset"))
   metric <- match_multiple_args(metric, c("AIC", "AICc", "BIC", "CP", "HQ", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"))
-  #strategy <- arg_match(strategy, c("forward", "backward", "bidirection", "subset"), multiple = TRUE)
-  #metric <- arg_match(metric, c("AIC", "AICc", "BIC", "CP", "HQ", "Rsq", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"), multiple = TRUE)
   
   test_method_linear <- match.arg(test_method_linear)
   test_method_glm <- match.arg(test_method_glm)
@@ -184,9 +180,11 @@ stepwise <- function(formula,
     for(met in metric) {
       if(stra == "subset") {
         table3_process_table <- getSubsetWrapper(data, type, met, x_name, y_name, intercept, include, weight = weight, best_n, test_method, sigma_value)
-        x_final_model <- getXNameSelected(table3_process_table,met)
-        table3_process_table[,met] <- as.numeric(table3_process_table[,met])
-      }else{
+        if(met != "SL"){
+          x_final_model <- getXNameSelected(table3_process_table,met)
+        }
+        #table3_process_table[,met] <- as.numeric(table3_process_table[,met])
+      } else {
         out_final_stepwise <- getStepwiseWrapper(data, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
         
         pic_df <- rbind(pic_df,out_final_stepwise$pic_df)
@@ -208,26 +206,29 @@ stepwise <- function(formula,
       #table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric() %>% round(num_digits) %>% as.character()
       table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric()
       result[[paste0("Summary of selection process under ",stra," with ",met,collapse="")]] <- table3_process_table %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character) # to keep digits as we expected, convert numeric to character for html output.
-      x_final_model_metric[[stra]][[met]] <- x_final_model
       
-      vote_df <- rbind(vote_df,data.frame(deparse(reformulate(x_final_model, y_name)),paste0(stra,":",met)))
+      if( stra != "subset" & met != "SL" ) {
+        x_final_model_metric[[stra]][[met]] <- x_final_model
+        vote_df <- rbind(vote_df,data.frame(deparse(reformulate(x_final_model, y_name)),paste0(stra,":",met)))
+      }
     }
     ##table4
     table4_coef_model_metric <- list()
     table4_coef_model_metric[[stra]] <- getTable4CoefModel(type = type, intercept, include, x_final_model_metric[[stra]] , y_name, n_y, data, weight, test_method_cox)
     for(met in metric) {
-      table4_coef_model <- table4_coef_model_metric[[stra]][[met]]
-      for(i in names(table4_coef_model)) {
-        #colnames(table4_coef_model[[i]]) %>% str_replace(" ", "_") -> colnames(table4_coef_model[[i]])
-        result[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table4_coef_model[[i]] %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character)
+      if(stra != "subset" & met != "SL") {
+        table4_coef_model <- table4_coef_model_metric[[stra]][[met]]
+        for(i in names(table4_coef_model)) {
+          result[[paste0("Summary of coefficients for the selected model with ", i, " under ",stra," and ",met,sep=" ")]] <- table4_coef_model[[i]] %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character)
+        }
       }
     }
   }
-  colnames(vote_df) <- c("model", "combination")
-  result[['Detail_selection_summary']] <-  pic_df
-  #result[['Final_variable']] <- x_final_model_metric
+  if(!is.null(vote_df)) {
+    colnames(vote_df) <- c("model", "combination")
+  }
   result[['Vote_df']] <- vote_df
+  result[['Detail_selection_summary']] <-  pic_df
   class(result) <- c("StepReg", "list", strategy, type)
-  #attr(result, "hidden") <- "Detail_selection_summary"
   return(result)
 }
