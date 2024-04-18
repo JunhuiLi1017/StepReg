@@ -30,8 +30,8 @@ formula <- mpg ~ .
 x <- stepwise(formula = formula,
               data = mtcars,
               type = "linear",
-              strategy = c("forward","bidirection","backward"),
-              metric = c("AIC","BIC","SL"))
+              strategy = c("forward","backward","subset"),
+              metric = c("AIC","BIC"))
 vote(x)
 
 }
