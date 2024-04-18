@@ -850,6 +850,7 @@ getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weig
         table3_process_table <- getSubsetWrapper(data, type = type, met, x_name, y_name, intercept, include, weight = weight, best_n, test_method, sigma_value)
         if(met != "SL"){
           x_final_model <- getXNameSelected(table3_process_table,met)
+          x_final_model <- x_final_model[!x_final_model %in% '1']
         }
       } else {
         out_final_stepwise <- getStepwiseWrapper(data, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)

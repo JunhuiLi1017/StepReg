@@ -251,8 +251,14 @@ server <- function(input, output, session) {
       test_method_cox = input$cox_test
     )
     process_plot <- plot(res)
-    model_vote <- vote(res)
-    results <- list(res, process_plot, model_vote)
+    
+    if(all(input$strategy %in% 'subset') & all(metric %in% 'SL')) {
+      results <- list(res, process_plot)
+    } else {
+      model_vote <- vote(res)
+      results <- list(res, process_plot, model_vote)
+    }
+
     enable("download")
     enable("download_process_plot")
     results
@@ -318,11 +324,18 @@ server <- function(input, output, session) {
     HTML("<b>Statistics of Variable Selection:\n</b>")
   })
   output$modelVoteText <- renderText({
-    HTML("<b>Model Selection by Vote Across All Combinations of Strategy and Metric:\n</b>")
+    if(all(input$strategy %in% 'subset') & all(metric %in% 'SL')) {
+      HTML("<b>Vote isn't available for selection strategy 'subset':\n</b>")
+    } else {
+      HTML("<b>Model Selection by Vote Across All Combinations of Strategy and Metric:\n</b>")
+    }
+    
   })
   
   output$modelVote <- renderDataTable({ 
-    DT::datatable(stepwiseModel()[[3]], options = list(scrollX = TRUE))
+    if(!(all(input$strategy %in% 'subset') & all(metric %in% 'SL'))) {
+      DT::datatable(stepwiseModel()[[3]], options = list(scrollX = TRUE))
+    }
   })
   # Output Data
   output$tbl <- renderDataTable({
