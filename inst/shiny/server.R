@@ -8,7 +8,7 @@ server <- function(input, output, session) {
   shinyjs::disable("download_process_plot")
   
   # Function to read uploaded dataset
-  dataset <- reactiveVal(NULL)
+  df = reactiveValues(path = NULL)
   
   observeEvent(input$example_dataset, {
     req(input$example_dataset)
@@ -20,14 +20,11 @@ server <- function(input, output, session) {
       mutate(sex = factor(sex, levels = c(1, 2))) %>% 
       na.omit() -> lung # get rid of incomplete records
     
-    
-    df <- switch(input$example_dataset,
+    df$data <- switch(input$example_dataset,
                  "mtcars (for Linear regression)" = mtcars,
                  "remission (for Logistic regression)" = remission,
                  "lung (for Cox regression)" = lung,
                  "creditCard (for Poisson regression)" = creditCard)
-    
-    dataset(df)
   })
   
   # Function to upload user custom dataset:
@@ -35,96 +32,110 @@ server <- function(input, output, session) {
     req(input$upload_file)
     # Read the uploaded file
     tryCatch(
-      df <- read.table(input$upload_file$datapath,
+      df$data <- read.table(input$upload_file$datapath,
                        header = input$header,
                        sep = input$sep,
                        quote = input$quote),
       error = function(e) {
         warning("An error occurred uploading dataset:", e$message)
-        return(NULL)
+        df$data <- NULL
       })
-    dataset(df)
-  })
-  ## Allow user to specify the variable types
-  # First set default variable types according to dataset
-  observe({
-    req(dataset())
-    numeric_var <- names(dataset())[sapply(dataset(), class) == "numeric"]
-    character_var <- names(dataset())[sapply(dataset(), class) == "character"]
-    factor_var <- names(dataset())[sapply(dataset(), class) == "factor"]
-    other_var <- names(dataset())[!(names(dataset()) %in% c(numeric_var, character_var, factor_var))]
-    
-    all_var <- names(dataset())
-    
-    updateSelectInput(session, "data_numeric", choices = all_var, selected = numeric_var)
-    updateSelectInput(session, "data_character", choices = all_var, selected = character_var)
-    updateSelectInput(session, "data_factor", choices = all_var, selected = factor_var)
-    updateSelectInput(session, "data_other", choices = all_var, selected = other_var)
   })
   
-  # Then, update the selectInput upon user changing any of the four
-  observeEvent(input$data_numeric, {
-    updateSelectInput(session, "data_character", selected = setdiff(input$data_character, input$data_numeric))
-    updateSelectInput(session, "data_factor", selected = setdiff(input$data_factor, input$data_numeric))
-    updateSelectInput(session, "data_other", selected = setdiff(input$data_other, input$data_numeric))})
+  output_list <- c("numeric_var", "factor_var", "character_var", "integer_var")
   
-  observeEvent(input$data_character, {
-    updateSelectInput(session, "data_numeric", selected = setdiff(input$data_numeric, input$data_character))
-    updateSelectInput(session, "data_factor", selected = setdiff(input$data_factor, input$data_character))
-    updateSelectInput(session, "data_other", selected = setdiff(input$data_other, input$data_character))})
-  
-  observeEvent(input$data_factor, {
-    updateSelectInput(session, "data_character", selected = setdiff(input$data_character, input$data_factor))
-    updateSelectInput(session, "data_numeric", selected = setdiff(input$data_numeric, input$data_factor))
-    updateSelectInput(session, "data_other", selected = setdiff(input$data_other, input$data_factor))})
-  
-  observeEvent(input$data_other, {
-    updateSelectInput(session, "data_character", selected = setdiff(input$data_character, input$data_other))
-    updateSelectInput(session, "data_factor", selected = setdiff(input$data_factor, input$data_other))
-    updateSelectInput(session, "data_numeric", selected = setdiff(input$data_numeric, input$data_other))})
-  
-  # Next, create a new dataset reflecting column types accordingly:
-  dataset_m <- reactive({
-    req(dataset())
-    df <- dataset()
-    col_numeric <- input$data_numeric
-    col_character <- input$data_character
-    col_factor <- input$data_factor
-    col_other <- input$data_other
-    
-    df[,col_factor] <- lapply(df[,col_factor], factor)
-    df[,col_numeric] <- lapply(df[,col_numeric], as.numeric)
-    df[,col_character] <- lapply(df[,col_character], as.character)
-    return(df)
+  lapply(output_list, function(i) {
+    output_name <- unlist(str_split(i, "_"))[1]
+    output[[paste0("colname_in_", output_name)]] <- renderUI({
+      req(df$data)
+      var_names <- names(df$data)[sapply(df$data, class) == output_name]
+      selectInput(inputId = i,
+                  label = paste0(str_to_title(output_name), " variables"),
+                  choices = names(df$data),
+                  selected = var_names,
+                  multiple = TRUE)
+    })
   })
-  ## End of "Allow user to specify the variable types"
+  
+  observeEvent(input$numeric_var, {
+    updateSelectInput(session, "character_var", selected = setdiff(input$character_var, input$numeric_var))
+    updateSelectInput(session, "factor_var", selected = setdiff(input$factor_var, input$numeric_var))
+    updateSelectInput(session, "integer_var", selected = setdiff(input$integer_var, input$numeric_var))
+  })
+
+  observeEvent(input$factor_var, {
+    updateSelectInput(session, "numeric_var", selected = setdiff(input$numeric_var, input$factor_var))
+    updateSelectInput(session, "character_var", selected = setdiff(input$character_var, input$factor_var))
+    updateSelectInput(session, "integer_var", selected = setdiff(input$integer_var, input$factor_var))
+  })
+
+  observeEvent(input$character_var, {
+    updateSelectInput(session, "numeric_var", selected = setdiff(input$numeric_var, input$character_var))
+    updateSelectInput(session, "factor_var", selected = setdiff(input$factor_var, input$character_var))
+    updateSelectInput(session, "integer_var", selected = setdiff(input$integer_var, input$character_var))
+  })
+
+  observeEvent(input$integer_var, {
+    updateSelectInput(session, "numeric_var", selected = setdiff(input$numeric_var, input$integer_var))
+    updateSelectInput(session, "factor_var", selected = setdiff(input$factor_var, input$integer_var))
+    updateSelectInput(session, "character_var", selected = setdiff(input$character_var, input$integer_var))
+  })
+  
+  observeEvent(input$change_class, {
+    #dont use req() below, otherwise cannot do eval function.
+    #req(input$numeric_var, input$factor_var, input$integer_var, input$character_var)
+    req(df$data)
+    var_forget <- colnames(df$data)[!colnames(df$data) %in% c(input$numeric_var, input$factor_var, input$integer_var, input$character_var)]
+    if(length(var_forget) > 0) {
+      showModal(modalDialog(
+        title = "Missing Variables",
+        paste0("Please specify variable type for ",paste0(var_forget,collapse=", "),'.'),
+        easyClose = TRUE,
+        footer = NULL
+      ))
+    }
+    mutate_variable <- function(var_names, var_type) {
+      lapply(var_names, function(i) {
+        df$data <- eval(parse(text = paste0('df$data %>% mutate(',
+                                             i,
+                                             ' = as.',
+                                             var_type,
+                                             '(',
+                                             i,
+                                             '))')))
+      })
+    }
+
+    mutate_variable(input$numeric_var, "numeric")
+    mutate_variable(input$factor_var, "factor")
+    mutate_variable(input$integer_var, "integer")
+    mutate_variable(input$character_var, "character")
+  })
 
   # Update select inputs based on regression type:
   observe({
-    req(dataset())
-    
+    req(df$data)
     # Update select input for distribution plot
-    updateSelectInput(session, "distribution_plot", choices = names(dataset()))
-    
-    updateSelectInput(session, "dependent_linear", choices = names(dataset()))
-    updateSelectInput(session, "status", choices = names(dataset()))
-    updateSelectInput(session, "time", choices = names(dataset()))
-    updateSelectInput(session, "dependent_glm", choices = names(dataset()))
+    updateSelectInput(session, "distribution_plot", choices = names(df$data))
+    updateSelectInput(session, "dependent_linear", choices = names(df$data))
+    updateSelectInput(session, "status", choices = names(df$data))
+    updateSelectInput(session, "time", choices = names(df$data))
+    updateSelectInput(session, "dependent_glm", choices = names(df$data))
     
     observeEvent(input$dependent_linear, {
-      updateSelectInput(session, "independent", choices = setdiff(names(dataset()), input$dependent_linear))
+      updateSelectInput(session, "independent", choices = setdiff(names(df$data), input$dependent_linear))
     })
     
     observeEvent(input$status, {
-      updateSelectInput(session, "time", choices = setdiff(names(dataset()), input$status))
+      updateSelectInput(session, "time", choices = setdiff(names(df$data), input$status))
     })
     
     observeEvent(c(input$status, input$time), {
-      updateSelectInput(session, "independent", choices = setdiff(names(dataset()), c(input$status, input$time)))
+      updateSelectInput(session, "independent", choices = setdiff(names(df$data), c(input$status, input$time)))
     })
     
     observeEvent(input$dependent_glm, {
-      updateSelectInput(session, "independent", choices = setdiff(names(dataset()), input$dependent_glm))
+      updateSelectInput(session, "independent", choices = setdiff(names(df$data), input$dependent_glm))
     })
     
     observeEvent(input$independent, {
@@ -188,7 +199,7 @@ server <- function(input, output, session) {
   stepwiseModel <- eventReactive(input$run_analysis, {
     disable("download")
     disable("download_process_plot")
-    req(dataset_m())
+    req(df$data)
     if (input$intercept == TRUE) {
       intercept <- 1
     } else {
@@ -228,7 +239,7 @@ server <- function(input, output, session) {
     
     res <- stepwise(
       formula = formula,
-      data = dataset_m(),
+      data = df$data,
       type = input$type,
       include = input$include,
       strategy = input$strategy,
@@ -315,28 +326,28 @@ server <- function(input, output, session) {
   })
   # Output Data
   output$tbl <- renderDataTable({
-    req(dataset_m())
-    DT::datatable(dataset_m(), options = list(scrollX = TRUE))
+    req(df$data)
+    DT::datatable(df$data, options = list(scrollX = TRUE))
   })
 
   # Render the appropriate summary based on the selected type
   observe({
     output$summary <- renderPrint({
-      req(dataset_m())
+      req(df$data)
       pdf(file = NULL)
-      summarytools::dfSummary(dataset_m(),graph.col = FALSE)
+      summarytools::dfSummary(df$data,graph.col = FALSE)
     })
   })
   
   observe({
-    req(dataset_m())
-    updateSelectInput(session, "var_plot", choices = colnames(dataset_m()))
+    req(df$data)
+    updateSelectInput(session, "var_plot", choices = colnames(df$data))
   })
   
   plot_data <- eventReactive(input$make_plot, {
     disable("downloadPlot")
     req(input$plot_type, input$var_plot)
-    plot_type <- createPlot(input$plot_type, input$var_plot, dataset_m())
+    plot_type <- createPlot(input$plot_type, input$var_plot, df$data)
     if (input$plot_type == "Pairs plot") {
       plot_result <- plot_type
     } else {

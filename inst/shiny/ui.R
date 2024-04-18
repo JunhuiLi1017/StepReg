@@ -35,7 +35,6 @@ ui <- tagList(
   
       # Sidebar layout with input and output definitions ----
       sidebarLayout(
-        
         # Sidebar panel for inputs ----
         sidebarPanel(
           selectInput(
@@ -48,10 +47,8 @@ ui <- tagList(
               "lung (for Cox regression)",
               "creditCard (for Poisson regression)")
           ),
-          # Horizontal line ----
-          tags$hr(),
-          br(),
-          # Input: Select a file ----
+          
+            # Input: Select a file ----
           fileInput(
             "upload_file", 
             "Or upload your data",
@@ -60,9 +57,7 @@ ui <- tagList(
                        "text/comma-separated-values,text/plain",
                        ".csv")),
           
-          # Horizontal line ----
-          tags$hr(),
-          
+
           # Input: Checkbox if file has header 
           checkboxInput("header", "Header", TRUE),
           
@@ -80,9 +75,11 @@ ui <- tagList(
                        choices = c(None = "",
                                    "Double Quote" = '"',
                                    "Single Quote" = "'")),
-          
-          # Horizontal line ----
-          tags$hr()
+          uiOutput("colname_in_numeric"),
+          uiOutput("colname_in_factor"),
+          uiOutput("colname_in_integer"),
+          uiOutput("colname_in_character"),
+          actionButton("change_class", "Change class")
         ),
         
         # Main panel for displaying outputs ----
@@ -92,38 +89,6 @@ ui <- tagList(
             
             tabPanel(
               "Data",
-              div(style = "width: 100%",
-                  selectInput(
-                    "data_numeric",
-                    "numeric variable(s):",
-                    choices = NULL,
-                    multiple = TRUE
-                  )
-              ),
-              div(style = "width: 100%",
-                  selectInput(
-                    "data_character",
-                    "character variable(s):",
-                    choices = NULL,
-                    multiple = TRUE
-                  )
-              ),
-              div(style = "width: 100%",
-                  selectInput(
-                    "data_factor",
-                    "factor variable(s):",
-                    choices = NULL,
-                    multiple = TRUE
-                  )
-              ),
-              div(style = "width: 100%",
-                  selectInput(
-                    "data_other",
-                    "other variable(s):",
-                    choices = NULL,
-                    multiple = TRUE
-                  )
-              ),
               div(style = "width: 100%;",
                   withSpinner(DT::dataTableOutput('tbl', width = 750))
                   )

@@ -5,7 +5,8 @@ require("StepReg") || stop("unable to load StepReg")
 if(packageVersion("StepReg") < "1.5.0") {
   stop("Need to wait until package:StepReg 1.5.0 is installed!")
 }
-require("cowplot") || stop("unable to load cowplot")
+#require("cowplot") || stop("unable to load cowplot")
+require("stringr") || stop("unable to load stringr")
 require("DT") || stop("unable to load DT")
 require("shinythemes") || stop("unable to load shinythemes")
 require("shinycssloaders") || stop("unable to laod shinycssloaders")

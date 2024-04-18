@@ -305,7 +305,8 @@ res1
 
 To visualize the selection process:
 ```{r plot_res1, warning = FALSE}
-plot(res1)
+plot_list <- plot(res1)
+cowplot::plot_grid(plotlist = plot_list$forward, ncol = 1)
 ```
 
 To exclude the intercept from the model, adjust the formula as follows:
@@ -335,7 +336,12 @@ res2 <- stepwise(formula = formula,
                  sle = 0.05,
                  sls = 0.05)
 res2
-plot(res2)
+```
+
+```{r, message = FALSE, warning = FALSE, fig.width=9, fig.height=12}
+plot_list <- plot(res2)
+cowplot::plot_grid(plotlist = plot_list$forward, ncol = 1, rel_heights = c(2, 1))
+cowplot::plot_grid(plotlist = plot_list$backward, ncol = 1, rel_heights = c(2, 1))
 ```
 
 ### Example2: multivariate regression ("mpg" and "drat")
