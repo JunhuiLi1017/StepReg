@@ -435,6 +435,7 @@ ui <- tagList(
                       selectInput("strategy_plot",
                                   "Stepwise Strategy:",
                                   choices = c("")),
+                      sliderInput("relative_1", "relative height:", value = 1, min = 0.1, max = 10, step = 0.05),
                       downloadButton("download_process_plot",
                                      "Save",
                                      icon = icon("download"),
@@ -442,24 +443,24 @@ ui <- tagList(
                       )
                    )
                 ),
+                # fluidRow(
+                #   column(width = 12,
+                #          mainPanel(
+                #                conditionalPanel(
+                #                  condition = "input.run_analysis",
+                #                  htmlOutput("selectionPlotText")
+                #                ),
+                #                withSpinner(plotOutput("process_plot"))
+                #          )
+                #   )
+                # ),
                 fluidRow(
                   column(width = 12,
                          mainPanel(
-                               conditionalPanel(
-                                 condition = "input.run_analysis",
-                                 htmlOutput("selectionPlotText")
-                               ),
-                               withSpinner(plotOutput("process_plot"))
-                         )
-                  )
-                ),
-                fluidRow(
-                  column(width = 12,
-                         mainPanel(
-                           # conditionalPanel(
-                           #   condition = "input.run_analysis",
-                           #   htmlOutput("selectionPlotText")
-                           # ),
+                           conditionalPanel(
+                             condition = "input.run_analysis",
+                             htmlOutput("selectionPlotText")
+                           ),
                            withSpinner(plotOutput("detail_plot"))
                          )
                   )

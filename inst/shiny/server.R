@@ -298,24 +298,42 @@ server <- function(input, output, session) {
   })
   
   rv <- reactiveValues()
-  output$process_plot <- renderPlot({
-    # Get the selected strategy plot from the list of plots
-    selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]["summary"]
-    rv$summary_plot <- selected_plot
-    selected_plot
-  }, res =72, 
-  width = function() { (320 * 2) }, 
-  height = function() { (320) })
- 
-  output$detail_plot <- renderPlot({
-    req(nmetric())  # Ensure nmetric is available before proceeding
-    # Get the selected strategy plot from the list of plots
-    selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]["detail"]
-    rv$detail_plot <- selected_plot
-    selected_plot
-  }, res =96, 
-  width = function() { (320 * 2) }, 
-  height = function() { (320 * nmetric()) }) 
+  rpl <- reactiveValues()
+  # output$process_plot <- renderPlot({
+  #   # Get the selected strategy plot from the list of plots
+  #   selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]["summary"]
+  #   rv$summary_plot <- selected_plot
+  #   selected_plot
+  # }, res =72, 
+  # width = function() { (320 * 2) }, 
+  # height = function() { (320) })
+  # 
+  # output$detail_plot <- renderPlot({
+  #   req(nmetric())  # Ensure nmetric is available before proceeding
+  #   # Get the selected strategy plot from the list of plots
+  #   selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]["detail"]
+  #   rv$detail_plot <- selected_plot
+  #   selected_plot
+  # }, res =96, 
+  # width = function() { (320 * 2) }, 
+  # height = function() { (320 * nmetric()) }) 
+  
+  
+  observeEvent(c(input$relative_1), {
+    output$detail_plot <- renderPlot({
+      req(nmetric())  # Ensure nmetric is available before proceeding
+      # Get the selected strategy plot from the list of plots
+      selected_plot <- plot_grid(plotlist = rev(stepwiseModel()[[2]][[input$strategy_plot]]), ncol = 1, rel_heights = c(1, input$relative_1))
+      for(i in input$strategy) {
+        rpl[[i]] <- list(plot_grid(plotlist = rev(stepwiseModel()[[2]][[i]]), ncol = 1, rel_heights = c(1, input$relative_1)))
+      }
+      rv$all_plot <- selected_plot
+      selected_plot
+    }, res =96, 
+    width = function() { (320 * 2) }, 
+    height = function() { (320 * nmetric()) }) 
+  })
+  
   
   output$selectionPlotText <- renderUI({
     HTML("<b>Visualization of Variable Selection:\n</b>")
@@ -391,7 +409,9 @@ server <- function(input, output, session) {
     req(nmetric()),
     filename = function() { paste(input$strategy_plot, '_selection_process.png', sep='') },
     content = function(file) {
-      ggsave(file, plot = plot_grid(plotlist = list(rv$summary_plot$summary,rv$detail_plot$detail), ncol = 1), device = "png")
+      #rel_height=c(1,ceiling(nmetric()/3))
+      #ggsave(file, plot = plot_grid(plotlist = list(rv$summary_plot$summary,rv$detail_plot$detail), ncol = 1, rel_heights = c(input$relative_1, input$relative_2)), device = "png")
+      ggsave(file, plot = rv$all_plot, device = "png")
     }
   )
   
@@ -403,7 +423,7 @@ server <- function(input, output, session) {
       file.copy(system.file('shiny/report.Rmd', package='StepReg'), tempReport, overwrite = TRUE)
       # Set up parameters to pass to Rmd document
       params <- list(modelSelection = stepwiseModel()[[1]], 
-                     selectionPlot = stepwiseModel()[[2]],
+                     selectionPlot = rpl, #stepwiseModel()[[2]],
                      modelVote = stepwiseModel()[[3]])
       
       rmarkdown::render(tempReport, 
