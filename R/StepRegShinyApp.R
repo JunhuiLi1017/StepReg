@@ -18,6 +18,7 @@
 #' @importFrom DT dataTableOutput datatable renderDataTable
 #' @importFrom summarytools dfSummary
 #' @importFrom ggcorrplot ggcorrplot
+#' @importFrom cowplot plot_grid
 #' @importFrom tidyr gather
 #' @importFrom GGally ggpairs
 #' @importFrom rmarkdown render

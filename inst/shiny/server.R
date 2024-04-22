@@ -388,9 +388,10 @@ server <- function(input, output, session) {
   )
   
   output$download_process_plot <- downloadHandler(
+    req(nmetric()),
     filename = function() { paste(input$strategy_plot, '_selection_process.png', sep='') },
     content = function(file) {
-      ggsave(file, plot = rv$summary_plot, device = "png")
+      ggsave(file, plot = plot_grid(plotlist = list(rv$summary_plot$summary,rv$detail_plot$detail), ncol = 1), device = "png")
     }
   )
   

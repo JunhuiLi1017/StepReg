@@ -24,7 +24,6 @@ Suggests:
     knitr,
     testthat,
     BiocStyle,
-    cowplot,
     kableExtra
 Imports:
     dplyr,
@@ -35,6 +34,7 @@ Imports:
     stringr,
     survival,
     flextable,
+    cowplot,
     xlsx,
     shiny,
     GGally,

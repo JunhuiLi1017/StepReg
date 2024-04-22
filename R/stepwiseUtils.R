@@ -850,7 +850,6 @@ getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weig
         table3_process_table <- getSubsetWrapper(data, type = type, met, x_name, y_name, intercept, include, weight = weight, best_n, test_method, sigma_value)
         if(met != "SL"){
           x_final_model <- getXNameSelected(table3_process_table,met)
-          x_final_model <- x_final_model[!x_final_model %in% '1']
         }
       } else {
         out_final_stepwise <- getStepwiseWrapper(data, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
@@ -866,7 +865,7 @@ getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weig
         if(all(table3_process_table[,"NumberEffect"] == table3_process_table[,"NumberParams"])) {
           table3_process_table <- table3_process_table[,!colnames(table3_process_table) %in% "NumberEffect"]
         }
-        x_final_model <- c(include, out_final_stepwise$x_in_model)
+        x_final_model <- c(intercept, include, out_final_stepwise$x_in_model)
       }
       #table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric() %>% round(num_digits) %>% as.character()
       table3_process_table[,met] <- table3_process_table[,met] %>% as.numeric()
