@@ -327,8 +327,17 @@ ui <- tagList(
                 tags$i(
                   class = "glyphicon glyphicon-question-sign centered-icon", 
                   style = "color:#0072B2;",
-                  title = "Used for the forward process. Depending on the type of regression, different tests — such as the F-test, Wald test, or Rao's test—will be employed to compute the corresponding P-values."
-                )),
+                  title = paste(c("Cut-off for 'SL' metric under forward and bidirection strategy. Depending on the type of regression, different tests will be employed to compute the corresponding P-values.",
+                                "------------------------------------------------------",
+                                "Type\t\t\t\t|\t\t\t\tTest",
+                                "------------------------------------------------------",
+                                "linear(univariate)\t|\tF test",
+                                "linear(multivariate)\t|\tApprox F test",
+                                "logit/poission/gamma\t|\tRao or LRT Chi-squared",
+                                "cox\t\t\t\t|\tWald Chi-squared",
+                                "------------------------------------------------------"), collapse = "\n")
+                )
+              ),
               min = 0, 
               max = 1,
               value = 0.05
@@ -344,8 +353,17 @@ ui <- tagList(
                 tags$i(
                   class = "glyphicon glyphicon-question-sign centered-icon", 
                   style = "color:#0072B2;",
-                  title = "Used for the backward process. Depending on the type of regression, different tests — such as the F-test, Wald test, or Rao's test—will be employed to compute the corresponding P-values."
-                )),
+                  title = paste(c("Cut-off for 'SL' metric under backward and bidirection strategy. Depending on the type of regression, different tests will be employed to compute the corresponding P-values.",
+                                  "------------------------------------------------------",
+                                  "Type\t\t\t\t|\t\t\t\tTest",
+                                  "------------------------------------------------------",
+                                  "linear(univariate)\t|\tF test",
+                                  "linear(multivariate)\t|\tApprox F test",
+                                  "logit/poission/gamma\t|\tWald Chi-squared",
+                                  "cox\t\t\t\t|\tWald Chi-squared",
+                                  "------------------------------------------------------"), collapse = "\n")
+                )
+              ),
               min = 0, 
               max = 1, 
               value = 0.05
@@ -361,8 +379,17 @@ ui <- tagList(
                 tags$i(
                   class = "glyphicon glyphicon-question-sign centered-icon", 
                   style = "color:#0072B2;",
-                  title = "Used for the forward process. Depending on the type of regression, different tests — such as the F-test, Wald test, or Rao's test—will be employed to compute the corresponding P-values."
-                )),
+                  title = paste(c("Cut-off for 'SL' metric under forward and bidirection strategy.. Depending on the type of regression, different tests will be employed to compute the corresponding P-values.",
+                                  "------------------------------------------------------",
+                                  "Type\t\t\t\t|\t\t\t\tTest",
+                                  "------------------------------------------------------",
+                                  "linear(univariate)\t|\tF test",
+                                  "linear(multivariate)\t|\tApprox F test",
+                                  "logit/poission/gamma\t|\tRao or LRT Chi-squared",
+                                  "cox\t\t\t\t|\tWald Chi-squared",
+                                  "------------------------------------------------------"), collapse = "\n")
+                )
+              ),
               min = 0, 
               max = 1,
               value = 0.05
@@ -378,8 +405,17 @@ ui <- tagList(
                 tags$i(
                   class = "glyphicon glyphicon-question-sign centered-icon", 
                   style = "color:#0072B2;",
-                  title = "Used for the backward process. Depending on the type of regression, different tests — such as the F-test, Wald test, or Rao's test—will be employed to compute the corresponding P-values."
-                )), 
+                  title = paste(c("Cut-off for 'SL' metric under backward and bidirection strategy. Depending on the type of regression, different tests will be employed to compute the corresponding P-values.",
+                                  "------------------------------------------------------",
+                                  "Type\t\t\t\t|\t\t\t\tTest",
+                                  "------------------------------------------------------",
+                                  "linear(univariate)\t|\tF test",
+                                  "linear(multivariate)\t|\tApprox F test",
+                                  "logit/poission/gamma\t|\tWald Chi-squared",
+                                  "cox\t\t\t\t|\tWald Chi-squared",
+                                  "------------------------------------------------------"), collapse = "\n")
+                )
+              ), 
               min = 0, 
               max = 1, 
               value = 0.05)
