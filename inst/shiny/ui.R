@@ -39,13 +39,30 @@ ui <- tagList(
         sidebarPanel(
           selectInput(
             "example_dataset",
-            "Select an example dataset",
+            label = tags$span(
+              "Select an example dataset", 
+              tags$i(
+                class = "glyphicon glyphicon-question-sign centered-icon", 
+                style = "color:#0072B2;",
+                title = paste(c(
+                  "Recommended Regression Type and Dependent Variable for Each Dataset (Demo Purposes)",
+                  "------------------------------------------------------",
+                  "Dataset\t|\tType\t\t|\tResponse",
+                  "------------------------------------------------------",
+                  "mtcars\t|\tlinear\t|\tmpg",
+                  "remission\t|\tlogit\t\t|\tremiss",
+                  "lung\t\t|\tcox\t\t|\ttime and status",
+                  "creditCard\t|\tpoisson\t|\treports",
+                  "------------------------------------------------------"), collapse = "\n"
+                )
+              )
+            ),
             choices = c(
               "",
-              "mtcars (for Linear regression)", 
-              "remission (for Logistic regression)", 
-              "lung (for Cox regression)",
-              "creditCard (for Poisson regression)")
+              "mtcars", 
+              "remission", 
+              "lung",
+              "creditCard")
           ),
           
             # Input: Select a file ----
@@ -435,7 +452,19 @@ ui <- tagList(
                       selectInput("strategy_plot",
                                   "Stepwise Strategy:",
                                   choices = c("")),
-                      sliderInput("relative_1", "relative height:", value = 1, min = 0.1, max = 10, step = 0.05),
+                      selectInput("relative_height",
+                                  label = tags$span(
+                                    "relative height of plots", 
+                                    tags$i(
+                                      class = "glyphicon glyphicon-question-sign centered-icon", 
+                                      style = "color:#0072B2;",
+                                      title = paste(c(
+                                        "Relative to the plot of the 'Selection Process', set the height of the plot of 'Metric values at each step'."), collapse = "\n"
+                                      )
+                                    )
+                                  ),
+                                  choices = c(seq(0.2,1,0.2),2:5), 
+                                  selected = 1),
                       downloadButton("download_process_plot",
                                      "Save",
                                      icon = icon("download"),
@@ -443,17 +472,6 @@ ui <- tagList(
                       )
                    )
                 ),
-                # fluidRow(
-                #   column(width = 12,
-                #          mainPanel(
-                #                conditionalPanel(
-                #                  condition = "input.run_analysis",
-                #                  htmlOutput("selectionPlotText")
-                #                ),
-                #                withSpinner(plotOutput("process_plot"))
-                #          )
-                #   )
-                # ),
                 fluidRow(
                   column(width = 12,
                          mainPanel(
@@ -465,26 +483,6 @@ ui <- tagList(
                          )
                   )
                 )
-
-                # sidebarLayout(
-                #   sidebarPanel(
-                #     selectInput("strategy_plot",
-                #                 "Stepwise Strategy:",
-                #                 choices = c("")
-                #                 ),
-                #     downloadButton("download_process_plot",
-                #                    "Save",
-                #                    icon = icon("download"),
-                #                    style = "width: 80px; font-size: 10px;")
-                #   ),
-                #   mainPanel(
-                #     conditionalPanel(
-                #       condition = "input.run_analysis",
-                #       htmlOutput("selectionPlotText")
-                #     ),
-                #     withSpinner(plotOutput("process_plot"))
-                #   )
-                # )
               )
             ),
             

@@ -6,6 +6,7 @@ params:
   modelSelection: NA
   selectionPlot: NA
   modelVote: NA
+  relValue: NA
 ---
 
 ```{r include = FALSE}
@@ -30,10 +31,10 @@ strategies <- length(unlist(str_split(params$modelSelection[[1]][2,2], "&")))
 ### Visualization
 
 **Visualization of Variable Selection:**
-```{r comment = NA, fig.width = 10, fig.height = 10}
+```{r comment = NA, warning=FALSE, fig.width = 10, fig.height = 6 * nmetric}
 for(i in names(params$selectionPlot)) {
   print(i)
-  print(params$selectionPlot[[i]][[1]])
+  print(plot_grid(plotlist = c( rev(params$selectionPlot[[i]])), ncol = 1, rel_heights = c(1, as.numeric(params$relValue))))
 }
 ```
 
