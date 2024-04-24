@@ -508,16 +508,16 @@ ui <- tagList(
                                   choices = c("")),
                       selectInput("relative_height",
                                   label = tags$span(
-                                    "relative height of plots", 
+                                    "Relative height of plots", 
                                     tags$i(
                                       class = "glyphicon glyphicon-question-sign centered-icon", 
                                       style = "color:#0072B2;",
                                       title = paste(c(
-                                        "Relative to the plot of the 'Selection Process', set the height of the plot of 'Metric values at each step'."), collapse = "\n"
+                                        "Adjust the height of plot B relative to plot A"), collapse = "\n"
                                       )
                                     )
                                   ),
-                                  choices = c(seq(0.2,1,0.2),2:5), 
+                                  choices = c(seq(0.2,1,0.2),seq(1.5,4,0.5)), 
                                   selected = 1),
                       downloadButton("download_process_plot",
                                      "Save",
@@ -541,7 +541,7 @@ ui <- tagList(
             ),
             
             tabPanel(
-              "Models Vote",
+              "Model Vote",
               conditionalPanel(
                 condition = "input.run_analysis",
                 htmlOutput("modelVoteText")

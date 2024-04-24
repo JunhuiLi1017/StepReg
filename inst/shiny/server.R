@@ -195,6 +195,9 @@ server <- function(input, output, session) {
     }
   })
   
+  rv <- reactiveValues()
+  rv$nmetric <- 1
+  rv$nvar <- 1
   # Perform stepwise regression based on uploaded dataset
   stepwiseModel <- eventReactive(input$run_analysis, {
     disable("download")
@@ -205,6 +208,21 @@ server <- function(input, output, session) {
     } else {
       intercept <- 0
     }
+    
+    formula <- switch(
+      input$type,
+      "linear" = {
+        if (length(input$dependent_linear) > 1) {
+          formula <- as.formula(paste(paste0("cbind(", paste(input$dependent_linear, collapse = ","), ")", collapse = ""), "~", paste(c(intercept, input$independent), collapse = "+")))
+        } else {
+          formula <- as.formula(paste(input$dependent_linear, "~", paste(c(intercept, input$independent), collapse = "+")))
+        }
+      },
+      "cox" = as.formula(paste("Surv(", input$time, ",", input$status, ") ~", paste(input$independent, collapse = "+"))),
+      "logit" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+"))),
+      "poisson" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+"))),
+      "gamma" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+")))
+    )
     
     metric <- switch(
       input$type,
@@ -221,21 +239,9 @@ server <- function(input, output, session) {
       "gamma" = input$metric_glm_cox
     )
     rv$nmetric <- length(metric)
-    
-    formula <- switch(
-      input$type,
-      "linear" = {
-        if (length(input$dependent_linear) > 1) {
-          formula <- as.formula(paste(paste0("cbind(", paste(input$dependent_linear, collapse = ","), ")", collapse = ""), "~", paste(c(intercept, input$independent), collapse = "+")))
-        } else {
-          formula <- as.formula(paste(input$dependent_linear, "~", paste(c(intercept, input$independent), collapse = "+")))
-        }
-      },
-      "cox" = as.formula(paste("Surv(", input$time, ",", input$status, ") ~", paste(input$independent, collapse = "+"))),
-      "logit" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+"))),
-      "poisson" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+"))),
-      "gamma" = as.formula(paste(input$dependent_glm, "~", paste(c(intercept, input$independent), collapse = "+")))
-    )
+    rv$nvar <- ncol(df$data)/15
+    # if round() = 2, then run make plot twice, so dont update input.
+    #updateSelectInput(session, "relative_height", selected = round(rv$nmetric*rv$nvar))
     
     res <- stepwise(
       formula = formula,
@@ -275,58 +281,16 @@ server <- function(input, output, session) {
   # Generate output and enable download button:
   output$modelSelection <- renderPrint(stepwiseModel()[[1]])
   
-  nmetric <- reactive({
-    metric <- switch(
-      input$type,
-      "linear" = {
-        if (length(input$dependent_linear) > 1) {
-          input$metric_multivariate_linear
-        } else {
-          input$metric_univariate_linear
-        }
-      },
-      "cox" = input$metric_glm_cox,
-      "logit" = input$metric_glm_cox,
-      "poisson" = input$metric_glm_cox,
-      "gamma" = input$metric_glm_cox
-    )
-    if (is.null(metric) || length(metric) == 0) {
-      return(1)  # Assign 1 if no metric selected
-    } else {
-      return(length(metric))
-    }
-  })
-  
-  rv <- reactiveValues()
-  # rpl <- reactiveValues()
-  # output$process_plot <- renderPlot({
-  #   # Get the selected strategy plot from the list of plots
-  #   selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]["summary"]
-  #   rv$summary_plot <- selected_plot
-  #   selected_plot
-  # }, res =72, 
-  # width = function() { (320 * 2) }, 
-  # height = function() { (320) })
-  # 
-  # output$detail_plot <- renderPlot({
-  #   req(nmetric())  # Ensure nmetric is available before proceeding
-  #   # Get the selected strategy plot from the list of plots
-  #   selected_plot <- stepwiseModel()[[2]][[input$strategy_plot]]["detail"]
-  #   rv$detail_plot <- selected_plot
-  #   selected_plot
-  # }, res =96, 
-  # width = function() { (320 * 2) }, 
-  # height = function() { (320 * nmetric()) }) 
-  
   output$detail_plot <- renderPlot({
-    req(nmetric())  # Ensure nmetric is available before proceeding
-    selected_plot <- plot_grid(plotlist = rev(stepwiseModel()[[2]][[input$strategy_plot]]), ncol = 1, rel_heights = c(1, as.numeric(input$relative_height)))
+    selected_plot <- plot_grid(plotlist = rev(stepwiseModel()[[2]][[input$strategy_plot]]), 
+                               ncol = 1, 
+                               labels = "AUTO", 
+                               rel_heights = c(1, as.numeric(input$relative_height)))
     rv$all_plot <- selected_plot
     selected_plot
   }, res =96, 
   width = function() { (320 * 2) }, 
-  height = function() { (320 * nmetric()) })
-  
+  height = function() { (320 * 2 * rv$nmetric * rv$nvar) })
   
   output$selectionPlotText <- renderUI({
     HTML("<b>Visualization of Variable Selection:\n</b>")
@@ -399,7 +363,6 @@ server <- function(input, output, session) {
   )
   
   output$download_process_plot <- downloadHandler(
-    req(nmetric()),
     filename = function() { paste(input$strategy_plot, '_selection_process.png', sep='') },
     content = function(file) {
       ggsave(file, plot = rv$all_plot, device = "png")

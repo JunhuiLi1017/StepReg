@@ -38,7 +38,7 @@ for(i in names(params$selectionPlot)) {
 }
 ```
 
-### Models Vote
+### Model Vote
 
 **Model Selection by Vote Across All Combinations of Strategy and Metric:**
 
