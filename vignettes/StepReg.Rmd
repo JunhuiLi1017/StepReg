@@ -8,8 +8,6 @@ author:
   affiliation: University of Massachusset Chan Medical School, Worcester, USA
 - name: Xiaohuan Lu
   affiliation: Clark University, Worcester, USA
-- name: Wenxin Liu
-  affiliation: China Agricultural University, Beijing, China
 - name: Lihua Julie Zhu
   affiliation: University of Massachusset Chan Medical School, Worcester, USA
 package: StepReg
@@ -420,7 +418,7 @@ In this example, we'll demonstrate how to perform Cox regression analysis using 
 
 **Description of the `lung` dataset**
 
-The `lung` dataset, available in the `r CRANpkg("survival")` R package, includes information on survival times for 228 patients with advanced lung cancer. It comprises ten variables, among which the "status" variable codes for censoring status (1 = censored, 2 = dead), and the "time" variable denotes the patient survival time in days. To learn more about the dataset, use `?survival::lung`.
+The `lung` dataset, available in the `r BiocStyle::CRANpkg("survival")` R package, includes information on survival times for 228 patients with advanced lung cancer. It comprises ten variables, among which the "status" variable codes for censoring status (1 = censored, 2 = dead), and the "time" variable denotes the patient survival time in days. To learn more about the dataset, use `?survival::lung`.
 
 **Why choose Cox regression**
 
@@ -453,7 +451,7 @@ In this example, we'll demonstrate how to perform Poisson regression analysis us
 
 **Descprition of the `creditCard` dataset**
 
-The `creditCard` dataset contains credit history information for a sample of applicants for a specific type of credit card, included in the `r CRANpkg("AER")` package. It encompasses 1319 observations across 12 variables, including "reports", "age", "income", among others. The "reports" variable represents the number of major derogatory reports. For detailed information, refer to `?AER::CreditCard`.
+The `creditCard` dataset contains credit history information for a sample of applicants for a specific type of credit card, included in the `r BiocStyle::CRANpkg("AER")` package. It encompasses 1319 observations across 12 variables, including "reports", "age", "income", among others. The "reports" variable represents the number of major derogatory reports. For detailed information, refer to `?AER::CreditCard`.
 
 **Why choose Poisson regression**
 
