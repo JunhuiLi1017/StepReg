@@ -801,21 +801,24 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
   x_in_model <- out_init_stepwise$x_in_model
   x_notin_model <- out_init_stepwise$x_notin_model
   process_table <- out_init_stepwise$process_table
-  
+  rownames(process_table) <- NULL
   pic_df_init <- data.frame(strategy, metric, process_table[,c(1:2,6)])
   colnames(pic_df_init)[c(3:5)] <- c("step","variable","value")
   ## get final stepwise model
   out_final_stepwise <- getFinalStepModel(add_or_remove, data, type = type, strategy, metric, sle, sls, weight = weight, y_name, x_in_model, x_notin_model, intercept, include, process_table, test_method, sigma_value)
   
   if(type == "cox") {
-    pic_df_init <- pic_df_init[-1,]
-    out_final_stepwise$pic_df$step <- as.numeric(out_final_stepwise$pic_df$step) - 1
-    if(nrow(pic_df_init) > 0){
-      selected <- rep("YES",nrow(pic_df_init) - 1)
+    if(strategy == "backward"){
+      selected <- rep("YES",nrow(pic_df_init))
     } else {
-      selected <- NULL
+      pic_df_init <- pic_df_init[-1,]
+      out_final_stepwise$pic_df$step <- as.numeric(out_final_stepwise$pic_df$step) - 1
+      if(nrow(pic_df_init) > 0){
+        selected <- rep("YES",nrow(pic_df_init) - 1)
+      } else {
+        selected <- NULL
+      }
     }
-    
   } else {
     selected <- rep("YES",nrow(pic_df_init)) 
   }
