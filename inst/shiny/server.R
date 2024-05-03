@@ -239,7 +239,7 @@ server <- function(input, output, session) {
       "gamma" = input$metric_glm_cox
     )
     rv$nmetric <- length(metric)
-    rv$nvar <- ncol(df$data)/15
+    rv$nvar <- ncol(df$data)/10
     # if round() = 2, then run make plot twice, so dont update input.
     #updateSelectInput(session, "relative_height", selected = round(rv$nmetric*rv$nvar))
     
@@ -290,7 +290,7 @@ server <- function(input, output, session) {
     selected_plot
   }, res =96, 
   width = function() { (320 * 2) }, 
-  height = function() { (320 * 2 * rv$nmetric * rv$nvar) })
+  height = function() { (320 * 4 * (rv$nmetric/(rv$nmetric + 1)) * rv$nvar) })
   
   output$selectionPlotText <- renderUI({
     HTML("<b>Visualization of Variable Selection:\n</b>")
