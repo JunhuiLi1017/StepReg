@@ -876,7 +876,7 @@ getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weig
       
       if(!(stra == "subset" & met == "SL")) {
         x_final_model_metric[[stra]][[met]] <- x_final_model
-        vote_df <- rbind(vote_df,data.frame(deparse(reformulate(x_final_model, y_name)),paste0(stra,":",met)))
+        vote_df <- rbind(vote_df,data.frame(deparse1(reformulate(x_final_model, y_name)),paste0(stra,":",met)))
       }
     }
   }
