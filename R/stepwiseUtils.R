@@ -418,7 +418,7 @@ getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced,
     
     xlevels <- fit_full$xlevels
     if(length(xlevels) > 0) {
-      xlevels <- xlevels[which(!names(xlevels) %in% include)]
+      #xlevels <- xlevels[which(!names(xlevels) %in% include)]
       factor_min_name <- vector( "character", length(xlevels))
       names(factor_min_name) <- names(xlevels)
       for(i in 1:length(xlevels)) {
@@ -456,7 +456,7 @@ getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced,
     # maxPVar <- names(which.max(pic_set))
     # statistics <- stat_table[maxPVar, stattype]
     # pic <- stat_table[maxPVar, ptype]
-  }else{
+  } else {
     stat_table <- anova(fit_reduced, fit_full, test = test_method)
     ptype <- names(stat_table)[names(stat_table) %in% ptype]
     statistics <- stat_table[2, stattype]
