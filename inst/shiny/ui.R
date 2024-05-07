@@ -128,11 +128,11 @@ ui <- tagList(
                                             "Correlation plot",
                                             "Density plot",
                                             "Dot plot",
-                                            "Pairs plot",
+                                            #"Pairs plot",
                                             "Histogram",
                                             "QQ plot",
                                             "Scatter and Line plot"),
-                                selected = "Pairs plot"),
+                                selected = "Correlation plot"),
                     
                     #h5("select variables for the Plot:"),
                     selectInput("var_plot", 

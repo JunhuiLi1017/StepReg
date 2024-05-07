@@ -14,7 +14,7 @@ require("dplyr") || stop("unable to load dplyr")
 require("summarytools") || stop("unable to load summarytools")
 require("ggcorrplot") || stop("unable to load ggcorrplot")
 require("tidyr") || stop("unable to load tidyr")
-require("GGally") || stop("unable to load GGally")
+#require("GGally") || stop("unable to load GGally")
 require("ggrepel") || stop("unable to load ggrepel")
 require("purrr") || stop("unable to load purrr")
 require("rmarkdown") || stop("unable to load rmarkdown")
@@ -98,13 +98,13 @@ createPlot <- function(plot_type_value, var_plot_value, data_value) {
           facet_wrap(~ var, scales = "free") +
           theme_bw()
       })
-    },
-    "Pairs plot" = {
-      # Create a pairs plot
-      data_value %>% 
-        select(all_of(var_plot_value)) %>% 
-        ggpairs
     }
+    # "Pairs plot" = {
+    #   # Create a pairs plot
+    #   data_value %>% 
+    #     select(all_of(var_plot_value)) %>% 
+    #     ggpairs
+    # }
   )
   return(plot_type)
 }

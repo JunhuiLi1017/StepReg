@@ -336,12 +336,12 @@ server <- function(input, output, session) {
     disable("downloadPlot")
     req(input$plot_type, input$var_plot)
     plot_type <- createPlot(input$plot_type, input$var_plot, df$data)
-    if (input$plot_type == "Pairs plot") {
-      plot_result <- plot_type
-    } else {
+    # if (input$plot_type == "Pairs plot") {
+    #   plot_result <- plot_type
+    # } else {
       #grid.arrange(grobs = plot_type)
       plot_result <- plot_grid(plotlist = plot_type)
-    }
+    # }
     enable("downloadPlot")
     return(plot_result)
   })
