@@ -814,7 +814,8 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
       pic_df_init <- pic_df_init[-1,]
       out_final_stepwise$pic_df$step <- as.numeric(out_final_stepwise$pic_df$step) - 1
       if(nrow(pic_df_init) > 0){
-        selected <- rep("YES",nrow(pic_df_init) - 1)
+        selected <- rep("YES",nrow(pic_df_init))
+        pic_df_init$step <- pic_df_init$step - 1
       } else {
         selected <- NULL
       }
