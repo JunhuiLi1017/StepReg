@@ -617,7 +617,11 @@ getCandStepModel <- function(add_or_remove, data, type, metric, weight, y_name, 
       }
     } else {
       if(add_or_remove == "remove" & length(x_test) == 1 & intercept == "0") {
-        pic_set <- Inf
+        if(metric == 'Rsq' | metric == 'adjRsq'){
+          pic_set <- 0
+        } else {
+          pic_set <- Inf
+        }
         names(pic_set) <- x_test
       }else{
         pic_set <- sapply(x_fit_list, function(x) {getModelFitStat(metric, x, type, sigma_value)})
@@ -690,7 +694,7 @@ checkEnterOrRemove <- function(add_or_remove, best_candidate_model, type, metric
   }else{
     indicator <- pic <= as.numeric(process_table[nrow(process_table), 6])
   }
-  if(indicator == TRUE & type == "linear" & (metric != "Rsq"|metric != "adjRsq")) {
+  if(indicator == TRUE & type == "linear" & (metric != "Rsq" & metric != "adjRsq")) {
     if(best_candidate_model$rank != 0) {
       BREAK <- getGoodnessFit(best_candidate_model, y_name, metric)
     }
@@ -759,7 +763,7 @@ getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, 
     # enter remove     
     #       x1(stop here)
     # x1
-    if(nrow(process_table)>1) {
+    if(nrow(process_table) > 1) {
       last2_step <- process_table[nrow(process_table) -1 , ]
       last1_step <- process_table[nrow(process_table), ]
       if(last2_step[, 2] != "" & last2_step[, 2] == last1_step[, 3]) {
