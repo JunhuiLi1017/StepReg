@@ -99,12 +99,12 @@ plot.StepReg <- function(x, num_digits = 6, ...) {
     }
     p2 <- p2 +
       scale_x_continuous(breaks = plot_data$Step) + 
-      labs(title ="Selection process") + 
+      labs(title ="Selection overview") + 
       theme_light()
     
     #p3 <- cowplot::plot_grid(p1, p2, ncol=1, rel_heights = c(1, 0.75))
     plot_list[[n]]["detail"] <- list(p1)
-    plot_list[[n]]["summary"] <- list(p2)
+    plot_list[[n]]["overview"] <- list(p2)
   }
   return(plot_list)
 }
@@ -208,7 +208,7 @@ plotStepwiseDetail <- function(df, num_digits) {
           strip.text = element_text(color = "black")) +  # Adjust text color in facet labels
     facet_wrap(~ .data$metric, ncol=1) + 
     theme(strip.background = element_rect(colour = "black", fill = "gray80")) +
-    ggtitle("Metric value at each step") + 
+    ggtitle("Selection details") + 
     ylab("Predictors") + 
     xlab("Step")
   return(p1)
@@ -231,7 +231,7 @@ plotSubsetDetail <- function(plot_data) {
   p1 <- ggplot(tile_df, aes(x = .data$Step, y = .data$Variable, fill = .data$Selected)) +
     geom_tile(width = 0.99, height = 0.95, color = "black") +
     scale_fill_manual(values = c("YES" = "palegreen2", "NO" = "gray80")) +
-    labs(x = "Step", y = "Predictors", title = "Variable selection in each step") +
+    labs(x = "Step", y = "Predictors", title = "Selection details") +
     scale_x_continuous(breaks = plot_data$Step) + 
     xlab("Variable number") +
     facet_wrap(~ .data$Metric, ncol=1) + 
