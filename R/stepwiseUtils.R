@@ -817,22 +817,22 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
   
   if(type == "cox") {
     if(strategy == "backward"){
-      selected <- rep("remove",nrow(pic_df_init))
+      Selection <- rep("Remove",nrow(pic_df_init))
     } else {
       pic_df_init <- pic_df_init[-1,]
       out_final_stepwise$pic_df$step <- as.numeric(out_final_stepwise$pic_df$step) - 1
       if(nrow(pic_df_init) > 0){
-        selected <- rep("entry",nrow(pic_df_init))
+        Selection <- rep("Entry",nrow(pic_df_init))
         pic_df_init$step <- pic_df_init$step - 1
       } else {
-        selected <- NULL
+        Selection <- NULL
       }
     }
   } else {
     if(strategy == "backward"){
-      selected <- rep("remove",nrow(pic_df_init))
+      Selection <- rep("Remove",nrow(pic_df_init))
     } else {
-      selected <- rep("entry",nrow(pic_df_init))
+      Selection <- rep("Entry",nrow(pic_df_init))
     }
   }
   for (i in out_final_stepwise$process_table$Step) {
@@ -841,21 +841,21 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
     if(nrow(sub_pic_df) > 0){
       sub_var <- sub_process_table[,c(2,3)][!sub_process_table[,c(2,3)] %in% ""]
       if(colnames(sub_var) == "EffectEntered"){
-        selected_index <- "entry"
+        selected_index <- "Entry"
       } else if(colnames(sub_var) == "EffectRemoved") {
-        selected_index <- "remove"
+        selected_index <- "Remove"
       }
       
       sub_pic_df$value[sub_pic_df$variable %in% sub_var] <- selected_index
-      sub_pic_df$value[!sub_pic_df$variable %in% sub_var] <- "no"
-      selected <- append(selected,sub_pic_df$value)
+      sub_pic_df$value[!sub_pic_df$variable %in% sub_var] <- "No"
+      Selection <- append(Selection,sub_pic_df$value)
     }
   }
   
   pic_df <- rbind(pic_df_init,out_final_stepwise$pic_df)
   pic_df$value <- as.numeric(pic_df$value)
   pic_df$step <- as.numeric(pic_df$step)
-  pic_df$selected <- selected
+  pic_df$Selection <- Selection
 
   out_final_stepwise$pic_df <- pic_df
   return(out_final_stepwise)

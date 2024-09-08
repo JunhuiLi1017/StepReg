@@ -78,14 +78,13 @@ plot.StepReg <- function(x, num_digits = 6, ...) {
       plot_data <- plot_data %>%
         group_by(.data$Step, .data$Metric) %>%
         filter(ifelse(.data$Metric == "SL", .data$MetricValue == max(.data$MetricValue), .data$MetricValue == min(.data$MetricValue)))
-      
       p1 <- plotSubsetDetail(plot_data)
     }
     
     ## make a dual y-axis with log10 transformed for 'SL' if 'SL' is selected
     if(n != 'subset') {
       if("SL" %in% plot_data$Metric) {
-        plot_data[plot_data$Metric == "SL",]$MetricValue <- detail_selection[detail_selection$metric == "SL" & detail_selection$selected %in% c("entry","remove"),"value"]
+        plot_data[plot_data$Metric == "SL",]$MetricValue <- detail_selection[detail_selection$metric == "SL" & detail_selection$Selection %in% c("Entry","Remove"),"value"]
         plot_data$MetricValue[plot_data$MetricValue %in% Inf] <- max(plot_data$MetricValue[!plot_data$MetricValue %in% Inf]) * 1.1
         a <- range(log10(plot_data[plot_data$Metric == "SL", ]$MetricValue))
         b <- range(plot_data[plot_data$Metric != "SL", ]$MetricValue)
@@ -197,11 +196,11 @@ plotStepwiseDetail <- function(df, num_digits) {
   p1 <- ggplot(df, 
                aes(x = .data$step,
                    y = .data$variable)) +
-    geom_tile(aes(fill = .data$selected), width = 0.99, height = 0.95, color = "black") +
+    geom_tile(aes(fill = .data$Selection), width = 0.99, height = 0.95, color = "black") +
     geom_text(aes(label = round(.data$value, num_digits)),
               color = "black",
               size = 2) +
-    scale_fill_manual(values = c("entry" = "palegreen2", "remove" = "tan3","no" = "gray80")) +
+    scale_fill_manual(values = c("Entry" = "palegreen2", "Remove" = "tan3","No" = "gray80")) +
     theme_light() + 
     scale_x_continuous(breaks = unique(df$step)) + 
     theme(axis.text.y = element_text(size = 8),
@@ -220,16 +219,16 @@ plotSubsetDetail <- function(plot_data) {
   variable_list <- lapply(strsplit(plot_data$Variable, " "), function(x) x[x != ""])
   tile_df <- expand.grid(Variable = variable_list[[length(variable_list)]], Step = plot_data$Step)
   tile_df$Metric <- rep(plot_data$Metric, each = length(variable_list[[length(variable_list)]]))
-  tile_df$Selected <- mapply(function(metric, step, variable) {
+  tile_df$Selection <- mapply(function(metric, step, variable) {
     df2_1 <- plot_data[plot_data$Metric == metric, ]
     df2_2 <- df2_1[df2_1$Step == step, ]
     any(variable %in% strsplit(df2_2$Variable, " ")[[1]])
   }, tile_df$Metric, tile_df$Step, tile_df$Variable)
-  tile_df$Selected <- ifelse(tile_df$Selected, "entry", "no")
+  tile_df$Selection <- ifelse(tile_df$Selection, "Entry", "No")
   
-  p1 <- ggplot(tile_df, aes(x = .data$Step, y = .data$Variable, fill = .data$Selected)) +
+  p1 <- ggplot(tile_df, aes(x = .data$Step, y = .data$Variable, fill = .data$Selection)) +
     geom_tile(width = 0.99, height = 0.95, color = "black") +
-    scale_fill_manual(values = c("entry" = "palegreen2", "no" = "gray80")) +
+    scale_fill_manual(values = c("Entry" = "palegreen2", "No" = "gray80")) +
     labs(x = "Step", y = "Predictors", title = "Selection details") +
     scale_x_continuous(breaks = plot_data$Step) + 
     xlab("Variable number") +
