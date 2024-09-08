@@ -234,7 +234,8 @@ plotSubsetDetail <- function(plot_data) {
     xlab("Variable number") +
     facet_wrap(~ .data$Metric, ncol=1) + 
     theme(strip.background = element_rect(colour = "black", fill = "gray80")) +
-    ggtitle("Best subset model under each variable number")
+    #ggtitle("Best subset model under each variable number")
+    ggtitle("Selection details")
 }
 
 
