@@ -817,27 +817,39 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
   
   if(type == "cox") {
     if(strategy == "backward"){
-      selected <- rep("YES",nrow(pic_df_init))
+      selected <- rep("remove",nrow(pic_df_init))
     } else {
       pic_df_init <- pic_df_init[-1,]
       out_final_stepwise$pic_df$step <- as.numeric(out_final_stepwise$pic_df$step) - 1
       if(nrow(pic_df_init) > 0){
-        selected <- rep("YES",nrow(pic_df_init))
+        selected <- rep("entry",nrow(pic_df_init))
         pic_df_init$step <- pic_df_init$step - 1
       } else {
         selected <- NULL
       }
     }
   } else {
-    selected <- rep("YES",nrow(pic_df_init)) 
+    if(strategy == "backward"){
+      selected <- rep("remove",nrow(pic_df_init))
+    } else {
+      selected <- rep("entry",nrow(pic_df_init))
+    }
   }
   for (i in out_final_stepwise$process_table$Step) {
     sub_process_table <- out_final_stepwise$process_table[out_final_stepwise$process_table$Step %in% i,]
     sub_pic_df <- out_final_stepwise$pic_df[out_final_stepwise$pic_df$step %in% i,]
-    
-    sub_pic_df$value[sub_pic_df$variable %in% sub_process_table[,c(2,3)][!sub_process_table[,c(2,3)] %in% ""]] <- "YES"
-    sub_pic_df$value[!sub_pic_df$variable %in% sub_process_table[,c(2,3)][!sub_process_table[,c(2,3)] %in% ""]] <- "NO"
-    selected <- append(selected,sub_pic_df$value)
+    if(nrow(sub_pic_df) > 0){
+      sub_var <- sub_process_table[,c(2,3)][!sub_process_table[,c(2,3)] %in% ""]
+      if(colnames(sub_var) == "EffectEntered"){
+        selected_index <- "entry"
+      } else if(colnames(sub_var) == "EffectRemoved") {
+        selected_index <- "remove"
+      }
+      
+      sub_pic_df$value[sub_pic_df$variable %in% sub_var] <- selected_index
+      sub_pic_df$value[!sub_pic_df$variable %in% sub_var] <- "no"
+      selected <- append(selected,sub_pic_df$value)
+    }
   }
   
   pic_df <- rbind(pic_df_init,out_final_stepwise$pic_df)
