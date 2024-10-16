@@ -420,9 +420,19 @@ getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced,
     stat_table[, stattype] <- stat_table[, stattype]^2
     coef_name <- rownames(stat_table)
     ptype <- colnames(stat_table)[colnames(stat_table) %in% ptype]
-    
     xlevels <- fit_full$xlevels
-    if(length(xlevels) > 0) {
+    
+    if(intercept == "1") { # remove intercept for scanning all other variables' p value
+      if(nrow(stat_table) == 2) {
+        stat_table <- stat_table[-1, , drop = FALSE]
+      } else {
+        stat_table <- stat_table[-1,]
+      }
+    }
+    if(length(xlevels) == 0) {
+      stat_table <- as.data.frame(stat_table)
+      stat_table$Var <- rownames(stat_table)
+    } else {
       coef_name_levels <- unlist(lapply(names(xlevels), function(i) {
         paste(i,xlevels[[i]],sep="")
       }))
@@ -440,17 +450,7 @@ getAnovaStat <- function(add_or_remove = "add", intercept, include, fit_reduced,
       stat_table <- as.data.frame(stat_table)
       stat_table$Var <- coef_name_parent
     }
-    if(intercept == "1") {
-      if(nrow(stat_table) == 2) {
-        stat_table <- stat_table[-1, , drop = FALSE]
-      } else {
-        stat_table <- stat_table[-1,]
-      }
-      if(length(xlevels) == 0) {
-        stat_table <- as.data.frame(stat_table)
-        stat_table$Var <- rownames(stat_table)
-      }
-    }
+    
     pic_set <- stat_table[, ptype]
     #names(pic_set) <- rownames(stat_table)
     names(pic_set) <- stat_table$Var
