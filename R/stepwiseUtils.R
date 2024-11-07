@@ -841,7 +841,7 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
   for (i in out_final_stepwise$process_table$Step) {
     sub_process_table <- out_final_stepwise$process_table[out_final_stepwise$process_table$Step %in% i,]
     sub_pic_df <- out_final_stepwise$pic_df[out_final_stepwise$pic_df$step %in% i,]
-    if(nrow(sub_pic_df) > 0){
+    if(!is.null(sub_pic_df) && nrow(sub_pic_df) > 0){
       sub_var <- sub_process_table[,c(2,3)][!sub_process_table[,c(2,3)] %in% ""]
       if(colnames(sub_var) == "EffectEntered"){
         selected_index <- "Entry"
