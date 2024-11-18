@@ -226,20 +226,20 @@ getInitialSubSet <- function(data, type, metric, y_name, intercept, include, wei
     }else{
       pic_set <- getModelFitStat(metric, x_fit, type, sigma_value)
     }
-    initial_process_table[1, 1:3] <- c(as.numeric(intercept) + length(include), pic_set, paste(intercept, include, sep = " "))
+    initial_process_table[1, 1:3] <- c(as.numeric(intercept) + length(include), pic_set, paste(c(intercept, include), collapse = " "))
   }
   return(initial_process_table)
 }
 
 getFinalSubSet <- function(data, type, metric, x_notin_model, initial_process_table, y_name, include, weight, intercept, best_n = Inf, test_method, sigma_value) {
 	process_table <- initial_process_table
-	#nv=1
+	#nv=8
 	for (nv in 1:length(x_notin_model)) {
 		com_table <- as.data.frame(combn(x_notin_model, nv))
 		n_test <- ncol(com_table)
 		com_var <- apply(com_table, 2, paste, collapse = " ")
 		sub_process_table <- matrix(rep(c(nv + length(include) + as.numeric(intercept), NA), each = n_test), n_test, 2)
-		com_var_df <- cbind(paste(intercept, include, sep = " "), data.frame(com_var))
+		com_var_df <- cbind(paste(c(intercept, include), collapse = " "), data.frame(com_var))
 		com_var_set <- apply(com_var_df, 1, paste, collapse = " ")
 		sub_process_table <- data.frame(sub_process_table, c(com_var_set))
 		colnames(sub_process_table) <- c("NumberOfVariables", metric, "VariablesInModel")
