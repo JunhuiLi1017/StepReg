@@ -30,7 +30,6 @@ Imports:
     ggplot2,
     ggrepel,
     MASS,
-    purrr,
     stringr,
     survival,
     flextable,
