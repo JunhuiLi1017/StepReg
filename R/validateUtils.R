@@ -14,11 +14,11 @@ validateUtils <- function(formula,
                           test_method_linear = c("Pillai", "Wilks", "Hotelling-Lawley", "Roy"),
                           test_method_glm = c("Rao", "LRT"),
                           test_method_cox = c("efron", "breslow", "exact"),
-													tolerance = 10e-7,
-													weight = NULL,
+                          tolerance = 10e-7,
+                          weight = NULL,
                           best_n = Inf,
-													n_y,
-													num_digits = 6) {
+                          n_y,
+                          num_digits = 6) {
 	## check required parameters
 	if(missing(data)) { 
 		stop("'data' parameter is missing.") 
