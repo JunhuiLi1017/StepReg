@@ -41,7 +41,8 @@ StepReg simplifies model selection tasks by providing a unified programming inte
 
 The following example selects an optimal linear regression model with the `mtcars` dataset.
 ```{r, message = FALSE}
-library(StepReg)
+#library(StepReg)
+devtools::load_all("~/dropbox/Project/UMMS/Github/JunhuiLi1017/StepReg")
 data(mtcars)
 formula <- mpg ~ .
 res <- stepwise(formula = formula,

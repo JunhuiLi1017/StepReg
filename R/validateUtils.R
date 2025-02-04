@@ -99,15 +99,15 @@ validateUtils <- function(formula,
 	                     "poisson" = "poisson",
 	                     "gamma" = "Gamma"
 	  )
-	                     
+            
 	  # check if Y separates X completely, if so, stop
 	  # ref: https://stats.oarc.ucla.edu/other/mult-pkg/faq/general/faqwhat-is-complete-or-quasi-complete-separation-in-logistic-regression-and-what-are-some-strategies-to-deal-with-the-issue/
 	  tryCatch(                
 	    expr = {                      
-	      glm(formula, data = data, weights = weight, family = type_glm)
+	      glm(formula, data = data, family = type_glm)
 	    },
 	    error = function(e) {          
-	      print("There was an error message.")
+	       print("There was an error message.")
 	    },
 	    warning = function(w) {  
 	      if (w$message %in% c("glm.fit: fitted probabilities numerically 0 or 1 occurred", "glm.fit: algorithm did not converge")) {
