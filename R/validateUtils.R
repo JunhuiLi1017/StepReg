@@ -104,7 +104,11 @@ validateUtils <- function(formula,
 	  # ref: https://stats.oarc.ucla.edu/other/mult-pkg/faq/general/faqwhat-is-complete-or-quasi-complete-separation-in-logistic-regression-and-what-are-some-strategies-to-deal-with-the-issue/
 	  tryCatch(                
 	    expr = {                      
-	      glm(formula, data = data, weights = weight, family = type_glm)
+	      if (is.null(weight)) {
+	        glm(formula, data = data, weights = NULL, family = type_glm)
+	      } else {
+	        glm(formula, data = data, weights = weight, family = type_glm)
+	      }
 	    },
 	    error = function(e) {          
 	      print("There was an error message.")
