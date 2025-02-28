@@ -84,7 +84,8 @@ getSigmaFullModel <- function(lmf, type, n_y) {
 }
 
 getMulticolX <- function(data, x_name, tolerance) {
-	x_matrix <- as.matrix(data[, x_name])
+  x_name_var <- x_name[x_name %in% colnames(data)]
+	x_matrix <- as.matrix(data[, x_name_var])
 	x_matrix_num <- apply(x_matrix, 2, function(x) {
 	  if(is.character(x)) as.numeric(as.factor(x)) else as.numeric(x)
 	})
