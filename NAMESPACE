@@ -3,7 +3,6 @@
 S3method(plot,StepReg)
 S3method(print,StepReg)
 export(StepRegShinyApp)
-export(print.StepReg)
 export(report)
 export(stepwise)
 export(vote)
