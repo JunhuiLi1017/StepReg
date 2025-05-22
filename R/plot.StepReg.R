@@ -1,43 +1,87 @@
-#' Plots from a StepReg object
+#' Visualize Stepwise Regression Results
 #'
-#' plot.StepReg visualizes the variable selection procedure using a StepReg object
+#' Creates informative visualizations of the variable selection process from a StepReg object.
+#' This function generates two types of plots: detailed step-by-step selection process and
+#' an overview of the final selected variables.
 #'
-#' @param x StepReg object
+#' @param x A StepReg object containing the results of stepwise regression analysis.
 #' 
-#' @param strategy Select which strategy to be displayed, default is the first name of StepReg object.
+#' @param strategy Character. Specifies which selection strategy to visualize:
+#'   \itemize{
+#'     \item "forward" - Forward selection
+#'     \item "backward" - Backward elimination
+#'     \item "bidirection" - Bidirectional selection
+#'     \item "subset" - Best subset selection
+#'   }
+#'   Default is the first strategy name in the StepReg object.
 #' 
-#' @param process Select which process of stepwise regression to be displayed from 'details' and 'overview', default is 'overview'.
+#' @param process Character. Specifies the type of visualization to display:
+#'   \itemize{
+#'     \item "details" - Shows detailed step-by-step selection process with variable entry/removal
+#'     \item "overview" - Shows summary of the selection process with metric values
+#'   }
+#'   Default is "overview".
 #' 
-#' @param num_digits The number of digits to keep when rounding the results. 
-#' Default is 6.
+#' @param num_digits Integer. Number of decimal places to display in the plots.
+#'   Default is 6.
 #' 
-#' @param ... Not used
+#' @param ... Additional arguments passed to plotting functions (currently not used).
 #'
-#' @return A list of plots comprising the selection detail plot and selection 
-#' summary plot for each strategy.
+#' @return A ggplot object showing either:
+#'   \itemize{
+#'     \item For "details" process: A heatmap showing variable selection status at each step
+#'     \item For "overview" process: A line plot showing metric values across steps
+#'   }
+#' 
+#' @details The function creates different types of visualizations based on the selection strategy:
+#'   \itemize{
+#'     \item For forward/backward/bidirectional selection:
+#'       \itemize{
+#'         \item Details view shows a heatmap with green tiles for added variables,
+#'               tan tiles for removed variables, and gray tiles for non-selected variables
+#'         \item Overview shows metric values across steps with variable labels
+#'       }
+#'     \item For subset selection:
+#'       \itemize{
+#'         \item Details view shows a heatmap of selected variables at each step
+#'         \item Overview shows metric values for different subset sizes
+#'       }
+#'   }
 #' 
 #' @import ggplot2
-#' 
 #' @importFrom stringr str_split
-#' 
 #' @importFrom dplyr group_by filter
-#' 
 #' @importFrom ggrepel geom_label_repel
 #' 
 #' @export
 #'
 #' @examples
 #' \dontrun{
+#' # Load example data
 #' data(mtcars)
+#' 
+#' # Run stepwise regression with multiple strategies
 #' formula <- mpg ~ .
-#' x <- stepwise(formula = formula,
-#'               data = mtcars,
-#'               type = "linear",
-#'               strategy = c("forward","bidirection","subset"),
-#'               metric = c("AIC","BIC","SL"))
-#' plot(x)
-#' plot(x, strategy = "forward", process = "overview")
+#' result <- stepwise(
+#'   formula = formula,
+#'   data = mtcars,
+#'   type = "linear",
+#'   strategy = c("forward", "bidirection", "subset"),
+#'   metric = c("AIC", "BIC", "SL")
+#' )
+#' 
+#' # Generate default overview plot
+#' plot(result)
+#' 
+#' # Generate detailed plot for forward selection
+#' plot(result, strategy = "forward", process = "details")
+#' 
+#' # Generate overview plot with 3 decimal places
+#' plot(result, strategy = "bidirection", process = "overview", num_digits = 3)
 #' }
+#'
+#' @seealso \code{\link{stepwise}} for creating StepReg objects
+#' @seealso \code{\link{summary.StepReg}} for numerical summary of stepwise regression results
 
 plot.StepReg <- function(x, strategy = attr(x,"nonhidden"), process = c("overview", "details"), num_digits = 6, ...) {
   process <- match.arg(process)

@@ -1,30 +1,59 @@
-#' remission
+#' Leukemia Remission Dataset
 #'
-#' A dataset containing the remission and 6 risk factors thought to be related to leukemia remission.
+#' A dataset containing information about leukemia remission and associated risk factors.
+#' This dataset is commonly used for demonstrating logistic regression analysis in medical research.
 #'
+#' @format A data frame with 27 observations and 7 variables:
+#' \describe{
+#'   \item{remiss}{Binary outcome variable indicating leukemia remission status:
+#'     \itemize{
+#'       \item 1 = Remission occurred
+#'       \item 0 = No remission
+#'     }
+#'   }
+#'   \item{cell}{Numeric. Cellularity of the marrow clot section (percentage)}
+#'   \item{smear}{Numeric. Smear differential percentage of blasts}
+#'   \item{infil}{Numeric. Percentage of absolute marrow leukemia cell infiltrate}
+#'   \item{li}{Numeric. Percentage labeling index of the bone marrow leukemia cells}
+#'   \item{blast}{Numeric. Absolute number of blasts in the peripheral blood}
+#'   \item{temp}{Numeric. Highest temperature (in Fahrenheit) before treatment}
+#' }
+#'
+#' @details This dataset is particularly useful for:
 #' \itemize{
-#'   \item remiss Indicates whether cancer remission occurred. A value of 1 indicates occurrence, while 0 indicates non-occurrence.
-#'   \item cell Cellularity of the marrow clot section
-#'   \item smear Smear differential percentage of blasts
-#'   \item infil Percentage of absolute marrow leukemia cell infiltrate
-#'   \item li Percentage labeling index of the bone marrow leukemia cells
-#'   \item blast The absolute number of blasts in the peripheral blood
-#'   \item temp The highest temperature before the start of treatment 
+#'   \item Demonstrating logistic regression analysis
+#'   \item Studying risk factors for leukemia remission
+#'   \item Teaching medical statistics and predictive modeling
+#' }
+#'
+#' @source Lee, E. T. (1974). "A Computer Program for Linear Logistic Regression Analysis."
+#' Computer Programs in Biomedicine 4:80–92.
+#'
+#' @references
+#' \itemize{
+#'   \item Lee, E. T. (1974). "A Computer Program for Linear Logistic Regression Analysis."
+#'   Computer Programs in Biomedicine 4:80–92.
+#'   \item Penn State University Statistics Online. "Logistic Regression Example."
+#'   \url{https://online.stat.psu.edu/stat501/book/export/html/1011}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' # Load the dataset
+#' data(remission)
+#' 
+#' # View first few rows
+#' head(remission)
+#' 
+#' # Summary statistics
+#' summary(remission)
+#' 
+#' # Run logistic regression
+#' model <- glm(remiss ~ ., data = remission, family = binomial)
+#' summary(model)
 #' }
 #'
 #' @name remission
-#' 
-#' @keywords datasets
-#' 
 #' @docType data
-#' 
-#' @usage data(remission)
-#' 
-#' @references 
-#' Lee, E. T. (1974). “A Computer Program for Linear Logistic Regression Analysis.” Computer Programs in Biomedicine 4:80–92.
-#' 
-#' https://online.stat.psu.edu/stat501/book/export/html/1011
-#' 
-#' @format A data frame with 27 rows and 7 columns.
-#' 
+#' @keywords datasets
 "remission"
