@@ -1,115 +1,164 @@
-#' Main wrapper function for stepwise regression
-#' 
-#' Select optimal model using various stepwise regression strategies, e.g., Forward Selection, Backward Elimination, Bidirectional Elimination; meanwhile, it also supports Best Subset method. Four types of models are currently implemented: linear regression, logistic regression, Cox regression, Poisson, and Gamma regression. For selection criteria, a.k.a, stop rule, users can choose from AIC, AICc, BIC, HQ, Significant Level, and more.
-#' 
-#' @param formula (formula) The formula used for model fitting by defining the scope of dependent and independent variables. The formula takes the form of a '~' (tilde) symbol, with the response variable(s) on the left-hand side, and the predictor variable(s) on the right-hand side. The 'lm()' function uses this formula to fit a regression model. A formula can be as simple as 'y ~ x'. For multiple predictors, they must be separated by the '+' (plus) symbol, e.g. 'y ~ x1 + x2'. To include an interaction term between variables, use the ':' (colon) symbol: 'y ~ x1 + x1:x2'. Use the '.' (dot) symbol to indicate that all other variables in the dataset should be included as predictors, e.g. 'y ~ .'. In the case of multiple response variables (multivariate), the formula can be specified as 'cbind(y1, y2) ~ x1 + x2'. By default, an intercept term is always included in the models, to exclude it, include '0' or '- 1' in your formula: 'y ~ 0 + x1', 'y ~ x1 + 0', and 'y ~ x1 - 1'.
-#' 
-#' @param data (data.frame) A dataset consisting of predictor variable(s) and response variable(s).
-#' 
-#' @param type (character) The stepwise regression type. Choose from 'linear', 'logit', 'poisson', 'cox', 'gamma' and 'negbin'. Default is 'linear'. More information, see \href{https://CRAN.R-project.org/package=StepReg/vignettes/StepReg.html}{StepReg_vignettes}
-#' 
-#' @param strategy (character) The model selection strategy. Choose from 'forward', 'backward', 'bidirectional' and 'subset'. Default is 'forward'. More information, see \href{https://CRAN.R-project.org/package=StepReg/vignettes/StepReg.html}{StepReg_vignettes}
-#' 
-#' @param metric (character) The model selection criterion (model fit score). Used for the evaluation of the predictive performance of an intermediate model. Choose from 'AIC', 'AICc', 'BIC', 'CP', 'HQ', 'adjRsq', 'SL', 'SBC', 'IC(3/2)', 'IC(1)'. Default is 'AIC'. More information, see \href{https://CRAN.R-project.org/package=StepReg/vignettes/StepReg.html}{StepReg_vignettes}
-#' 
-#' @param sle (numeric) Significance Level to Enter. It is the statistical significance level that a predictor variable must meet to be included in the model. E.g. if 'sle = 0.05', a predictor with a P-value less than 0.05 will 'enter' the model. Default is 0.15.
-#' 
-#' @param sls (numeric) Significance Level to Stay. Similar to 'sle', 'sls' is the statistical significance level that a predictor variable must meet to 'stay' in the model. E.g. if 'sls = 0.1', a predictor that was previously included in the model but whose P-value is now greater than 0.1 will be removed.
-#' 
-#' @param include (NULL|character) A character vector specifying predictor variables that will always stay in the model. A subset of the predictors in the dataset.
-#' 
-#' @param tolerance (numeric)  A statistical measure used to assess multicollinearity in a multiple regression model. It is calculated as the proportion of the variance in a predictor variable that is not accounted for by the other predictor variables in the model. Default is 1e-07.
-#' 
-#' @param weight (numeric) A numeric vector specifying the coefficients assigned to the predictor variables. The magnitude of the weight reflects the degree to which each predictor variable contributes to the prediction of the response variable. The range of weight should be from 0 to 1. Values greater than 1 will be coerced to 1, and values less than 0 will be coerced to 0. Default is NULL, which means that all weight are set equal.
-#' 
-#' @param test_method_linear (character) Test method for multivariate linear regression analysis, choose from 'Pillai', 'Wilks', 'Hotelling-Lawley', 'Roy'. Default is 'Pillai'. For univariate regression, 'F-test' will be used. 
-#' 
-#' @param test_method_glm (character) Test method for logit, Poisson, Gamma, and negative binomial regression analysis, choose from 'Rao', 'LRT'. Default is 'Rao'. Only "Rao" is available for strategy = 'subset'.
-#' 
-#' @param test_method_cox (character) Test method for cox regression analysis, choose from 'efron', 'breslow', 'exact'. Default is 'efron'.
-#' 
-#' @param best_n (numeric(integer)) The number of models to be retained in the process output. Default is 3, indicating that only the top 3 best models with the same number of variables are displayed. If all models are displayed, set it to Inf.
-#'  
-#' @param num_digits (numeric(integer)) The number of digits to keep when rounding the results. Default is 6.
-#' 
-#' @references
-#' 
-#' Alsubaihi, A. A., Leeuw, J. D., and Zeileis, A. (2002). Variable strategy in multivariable regression using sas/iml. , 07(i12).
-#' 
-#' Darlington, R. B. (1968). Multiple regression in psychological research and practice. Psychological Bulletin, 69(3), 161.
-#' 
-#' Dharmawansa, P. , Nadler, B. , & Shwartz, O. . (2014). Roy's largest root under rank-one alternatives:the complex valued case and applications. Statistics.
-#' 
-#' Hannan, E. J., & Quinn, B. G. (1979). The determination of the order of an autoregression. Journal of the Royal Statistical Society, 41(2), 190-195.
-#' 
-#' Harold Hotelling. (1992). The Generalization of Student's Ratio. Breakthroughs in Statistics. Springer New York.
-#' 
-#' Hocking, R. R. (1976). A biometrics invited paper. the analysis and strategy of variables in linear regression. Biometrics, 32(1), 1-49.
-#' 
-#' Hurvich, C. M., & Tsai, C. (1989). Regression and time series model strategy in small samples. Biometrika, 76(2), 297-307.
-#' 
-#' Judge, & GeorgeG. (1985). The Theory and practice of econometrics /-2nd ed. The Theory and practice of econometrics /. Wiley.
-#' 
-#' Mallows, C. L. (1973). Some comments on cp. Technometrics, 15(4), 661-676.
-#' 
-#' Mardia, K. V., Kent, J. T., & Bibby, J. M. (1979). Multivariate analysis. Mathematical Gazette, 37(1), 123-131.
-#' 
-#' Mckeon, J. J. (1974). F approximations to the distribution of hotelling's t20. Biometrika, 61(2), 381-383.
-#' 
-#' Mcquarrie, A. D. R., & Tsai, C. L. (1998). Regression and Time Series Model strategy. Regression and time series model strategy /. World Scientific.
-#' 
-#' Pillai, K. . (1955). Some new test criteria in multivariate analysis. The Annals of Mathematical Statistics, 26(1), 117-121.
-#' 
-#' R.S. Sparks, W. Zucchini, & D. Coutsourides. (1985). On variable strategy in multivariate regression. Communication in Statistics- Theory and Methods, 14(7), 1569-1587.
-#' 
-#' Sawa, T. (1978). Information criteria for discriminating among alternative regression models. Econometrica, 46(6), 1273-1291.
-#' 
-#' Schwarz, G. (1978). Estimating the dimension of a model. Annals of Statistics, 6(2), pags. 15-18.
-#' 
-#' @author Junhui Li, Kai Hu, Xiaohuan Lu
-#' 
-#' @return A list of multiple models, each with its associated strategy and metric, will be returned.
-#' 
-#' @examples
-#' ## perform multivariate linear stepwise regression with 'bidirection' 
-#' ## strategy and 'AIC' stop rule, excluding intercept.
-#' data(mtcars)
-#' mtcars$yes <- mtcars$wt
-#' formula <- cbind(mpg,drat) ~ . + 0
-#' stepwise(formula = formula,
-#'          data = mtcars,
-#'          type = "linear",
-#'          strategy = "bidirection",
-#'          metric = "AIC")
-#' ## perform linear stepwise regression with 'bidirection' strategy and 
-#' ## "AIC","SBC","SL","AICc","BIC", and "HQ" stop rule.
-#' formula <- mpg ~ . + 1
-#' stepwise(formula = formula,
-#'          data = mtcars,
-#'          type = "linear",
-#'          strategy = c("forward","bidirection"),
-#'          metric = c("AIC","SBC","SL","AICc","BIC","HQ"))
+#' Stepwise Regression Model Selection
 #'
-#' ## perform logit stepwise regression with 'forward' strategy and significance
-#' ## level as stop rule.
+#' Performs stepwise regression model selection using various strategies and selection criteria.
+#' Supports multiple regression types including linear, logistic, Cox, Poisson, and Gamma regression.
+#'
+#' @param formula A formula object specifying the model structure:
+#'   \itemize{
+#'     \item Response variable(s) on left side of ~
+#'     \item Predictor variable(s) on right side of ~
+#'     \item Use + to separate multiple predictors
+#'     \item Use : for interaction terms
+#'     \item Use . to include all variables
+#'     \item Use cbind() for multiple responses
+#'     \item Use 0 or -1 to exclude intercept
+#'   }
+#'
+#' @param data A data frame containing the variables in the model
+#'
+#' @param type The type of regression model to fit:
+#'   \itemize{
+#'     \item "linear" - Linear regression (default)
+#'     \item "logit" - Logistic regression
+#'     \item "poisson" - Poisson regression
+#'     \item "cox" - Cox proportional hazards regression
+#'     \item "gamma" - Gamma regression
+#'     \item "negbin" - Negative binomial regression
+#'   }
+#'
+#' @param strategy The model selection strategy:
+#'   \itemize{
+#'     \item "forward" - Forward selection (default)
+#'     \item "backward" - Backward elimination
+#'     \item "bidirection" - Bidirectional elimination
+#'     \item "subset" - Best subset selection
+#'   }
+#'
+#' @param metric The model selection criterion:
+#'   \itemize{
+#'     \item "AIC" - Akaike Information Criterion (default)
+#'     \item "AICc" - Corrected AIC
+#'     \item "BIC" - Bayesian Information Criterion
+#'     \item "CP" - Mallows' Cp
+#'     \item "HQ" - Hannan-Quinn criterion
+#'     \item "adjRsq" - Adjusted R-squared
+#'     \item "SL" - Significance Level
+#'     \item "SBC" - Schwarz Bayesian Criterion
+#'     \item "IC(3/2)" - Information Criterion with penalty 3/2
+#'     \item "IC(1)" - Information Criterion with penalty 1
+#'   }
+#'
+#' @param sle Significance Level to Enter (default: 0.15). A predictor must have p-value < sle to enter the model.
+#'
+#' @param sls Significance Level to Stay (default: 0.15). A predictor must have p-value < sls to remain in the model.
+#'
+#' @param include Character vector of predictor variables that must be included in all models.
+#'
+#' @param tolerance Threshold for detecting multicollinearity (default: 1e-07). Lower values are more strict.
+#'
+#' @param weight Optional numeric vector of observation weights. Values are coerced to [0,1].
+#'
+#' @param test_method_linear Test method for multivariate linear regression:
+#'   \itemize{
+#'     \item "Pillai" (default)
+#'     \item "Wilks"
+#'     \item "Hotelling-Lawley"
+#'     \item "Roy"
+#'   }
+#'   For univariate regression, F-test is used.
+#'
+#' @param test_method_glm Test method for GLM models:
+#'   \itemize{
+#'     \item "Rao" (default)
+#'     \item "LRT"
+#'   }
+#'   Only "Rao" available for subset strategy.
+#'
+#' @param test_method_cox Test method for Cox regression:
+#'   \itemize{
+#'     \item "efron" (default)
+#'     \item "breslow"
+#'     \item "exact"
+#'   }
+#'
+#' @param best_n Maximum number of models to retain for each variable count (default: 3)
+#'
+#' @param num_digits Number of decimal places to round results (default: 6)
+#'
+#' @return A list containing:
+#'   \itemize{
+#'     \item Selected models for each strategy-metric combination
+#'     \item Model selection process details
+#'     \item Variable importance information
+#'     \item Model fit statistics
+#'   }
+#'
+#' @examples
+#' # Multivariate linear regression with bidirectional selection
+#' data(mtcars)
+#' formula <- cbind(mpg, drat) ~ . + 0
+#' stepwise(
+#'   formula = formula,
+#'   data = mtcars,
+#'   type = "linear",
+#'   strategy = "bidirection",
+#'   metric = "AIC"
+#' )
+#'
+#' # Linear regression with multiple strategies and metrics
+#' formula <- mpg ~ . + 1
+#' stepwise(
+#'   formula = formula,
+#'   data = mtcars,
+#'   type = "linear",
+#'   strategy = c("forward", "bidirection"),
+#'   metric = c("AIC", "SBC", "SL", "AICc", "BIC", "HQ")
+#' )
+#'
+#' # Logistic regression with significance level criteria
 #' data(remission)
 #' formula <- remiss ~ .
-#' stepwise(formula = formula,
-#'          data = remission,
-#'          type = "logit",
-#'          strategy = "forward",
-#'          metric = "SL",
-#'          sle=0.05,
-#'          sls=0.05)
+#' stepwise(
+#'   formula = formula,
+#'   data = remission,
+#'   type = "logit",
+#'   strategy = "forward",
+#'   metric = "SL",
+#'   sle = 0.05,
+#'   sls = 0.05
+#' )
+#'
+#' @references
+#' \itemize{
+#'   \item Alsubaihi et al. (2002) Variable strategy in multivariable regression using sas/iml
+#'   \item Darlington (1968) Multiple regression in psychological research and practice
+#'   \item Dharmawansa et al. (2014) Roy's largest root under rank-one alternatives
+#'   \item Hannan & Quinn (1979) The determination of the order of an autoregression
+#'   \item Hotelling (1992) The Generalization of Student's Ratio
+#'   \item Hocking (1976) The analysis and strategy of variables in linear regression
+#'   \item Hurvich & Tsai (1989) Regression and time series model strategy in small samples
+#'   \item Judge (1985) The Theory and practice of econometrics
+#'   \item Mallows (1973) Some comments on cp
+#'   \item Mardia et al. (1979) Multivariate analysis
+#'   \item Mckeon (1974) F approximations to the distribution of hotelling's t20
+#'   \item Mcquarrie & Tsai (1998) Regression and Time Series Model strategy
+#'   \item Pillai (1955) Some new test criteria in multivariate analysis
+#'   \item Sparks et al. (1985) On variable strategy in multivariate regression
+#'   \item Sawa (1978) Information criteria for discriminating among alternative regression models
+#'   \item Schwarz (1978) Estimating the dimension of a model
+#' }
+#'
+#' @author Junhui Li, Kai Hu, Xiaohuan Lu
+#'
 #' @keywords stepwise regression
-#' 
+#'
 #' @importFrom survival coxph
 #' @importFrom stringr str_replace
 #' @importFrom utils combn
 #' @importFrom dplyr %>% mutate_if mutate
 #' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms deviance df.residual formula model.frame
 #' @importFrom MASS glm.nb
-#' 
+#'
 #' @export
 
 stepwise <- function(formula,

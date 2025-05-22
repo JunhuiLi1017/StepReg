@@ -28,7 +28,7 @@
 #' @examples
 #' data(creditCard)
 #' summary(creditCard)
-#' 
+#' @usage data(creditCard)
 #' @name creditCard
 #' @docType data
 #' @keywords datasets

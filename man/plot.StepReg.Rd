@@ -92,6 +92,4 @@ plot(result, strategy = "bidirection", process = "overview", num_digits = 3)
 }
 \seealso{
 \code{\link{stepwise}} for creating StepReg objects
-
-\code{\link{summary.StepReg}} for numerical summary of stepwise regression results
 }

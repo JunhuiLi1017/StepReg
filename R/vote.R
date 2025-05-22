@@ -1,31 +1,38 @@
-#' Vote for all models
+#' Vote for Models Across Different Selection Strategies
 #'
-#' Votes for all models across all combinations of strategies and metrics
+#' Creates a summary table showing which models were selected by different combinations of 
+#' stepwise regression strategies and selection metrics.
 #'
-#' @param x each dataframe from outputlist
-#' 
-#' @param ... further parameters
+#' @param x A list object returned by the \code{stepwise()} function containing model selection results
+#' @param ... Additional arguments (currently not used)
 #'
-#' @return 
-#' A dataframe with column names "model" and combinations of strategy and metric. 
-#' The first column represents the model formula, and a checkmark indicates 
-#' that the corresponding model was supported by the given strategy and metric 
-#' combination. Please note that for the subset strategy, the "vote" will report
-#' the single best model across all numbers of variables under Information 
-#' Criteria (IC). However, this rule should not be applied to Significance Level
-#' (SL) because the F/Rao value is only comparable for models with the same 
-#' number of variables.
-#' 
+#' @return A data frame where:
+#'   \item{model}{The formula of each selected model}
+#'   \item{strategy:metric}{Columns for each combination of strategy and metric used}
+#'   
+#' Each cell contains a checkmark (✓) if that model was selected by the corresponding 
+#' strategy-metric combination. For the subset strategy with Information Criteria (IC), 
+#' only the single best model across all variable numbers is shown. This does not apply 
+#' to Significance Level (SL) since F/Rao statistics can only be compared between models 
+#' with the same number of variables.
+#'
 #' @examples
+#' # Load example data
 #' data(mtcars)
-#' formula <- mpg ~ .
-#' x <- stepwise(formula = formula,
-#'               data = mtcars,
-#'               type = "linear",
-#'               strategy = c("forward","backward","subset"),
-#'               metric = c("AIC","BIC"))
-#' vote(x)
 #' 
+#' # Run stepwise regression with multiple strategies and metrics
+#' formula <- mpg ~ .
+#' results <- stepwise(
+#'   formula = formula,
+#'   data = mtcars,
+#'   type = "linear",
+#'   strategy = c("forward", "backward", "subset"),
+#'   metric = c("AIC", "BIC")
+#' )
+#' 
+#' # Get voting summary
+#' vote(results)
+#'
 #' @export
 #' 
 vote <- function(x, ...){

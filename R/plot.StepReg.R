@@ -81,7 +81,6 @@
 #' }
 #'
 #' @seealso \code{\link{stepwise}} for creating StepReg objects
-#' @seealso \code{\link{summary.StepReg}} for numerical summary of stepwise regression results
 
 plot.StepReg <- function(x, strategy = attr(x,"nonhidden"), process = c("overview", "details"), num_digits = 6, ...) {
   process <- match.arg(process)

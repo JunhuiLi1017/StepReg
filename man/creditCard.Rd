@@ -25,7 +25,7 @@ A data frame with 1,319 observations and 12 variables:
 Greene, W.H. (2003). Econometric Analysis, 5th edition. Upper Saddle River, NJ: Prentice Hall.
 }
 \usage{
-creditCard
+data(creditCard)
 }
 \description{
 A dataset containing credit history information for credit card applicants. This dataset is sourced from the AER package.
@@ -37,7 +37,6 @@ It provides a comprehensive view of various factors that may influence credit ca
 \examples{
 data(creditCard)
 summary(creditCard)
-
 }
 \seealso{
 \code{\link[AER]{CreditCard}} for the original dataset in the AER package

@@ -15,7 +15,7 @@
 #' @details The print method provides a focused view of the final model's performance,
 #' showing the selected variables and their corresponding fit statistics. This is useful
 #' for quickly assessing the model's quality without the detailed step-by-step selection
-#' process (which can be viewed using \code{\link{summary.StepReg}}).
+#' process (which can be viewed using \code{\link{stepwise}}).
 #' 
 #' @export
 #'

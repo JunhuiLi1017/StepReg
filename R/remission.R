@@ -53,6 +53,7 @@
 #' summary(model)
 #' }
 #'
+#' @usage data(remission)
 #' @name remission
 #' @docType data
 #' @keywords datasets

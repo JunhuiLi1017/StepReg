@@ -26,7 +26,7 @@ Lee, E. T. (1974). "A Computer Program for Linear Logistic Regression Analysis."
 Computer Programs in Biomedicine 4:80–92.
 }
 \usage{
-remission
+data(remission)
 }
 \description{
 A dataset containing information about leukemia remission and associated risk factors.
