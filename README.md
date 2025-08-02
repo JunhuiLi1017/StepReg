@@ -6,13 +6,23 @@
 ## How to install
 For released version:
 ```
+pak::pkg_install("StepReg")
+```
+
+or
+
+```
 install.packages("StepReg")
 ```
 
 For development version:
 ```
-library(devtools)
-install_github("JunhuiLi1017/StepReg")
+pak::pkg_install("JunhuiLi1017/StepReg")
+```
+or
+
+```
+devtools::install_github("JunhuiLi1017/StepReg")
 ```
 
 ## Detailed usage
