@@ -9,7 +9,7 @@ match_multiple_args <- function(value, choice){
 }
 
 getXname <- function(formula, data) {
-  term_form <- terms(formula, data = data1)
+  term_form <- terms(formula, data = data)
   x_name <- attr(term_form, "term.labels")
   strata_check <- grepl("strata\\(", x_name)
   if(any(strata_check)) {
