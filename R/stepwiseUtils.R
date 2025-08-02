@@ -9,10 +9,15 @@ match_multiple_args <- function(value, choice){
 }
 
 getXname <- function(formula, data) {
-	term_form <- terms(formula, data = data)
-	vars <- as.character(attr(term_form, "variables"))[ -1 ]
-	x_name <- attr(term_form, "term.labels")
-	return(x_name)
+  term_form <- terms(formula, data = data1)
+  x_name <- attr(term_form, "term.labels")
+  strata_check <- grepl("strata\\(", x_name)
+  if(any(strata_check)) {
+    strata_var <- gsub("strata\\((.*)\\)", "\\1", x_name[strata_check])
+    x_name <- x_name[!strata_check]
+    x_name <- x_name[!x_name %in% strata_var]
+  }
+  return(x_name)
 }
 
 getYname <- function(formula, data) {
@@ -32,7 +37,12 @@ getIntercept <- function(formula, data, type) {
 	    intercept <- "1"
 	  }
 	}else{
-	  intercept <- '0'
+    x_name <- attr(term_form, "term.labels")
+    if(any(grepl("strata\\(", x_name))) {
+      intercept <- x_name[grepl("strata\\(", x_name)]
+    }else{
+      intercept <- '0'
+    }
 	}
 	return(intercept)
 }
