@@ -468,9 +468,9 @@ The `lung` dataset, available in the `"survival"` R package, includes informatio
 
 Cox regression, also termed the Cox proportional hazards model, is specifically designed for analyzing survival data, making it well-suited for datasets like `lung` that include information on the time until an event (e.g., death) occurs. This method accommodates censoring and assumes proportional hazards, enhancing its applicability to medical studies involving time-to-event outcomes.
 
-### Example1: using "forward" strategy
+### Example1: using "forward" strategy with strata function in the formula
 
-In this example, we employ a "forward" strategy with "AICc" as the selection criteria.
+In this example, we employ a "forward" strategy with c("AICc", "SL") as the selection criteria. We set the significance level for entry to 0.05 (`sle = 0.05`). We also use the `strata` function in the formula to account for the stratified analysis.
 ```{r, message = FALSE}
 library(dplyr)
 library(survival)
@@ -479,12 +479,13 @@ lung <- survival::lung %>%
   mutate(sex = factor(sex, levels = c(1, 2))) %>% # make sex as factor
   na.omit() # get rid of incomplete records
 
-formula  =  Surv(time, status) ~ .
+formula  =  Surv(time, status) ~ . + strata(sex)
 res6 <- stepwise(formula = formula,
                  data = lung,
                  type = "cox",
                  strategy = "forward",
-                 metric = "AICc")
+                 metric = c("AICc", "SL"),
+                 sle = 0.05)
 res6
 
 plot_list <- setNames(
