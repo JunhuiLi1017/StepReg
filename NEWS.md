@@ -1,6 +1,6 @@
 # StepReg NEWS
 
-## Version 1.5.9 (2025-02-28)
+## Version 1.5.9 (2025-08-04)
 
 ### New Features
 
@@ -20,25 +20,6 @@
 - Updated function documentation with new examples
 - Enhanced README with quick start examples for new features
 - Updated package description to highlight new capabilities
-
-### Examples
-
-**Strata Variables in Cox Regression:**
-```r
-library(survival)
-data(lung)
-lung$sex <- factor(lung$sex)
-formula <- Surv(time, status) ~ age + sex + ph.ecog + strata(inst)
-res <- stepwise(formula = formula, data = lung, type = "cox")
-```
-
-**Continuous-Nested-Within-Class Effects:**
-```r
-data(mtcars)
-mtcars$am <- factor(mtcars$am)
-formula <- mpg ~ am + wt:am + disp:am + hp:am
-res <- stepwise(formula = formula, data = mtcars, type = "linear")
-```
 
 ## Version 1.5.8
 
