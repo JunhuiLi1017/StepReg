@@ -25,7 +25,7 @@ output:
     toc_float: true
   BiocStyle::pdf_document: default
 abstract: |
-  The StepReg package, developed for exploratory model building tasks, offers support across diverse scenarios. It facilitates model construction for various response variable types, including continuous (linear regression), binary (logistic regression), and time-to-event (Cox regression), among others. StepReg encompasses all commonly used model selection strategies, including forward selection, backward elimination, bidirectional elimination, and best subsets. Notably, it offers flexibility in selection metrics, accommodating both information criteria (AIC, BIC, etc.) and significance level cutoffs. While StepReg is a powerful tool for model development, it is important to emphasize that the final models should not be used for statistical inference. The models generated should only be employed for exploratory or predictive purposes.  This vignette provides numerous examples showcasing the effective utilization of StepReg for model development in diverse contexts. Furthermore, it delves into considerations for selecting appropriate strategies and metrics, empowering users to make informed decisions throughout the modeling process.
+  The StepReg package, developed for exploratory model building tasks, offers support across diverse scenarios. It facilitates model construction for various response variable types, including continuous (linear regression), binary (logistic regression), and time-to-event (Cox regression), among others. StepReg encompasses all commonly used model selection strategies, including forward selection, backward elimination, bidirectional elimination, and best subsets. Notably, it offers flexibility in selection metrics, accommodating both information criteria (AIC, BIC, etc.) and significance level cutoffs. StepReg supports advanced features including strata variables for Cox regression and continuous-nested-within-class effects for complex modeling scenarios. While StepReg is a powerful tool for model development, it is important to emphasize that the final models should not be used for statistical inference. The models generated should only be employed for exploratory or predictive purposes.  This vignette provides numerous examples showcasing the effective utilization of StepReg for model development in diverse contexts. Furthermore, it delves into considerations for selecting appropriate strategies and metrics, empowering users to make informed decisions throughout the modeling process.
 ---
 ```{r include=FALSE}
 knitr::opts_chunk$set(comment = NA)
@@ -37,7 +37,7 @@ Model selection is the process of identifying the most relevant features from a 
 
 However, it is important to note that stepwise regression should never be used for statistical inference unless the variable selection process is explicitly accounted for. Without proper adjustments, the selection process invalidates statistical inference, such as p-values and confidence intervals, due to issues like multiple testing and data dredging. This limitation does not apply when stepwise regression is used for prediction, as the primary goal in predictive modeling is to maximize accuracy rather than draw causal conclusions.
 
-StepReg simplifies model selection tasks by providing a unified programming interface. It currently supports model buildings for five distinct response variable types (section \@ref(regressioncategories)), four model selection strategies (section \@ref(modelselectionstrategies)) including the best subsets algorithm, and a variety of selection metrics (section \@ref(selectionmetrics)). Moreover, StepReg detects and addresses the multicollinearity issues if they exist (section \@ref(multicollinearity)). The output of StepReg includes multiple tables summarizing the final model and the variable selection procedures. Additionally, StepReg offers a plot function to visualize the selection steps (section \@ref(stepregoutput)). For demonstration, the vignettes include four use cases covering distinct regression scenarios (section \@ref(usecases)). Non-programmers can access the tool through the iterative Shiny app detailed in section \@ref(shinyapp).
+StepReg simplifies model selection tasks by providing a unified programming interface. It currently supports model buildings for five distinct response variable types (section \@ref(regressioncategories)), four model selection strategies (section \@ref(modelselectionstrategies)) including the best subsets algorithm, and a variety of selection metrics (section \@ref(selectionmetrics)). StepReg also supports advanced features including strata variables for Cox regression and continuous-nested-within-class effects for complex modeling scenarios (section \@ref(advancedfeatures)). Moreover, StepReg detects and addresses the multicollinearity issues if they exist (section \@ref(multicollinearity)). The output of StepReg includes multiple tables summarizing the final model and the variable selection procedures. Additionally, StepReg offers a plot function to visualize the selection steps (section \@ref(stepregoutput)). For demonstration, the vignettes include four use cases covering distinct regression scenarios (section \@ref(usecases)). Non-programmers can access the tool through the iterative Shiny app detailed in section \@ref(shinyapp).
 
 By combining flexibility, robustness, and ease of use, StepReg is a powerful tool for predictive modeling tasks, particularly when the goal is to identify an optimal set of features for accurate predictions. However, users should exercise caution and avoid using StepReg for statistical inference unless the variable selection process is properly accounted for.
 
@@ -247,6 +247,104 @@ StepReg enables to explore the arguments used in `stepwise()`, variable calsses,
 report(res, report_name = "results", format = c("xlsx", "docx"))
 ```
 
+## Advanced Features {#advancedfeatures}
+
+StepReg supports several advanced features that enhance its flexibility for complex modeling scenarios.
+
+### Strata Variables in Cox Regression {#strata}
+
+For Cox proportional hazards regression, StepReg supports the use of `strata()` function to include stratification variables. This is particularly useful when you want to control for confounding variables that may violate the proportional hazards assumption.
+
+The `strata()` function allows you to fit separate baseline hazard functions for different groups while sharing the same regression coefficients across strata. This is equivalent to fitting separate Cox models for each stratum but with the advantage of more efficient parameter estimation.
+
+**Example with strata variable:**
+```{r, message = FALSE}
+library(dplyr)
+library(survival)
+# Preprocess:
+lung <- survival::lung %>%
+  mutate(sex = factor(sex, levels = c(1, 2))) %>% # make sex as factor
+  na.omit() # get rid of incomplete records
+
+formula  =  Surv(time, status) ~ . + strata(inst)
+res_strata <- stepwise(formula = formula,
+                 data = lung,
+                 type = "cox",
+                 strategy = "forward",
+                 metric = c("AICc", "SL"),
+                 sle = 0.1)
+res_strata
+```
+
+In this example, `strata(inst)` creates separate baseline hazard functions for each institution (`inst`), while the effects of `age`, `sex`, and `ph.ecog` are assumed to be the same across all institutions.
+
+### Continuous-Nested-Within-Class Effects {#nested}
+
+StepReg supports continuous-nested-within-class effects, which are useful when you want to model how a continuous variable's effect varies across different levels of a categorical variable. This is implemented using the `:` operator in the formula.
+
+**Key points about nested effects:**
+- The class variable (categorical) must be a factor
+- The continuous variable can be nested within the class variable using `:` notation
+- The order of variables in the nested term doesn't matter (e.g., `X:A` is equivalent to `A:X`)
+- Nested effects are automatically expanded to include the main effects of both variables
+
+**Example with nested effects:**
+```{r, message = FALSE}
+data(mtcars)
+# Convert categorical variables to factors
+mtcars$am <- factor(mtcars$am)
+mtcars$cyl <- factor(mtcars$cyl)
+
+# Formula with nested effects
+formula <- mpg ~ am + cyl + wt:am + disp:am + hp:am
+res_nested <- stepwise(
+  formula = formula,
+  data = mtcars,
+  type = "linear",
+  strategy = "bidirection",
+  metric = "AIC"
+)
+res_nested
+```
+
+In this example:
+- `wt:am` models how the effect of weight (`wt`) varies by transmission type (`am`)
+- `disp:am` models how the effect of displacement varies by transmission type
+- `hp:am` models how the effect of horsepower varies by transmission type
+
+**Combining strata and nested effects:**
+```{r, message = FALSE}
+library(survival)
+data(lung)
+lung$sex <- as.factor(lung$sex)
+
+# Formula combining strata and nested effects
+formula <- Surv(time, status) ~ age + sex + age:sex + strata(inst)
+res_combined <- stepwise(
+  formula = formula,
+  data = lung,
+  type = "cox",
+  strategy = "forward",
+  metric = "AIC"
+)
+res_combined
+```
+
+This example demonstrates how to use both stratification (`strata(inst)`) and nested effects (`age:sex`) in the same model.
+
+### Formula Syntax Summary {#formulasyntax}
+
+The following table summarizes the formula syntax supported by StepReg:
+
+```{r, echo = FALSE}
+Syntax <- c("`y ~ x1 + x2`", "`y ~ .`", "`y ~ . - x1`", "`y ~ x1 * x2`", "`y ~ x1:x2`", "`cbind(y1, y2) ~ .`", "`y ~ . + 0`", "`Surv(time, status) ~ . + strata(strata_var)`")
+Description <- c("Multiple predictors", "All variables in dataset", "All variables except x1", "Main effects and interaction", "Interaction only", "Multiple response variables", "No intercept", "Cox regression with strata")
+Example <- c("`mpg ~ cyl + wt`", "`mpg ~ .`", "`mpg ~ . - disp`", "`mpg ~ cyl * am`", "`mpg ~ cyl:am`", "`cbind(mpg, drat) ~ .`", "`mpg ~ . + 0`", "`Surv(time, status) ~ age + sex + strata(inst)`")
+
+df <- data.frame(Syntax, Description, Example)
+kable(df, format = "html", caption = 'Formula syntax supported by StepReg') %>% kable_styling()
+```
+
 # Use cases {#usecases}
 
 Below, we present various examples illustrating the application of different models tailored to specific datasets. Please note that stepwise regression should never be used for statistical inference unless the variable selection process is properly accounted for, as it can invalidate the results. However, this issue does not arise when stepwise regression is used for prediction. It is essential to select the regression model that best suits the type of response variable. For detailed guidance, refer to section @ref(regressioncategories).
@@ -275,17 +373,19 @@ The `mtcars` is a classic dataset in statistics and is included in the base R in
 
 Linear regression is an ideal choice for analyzing the `mtcars` dataset due to its inclusion of continuous variables like "mpg", "hp", or "weight", which can serve as response variables. Furthermore, the dataset exhibits potential linear relationships between the response variable and other variables.
 
-### Example1: single dependent variable ("mpg")
+### Example1: single dependent variable ("mpg"), and apply continuous-nested-within-class variables
 
 In this example, we employ "forward" strategy with "AIC" as the selection criteria. Additionally, we specify using the `include` argument that "disp", "cyl" always be included in the model.
 ```{r, message = FALSE}
 data(mtcars)
+## make sure the categorical variable is a factor variable
+mtcars$am <- as.factor(mtcars$am)
 
-formula <- mpg ~ .
+formula <- mpg ~ am + cyl:am + disp:am + am:hp + drat:am + wt:am + qsec:am + vs:am + gear:am + carb:am
 res1 <- stepwise(formula = formula,
                  data = mtcars,
                  type = "linear",
-                 include = c("disp", "cyl"),
+                 include = c("cyl:am", "am"),
                  strategy = "forward",
                  metric = "AIC")
 res1
@@ -485,7 +585,7 @@ res6 <- stepwise(formula = formula,
                  type = "cox",
                  strategy = "forward",
                  metric = c("AICc", "SL"),
-                 sle = 0.05)
+                 sle = 0.1)
 res6
 
 plot_list <- setNames(

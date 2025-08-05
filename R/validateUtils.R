@@ -42,7 +42,31 @@ validateUtils <- function(formula,
 	if(!is.null(include)) {
 		term_form <- terms(formula, data = data)
 		x_name <- attr(term_form, "term.labels")
-		if(!all(include %in% x_name)) {
+		y_name <- getYname(formula, data)
+		formula_include <- reformulate(include, response = y_name)
+		term_form_include <- terms(formula_include, data = data)
+		x_name_include <- attr(term_form_include, "term.labels")
+		
+		# Normalize interaction terms to alphabetical order for comparison
+		normalize_interaction_terms <- function(terms) {
+			sapply(terms, function(term) {
+				if (grepl(":", term)) {
+					parts <- strsplit(term, ":")[[1]]
+					paste(sort(parts), collapse = ":")
+				} else if(grepl("\\*", term)) {
+					parts <- strsplit(term, "\\*")[[1]]
+					paste(sort(parts), collapse = "*")
+				} else {
+					term
+				}
+			})
+		}
+		
+		x_name_normalized <- normalize_interaction_terms(x_name)
+		x_name_include_normalized <- normalize_interaction_terms(x_name_include)
+		
+		## check if the include variables are in the formula
+		if(!all(x_name_include_normalized %in% x_name_normalized)) {
 			stop(paste0("'include' should be a subset of: c('",paste0(x_name,collapse = "','"),"')"))
 		}
 	}

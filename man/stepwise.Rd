@@ -28,10 +28,12 @@ stepwise(
   \item Response variable(s) on left side of ~
   \item Predictor variable(s) on right side of ~
   \item Use + to separate multiple predictors
-  \item Use : for interaction terms
+  \item Use * for main effect and interaction terms
+  \item Use : for continuous-nested-within-class variable, make sure class variable is a factor variable, e.g. X:A or A:X means a continuous variable X nested within a factor variable A
   \item Use . to include all variables
   \item Use cbind() for multiple responses
   \item Use 0 or -1 to exclude intercept
+  \item Use strata() to include strata variable for Cox regression
 }}
 
 \item{data}{A data frame containing the variables in the model}
@@ -151,6 +153,17 @@ stepwise(
   metric = "SL",
   sle = 0.05,
   sls = 0.05
+)
+
+# Linear regression with continuous-nested-within-class effects
+mtcars$am <- factor(mtcars$am)
+formula <- mpg ~ am + cyl + wt:am + disp:am + hp:am
+stepwise(
+  formula = formula,
+  data = mtcars,
+  type = "linear",
+  strategy = "bidirection",
+  metric = "AIC"
 )
 
 }
