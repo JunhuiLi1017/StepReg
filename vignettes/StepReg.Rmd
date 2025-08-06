@@ -619,9 +619,9 @@ StepRegShinyApp()
 
 Here is the user interface.
 
-![](src/StepReg_shiny_UI_description_File.png)
+![](src/StepReg_shiny_UI_description_Data.png){width=100%}
 
-![](src/StepReg_shiny_UI_description_Analyze.png)
+![](src/StepReg_shiny_UI_description_Stepwise.png){width=100%}
 
 # Session info
 
