@@ -114,34 +114,44 @@ server <- function(input, output, session) {
 
   # Enable run button if all required fields are specified by user:
   run_analysis_enabled <- reactive({
-    # Check if formula is provided
-    if (is.null(input$formula_input) || input$formula_input == "") {
-      return(FALSE)
-    }
-    # Check if strategy is selected
-    if (length(input$strategy) == 0) return(FALSE)
-    # Check if metric is selected based on detected type
-    if (input$type == "linear") {
-      # Check if it's multivariate by looking for cbind in the formula
-      if (grepl("cbind\\(", input$formula_input)) {
-        if (length(input$metric_multivariate_linear) == 0) return(FALSE)
-      } else {
-        if (length(input$metric_univariate_linear) == 0) return(FALSE)
+    tryCatch({
+      # Check if formula is provided
+      if (is.null(input$formula_input) || input$formula_input == "") {
+        return(FALSE)
       }
-    } else if (input$type %in% c("logit", "cox", "poisson", "gamma")) {
-      if (length(input$metric_glm_cox) == 0) return(FALSE)
-    } else {
-      stop("input$metric_xxx: not a valid input$type!")
-    }
-    return(TRUE)
+      # Check if strategy is selected
+      if (is.null(input$strategy) || length(input$strategy) == 0) return(FALSE)
+      # Check if metric is selected based on detected type
+      if (is.null(input$type)) return(FALSE)
+      
+      if (input$type == "linear") {
+        # Check if it's multivariate by looking for cbind in the formula
+        if (grepl("cbind\\(", input$formula_input)) {
+          if (is.null(input$metric_multivariate_linear) || length(input$metric_multivariate_linear) == 0) return(FALSE)
+        } else {
+          if (is.null(input$metric_univariate_linear) || length(input$metric_univariate_linear) == 0) return(FALSE)
+        }
+      } else if (input$type %in% c("logit", "cox", "poisson", "gamma", "negbin")) {
+        if (is.null(input$metric_glm_cox) || length(input$metric_glm_cox) == 0) return(FALSE)
+      } else {
+        return(FALSE)
+      }
+      return(TRUE)
+    }, error = function(e) {
+      return(FALSE)
+    })
   })
   
   exploratory_plot_enabled <- reactive({
-    if (length(input$var_plot) == 0){
+    tryCatch({
+      if (is.null(input$var_plot) || length(input$var_plot) == 0){
+        return(FALSE)
+      } else {
+        return(TRUE)
+      }
+    }, error = function(e) {
       return(FALSE)
-    } else {
-      return(TRUE)
-    }
+    })
   })
   
   observe({
@@ -328,9 +338,7 @@ server <- function(input, output, session) {
     # if round() = 2, then run make plot twice, so dont update input.
     #updateSelectInput(session, "relative_height", selected = round(rv$nmetric*rv$nvar))
     
-    # Try to run stepwise with error handling
-    tryCatch({
-      res <- stepwise(
+    res <- stepwise(
         formula = formula,
         data = df$data,
         type = input$type,
@@ -342,10 +350,7 @@ server <- function(input, output, session) {
         test_method_linear = input$Approx_F,
         test_method_glm = input$glm_test,
         test_method_cox = input$cox_test
-      )
-    }, error = function(e) {
-      stop(paste("Error in stepwise regression:", e$message, "\nPlease check your formula and data."))
-    })
+    )
     
     summary_list <- setNames(
       lapply(attr(res, "nonhidden"), function(i) {
@@ -392,12 +397,14 @@ server <- function(input, output, session) {
     tryCatch({
       stepwiseModel()[[1]]
     }, error = function(e) {
-      cat("Error:", e$message, "\n")
+      plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
+      text(1, 1, "Please run the analysis first", col = "blue", cex = 1.2)
     })
   })
   
   output$detail_plot <- renderPlot({
     tryCatch({
+      req(stepwiseModel(), input$strategy_plot)
       selected_plot <- plot_grid(plotlist = rev(stepwiseModel()[[2]][[input$strategy_plot]]), 
                                  ncol = 1, 
                                  labels = "AUTO", 
@@ -406,7 +413,7 @@ server <- function(input, output, session) {
       selected_plot
     }, error = function(e) {
       plot(1, 1, type = "n", axes = FALSE, xlab = "", ylab = "")
-      text(1, 1, paste("Error:", e$message), col = "red", cex = 1.2)
+      text(1, 1, "Please run the analysis first", col = "blue", cex = 1.2)
     })
   }, res =96, 
   width = function() { (320 * 2) }, 
@@ -420,23 +427,29 @@ server <- function(input, output, session) {
   })
   output$modelVoteText <- renderText({
     tryCatch({
+      req(stepwiseModel())
+      # Get the metric from the stepwiseModel results
+      metric <- stepwiseModel()[[4]]$metric
       if(all(input$strategy %in% 'subset') & all(metric %in% 'SL')) {
         HTML("<b>Vote isn't available for selection strategy 'subset':\n</b>")
       } else {
         HTML("<b>Model Selection by Vote Across All Combinations of Strategy and Metric:\n</b>")
       }
     }, error = function(e) {
-      HTML(paste("<b>Error:</b>", e$message))
+      HTML("<b>Model Selection by Vote Across All Combinations of Strategy and Metric:\n</b>")
     })
   })
   
   output$modelVote <- renderDataTable({ 
     tryCatch({
+      req(stepwiseModel())
+      # Get the metric from the stepwiseModel results
+      metric <- stepwiseModel()[[4]]$metric
       if(!(all(input$strategy %in% 'subset') & all(metric %in% 'SL'))) {
         DT::datatable(stepwiseModel()[[3]], options = list(scrollX = TRUE))
       }
     }, error = function(e) {
-      DT::datatable(data.frame(Error = e$message), options = list(scrollX = TRUE))
+      DT::datatable(data.frame(Message = "No voting results available"), options = list(scrollX = TRUE))
     })
   })
   # Output Data
