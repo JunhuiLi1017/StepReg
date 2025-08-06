@@ -7,7 +7,6 @@ Authors@R: c(
     person("Junhui", "Li", , "junhui.li11@umassmed.edu", role = c("aut")),
     person("Kai", "Hu", , "kai.hu@umassmed.edu", role = c("aut")),
     person("Xiaohuan", "Lu", , role = c("aut")),
-    person("Kun", "Cheng", , role = c("ctb")),
     person("Sushmita", "N Nayak", , role = c("ctb")),
     person("Cesar", "Bautista Sotelo", , role = c("ctb")),
     person("Michael", "A Lodato", , role = c("ctb")),
