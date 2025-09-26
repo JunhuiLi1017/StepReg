@@ -40,7 +40,9 @@ Imports:
     rmarkdown,
     DT,
     shinycssloaders,
-    shinyjs
+    shinyjs,
+    pROC,
+    survAUC
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 NeedsCompilation: no
