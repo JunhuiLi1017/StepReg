@@ -85,7 +85,7 @@
 #'
 #' @param best_n Maximum number of models to retain for each variable count (default: 3)
 #' 
-#' @param test_ratio Ratio of training set to test set (default: 1)
+#' @param test_ratio Ratio of training set to test set (default: 0)
 #' 
 #' @param feature_ratio Ratio of feature selection to full model (default: 1), this is only valid when strategy is "forward".
 #' 
@@ -210,13 +210,13 @@
 #'
 #' @keywords stepwise regression
 #'
-#' @importFrom survival coxph concordance
+#' @importFrom survival coxph concordance Surv
 #' @importFrom survAUC AUC.uno AUC.sh AUC.hc
 #' @importFrom stringr str_replace
 #' @importFrom utils combn
 #' @importFrom pROC auc roc
 #' @importFrom dplyr %>% mutate_if mutate
-#' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms deviance df.residual formula model.frame
+#' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms deviance df.residual formula model.frame predict
 #' @importFrom MASS glm.nb
 #'
 #' @export
