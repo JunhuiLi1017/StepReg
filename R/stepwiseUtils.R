@@ -937,9 +937,8 @@ getTable3ProcessSummary <- function(data_train, data_test, type, strategy, metri
 			overview[[stra]][[met]] <- overview_table %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character) # to keep digits as we expected, convert numeric to character for html output.
 			
 			if(!(stra == "subset" & met == "SL")) {
-				model_train <- getModel(data_train, type, intercept, c(x_final_model), y_name, weight, method = test_method)
+				model_train <- getModel(data_train, type, intercept, c(x_final_model[!x_final_model %in% intercept]), y_name, weight, method = test_method)
 				x_final_model_metric[[stra]][[met]] <- x_final_model
-				final_formula <- reformulate(x_final_model, y_name)
 				if(type == "cox") {
 				  model_performance <- cox_performance(data_train, data_test, stra, met, model_train, y_name, weight)
 				} else if(type == "linear" | type == "gamma" |type == "negbin" | type == "poisson"){
