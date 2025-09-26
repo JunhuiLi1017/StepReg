@@ -902,23 +902,23 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
 	return(out_final_stepwise)
 }
 
-getTable3ProcessSummary <- function(data_train, data_test, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, best_n, test_method, sigma_value, num_digits) {
+getTable3ProcessSummary <- function(data, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, best_n, test_method, sigma_value, num_digits) {
 	overview_table_metric <- list()
 	x_final_model_metric <- list()
-	detail <- list()
-	model_performance_df <- NULL
+	details <- list()
+	vote_df <- NULL
 	overview <- list()
 	
 	for(stra in strategy) {
 		for(met in metric) {
 			if(stra == "subset") {
-				overview_table <- getSubsetWrapper(data_train, type = type, met, x_name, y_name, intercept, include, weight = weight, best_n, test_method, sigma_value)
+				overview_table <- getSubsetWrapper(data, type = type, met, x_name, y_name, intercept, include, weight = weight, best_n, test_method, sigma_value)
 				if(met != "SL"){
 					x_final_model <- getXNameSelected(overview_table,met)
 				}
 			} else {
-				out_final_stepwise <- getStepwiseWrapper(data_train, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
-				detail[[stra]][[met]] <- out_final_stepwise$pic_df
+				out_final_stepwise <- getStepwiseWrapper(data, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
+				details[[stra]][[met]] <- out_final_stepwise$pic_df
 				overview_table <- out_final_stepwise$process_table
 				remove_col <- NULL
 				if(stra == "forward") {
@@ -937,21 +937,15 @@ getTable3ProcessSummary <- function(data_train, data_test, type, strategy, metri
 			overview[[stra]][[met]] <- overview_table %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character) # to keep digits as we expected, convert numeric to character for html output.
 			
 			if(!(stra == "subset" & met == "SL")) {
-				model_train <- getModel(data_train, type, intercept, c(x_final_model), y_name, weight, method = test_method)
 				x_final_model_metric[[stra]][[met]] <- x_final_model
-				final_formula <- reformulate(x_final_model, y_name)
-				if(type == "cox") {
-				  model_performance <- cox_performance(data_train, data_test, stra, met, model_train, y_name, weight)
-				} else if(type == "linear" | type == "gamma" |type == "negbin" | type == "poisson"){
-				  model_performance <- lm_performance(data_train, data_test, type, stra, met, model_train, y_name, weight)
-				} else if(type == "logit"){
-				  model_performance <- logit_performance(data_train, data_test, stra, met, model_train, y_name, weight)
-				}
+				vote_df <- rbind(vote_df,data.frame(deparse1(reformulate(x_final_model, y_name)),paste0(stra,":",met)))
 			}
-			model_performance_df <- rbind(model_performance_df ,model_performance)
 		}
 	}
-	return(list('final_variable' = x_final_model_metric, 'performance' = model_performance_df, 'overview' = overview, "detail" = detail))
+	if(!is.null(vote_df)) {
+		colnames(vote_df) <- c("model", "strategy:metric")
+	}
+	return(list('final_variable' = x_final_model_metric, 'voted_model' = vote_df, 'overview' = overview, "details" = details))
 }
 
 getTable4ModelCall <- function(type, intercept, include, x_final_model_metric, y_name, n_y, data, weight, test_method, num_digits) {
@@ -966,194 +960,34 @@ getTable4ModelCall <- function(type, intercept, include, x_final_model_metric, y
 	return(table4_model_call)
 }
 
-cox_performance <- function(data_train, data_test, strategy, metric, model_train, y_name, weight) {	
-	# 1. Concordance Index
-	cindex_train <- concordance(model_train)$concordance
-	
-	# Test data operations with error handling
-	test_results <- tryCatch({
-		y_vars <- sub("Surv\\((.*)\\)", "\\1", y_name)
-		time_var <- trimws(strsplit(y_vars, ",")[[1]][1])
-		status_var <- trimws(strsplit(y_vars, ",")[[1]][2])
-		surv_obj <- Surv(data_test[[time_var]], data_test[[status_var]])
-		lp_test <- predict(model_train, newdata = data_test, type = "lp", weights=weight)
-		cindex_test <- concordance(surv_obj ~ lp_test, data = data_test)$concordance
-		
-		# 3. Time-Dependent AUC
-		data <- rbind(data_train, data_test)
-		times <- seq(min(data[[time_var]]), max(data[[time_var]]), by = 100)
-		lp_train <- predict(model_train, weights=weight)
-		lp_test <- predict(model_train, newdata=data_test, weights=weight)
-		Surv_rsp_train <- Surv(data_train[[time_var]], data_train[[status_var]])
-		Surv_rsp_test <- Surv(data_test[[time_var]], data_test[[status_var]])
-		
-		auc_uno <- AUC.uno(Surv_rsp_train, Surv_rsp_test, lp_test, times)
-		auc_sh <- AUC.sh(Surv_rsp_train, Surv_rsp_test, lp_train, lp_test, times)
-		auc_hc <- AUC.hc(Surv_rsp_train, Surv_rsp_test, lp_test, times)
-		
-		list(cindex_test = cindex_test, auc_hc = auc_hc$iauc, auc_uno = auc_uno$iauc, auc_sh = auc_sh$iauc)
-	}, error = function(e) {
-		# Return NA values if test data operations fail
-		list(cindex_test = NA, auc_hc = NA, auc_uno = NA, auc_sh = NA)
-	})
-	
-	# 2. Integrated Brier Score (requires pec package)
-	# Install if needed: install.packages("pec")
-	# brier_train <- pec(list(model_train), formula = Surv(time, status) ~ 1, data = data_train, 
-	#                    exact = TRUE, cens.model = "cox", splitMethod = "none")
-	# brier_test <- pec(list(model_train), formula = Surv(time, status) ~ 1, data = data_test, 
-	#                   exact = TRUE, cens.model = "cox", splitMethod = "none")
-	# cat("Integrated Brier Score (Training):", mean(brier_train$AppErr), "\n")
-	# cat("Integrated Brier Score (Test):", mean(brier_test$AppErr), "\n")
-	
-	model_performance <- data.frame(deparse1(model_train$formula), paste0(strategy,":",metric),
-								   cindex_train, test_results$cindex_test, 
-								   test_results$auc_hc, test_results$auc_uno, test_results$auc_sh)
-	colnames(model_performance) <- c("model", "strategy:metric", "c-index_train", "c-index_test", "auc_hc", "auc_uno", "auc_sh")
-	return(model_performance)
-}
+getTable5ValidationSummary <- function(result, data) {
 
-
-
-lm_performance <- function(data_train, data_test, type, strategy, metric, model_train, y_name, weight) {	
-	pred_train <- predict(model_train, newdata=data_train, weights=weight)
-
-	if(is.matrix(pred_train)) {
-		y_name <- colnames(pred_train)
-	} 
-	# Actual values
-	actual_train <- data_train[,y_name]
-	if(type == "linear"){
-	  model_train_summary <- summary(model_train)
-	} else {
-	  model_train_summary <- model_train
+	result$arguments$type
+	result$arguments$strategy
+	result$arguments$metric
+	result$arguments$sle
+	result$arguments$sls
+	result$arguments$weight
+	result$arguments$test_method
+	result$arguments$sigma_value
+	result$arguments$best_n
+	result$arguments$n_y
+	result$arguments$num_digits
+	if(result$arguments$type == "linear") {
+		validation_metric <- c("adjRsq", "Rsq")
+	}else if(result$arguments$type == "logit" | result$arguments$type == "poisson" | result$arguments$type == "gamma") {
+		validation_metric <- c("accuracy", "AUC", "confusion_matrix")
+	} else if(result$arguments$type == "cox") {
+		validation_metric <- c("C-index", "Integrated Brier Score")
 	}
-	
-	# Test data operations with error handling
-	test_results <- tryCatch({
-		pred_test <- predict(model_train, newdata = data_test, weights=weight)
-		actual_test <- data_test[,y_name]
-		
-		if(is.matrix(pred_train)) {
-		  mse_test <- colMeans((actual_test - pred_test)^2)
-		  rmse_test <- sqrt(mse_test)
-		  mae_test <- colMeans(abs(actual_test - pred_test))
-		  r2_test <- diag(cor(actual_test, pred_test)^2)
-		  n_test <- nrow(data_test)
-		  coef_df <- coef(model_train)
-		  p_test <- sum(!rownames(coef_df) %in% "(Intercept)")
-		  adj_r2_test <- 1 - ((1 - r2_test) * (n_test - 1) / (n_test - p_test - 1))
-		} else {
-		  mse_test <- mean((actual_test - pred_test)^2)
-		  rmse_test <- sqrt(mse_test)
-		  mae_test <- mean(abs(actual_test - pred_test))
-		  if(type == "linear") {
-		    r2_test <- cor(actual_test, pred_test)^2
-		    n_test <- nrow(data_test)
-		    coef_df <- coef(summary(model_train))
-		    p_test <- sum(!rownames(coef_df) %in% "(Intercept)")
-		    adj_r2_test <- 1 - ((1 - r2_test) * (n_test - 1) / (n_test - p_test - 1))
-		  } else {
-		    adj_r2_test <- NA
-		  }
+
+	for (i in 1:length(result$arguments$strategy)) {
+		for (j in 1:length(result$arguments$metric)) {
+			model_train <- result$final_variable[[i]][[j]]
+
+			table5_model_call[[i]][[j]] <- getModel(data, result$arguments$type, intercept = NULL, x_name = c(result$arguments$x_in_model), y_name, weight = result$arguments$weight,	method = result$arguments$test_method)
 		}
-		list(pred_test = pred_test, actual_test = actual_test, mse_test = mse_test, 
-			 rmse_test = rmse_test, mae_test = mae_test, adj_r2_test = adj_r2_test)
-	}, error = function(e) {
-		# Return NA values if test data operations fail
-		list(pred_test = NA, actual_test = NA, mse_test = NA, 
-			 rmse_test = NA, mae_test = NA, adj_r2_test = NA)
-	})
-  
-	if(is.matrix(pred_train)) {
-	  mse_train <- colMeans((model_train$residuals)^2)
-	  rmse_train <- sqrt(mse_train)
-	  mae_train <- colMeans(abs(model_train$residuals))
-	  #adj_r2_train <- model_train_summary$adj.r.squared # cannot access adj.r.squared of two response
-	  adj_r2_train <- NULL
-	  for(i in 1:dim(pred_train)[2]) {
-	    adj_r2_train <- append(adj_r2_train, model_train_summary[[i]]$adj.r.squared)
-	  }
-	  names(adj_r2_train) <- y_name
-	} else {
-	  mse_train <- mean((model_train_summary$residuals)^2)
-	  rmse_train <- sqrt(mse_train)
-	  mae_train <- mean(abs(model_train_summary$residuals))
-	  if(type == "linear") {
-	    adj_r2_train <- model_train_summary$adj.r.squared
-	  } else {
-	    adj_r2_train <- NA
-	  }
 	}
-
-	model_performance <- data.frame(deparse1(model_train$call$formula), paste0(strategy,":",metric), 
-								   adj_r2_train, test_results$adj_r2_test, 
-								   mse_train, test_results$mse_test, 
-								   mae_train, test_results$mae_test)
-	if(is.matrix(pred_train)) {
-	  model_performance$response <- y_name
-	  colnames(model_performance) <- c("model", "strategy:metric", "adj_r2_train", "adj_r2_test", "mse_train", "mse_test", "mae_train", "mae_test", "response")
-	} else {
-	  colnames(model_performance) <- c("model", "strategy:metric", "adj_r2_train", "adj_r2_test", "mse_train", "mse_test", "mae_train", "mae_test")
-	}
-	if(type != "linear") {
-	  model_performance <- model_performance[,-c(3:4)]
-	}
-	return(model_performance)
-}
-
-
-
-logit_performance <- function(data_train, data_test, strategy, metric, model_train, y_name, weight) {	
-	# Predictions
-	pred_prob_train <- predict(model_train, newdata=data_train, type = "response", weights=weight)
 	
-	# Test data operations with error handling
-	test_results <- tryCatch({
-		pred_prob_test <- predict(model_train, newdata = data_test, type = "response", weights=weight)
-		pred_class_test <- ifelse(pred_prob_test > 0.5, 0, 1)
-		actual_test <- data_test[,y_name]
-		conf_mat_test <- table(Predicted = pred_class_test, Actual = actual_test)
-		accuracy_test <- sum(diag(conf_mat_test)) / sum(conf_mat_test)
-		auc_test <- tryCatch({
-			auc(roc(actual_test, pred_prob_test))
-		}, error = function(e) {
-			NA  # Return NA if AUC calculation fails
-		})
-		log_loss_test <- -mean(actual_test * log(pred_prob_test + 1e-15) + (1 - actual_test) * log(1 - pred_prob_test + 1e-15))
-		
-		list(pred_prob_test = pred_prob_test, pred_class_test = pred_class_test, 
-			 actual_test = actual_test, conf_mat_test = conf_mat_test, 
-			 accuracy_test = accuracy_test, auc_test = auc_test, log_loss_test = log_loss_test)
-	}, error = function(e) {
-		# Return NA values if test data operations fail
-		list(pred_prob_test = NA, pred_class_test = NA, 
-			 actual_test = NA, conf_mat_test = NA, 
-			 accuracy_test = NA, auc_test = NA, log_loss_test = NA)
-	})
-	
-	pred_class_train <- ifelse(pred_prob_train > 0.5, 1, 0)
-
-	# Actual values
-	actual_train <- data_train[,y_name]
-
-	# Metrics
-	conf_mat_train <- table(Predicted = pred_class_train, Actual = actual_train)
-	accuracy_train <- sum(diag(conf_mat_train)) / sum(conf_mat_train)
-	
-	# Calculate AUC with error handling
-	auc_train <- tryCatch({
-		auc(roc(actual_train, pred_prob_train))
-	}, error = function(e) {
-		NA  # Return NA if AUC calculation fails
-	})
-	
-	log_loss_train <- -mean(actual_train * log(pred_prob_train + 1e-15) + (1 - actual_train) * log(1 - pred_prob_train + 1e-15))
-
-	model_performance <- data.frame(deparse1(model_train$formula), paste0(strategy,":",metric), 
-								   accuracy_train, test_results$accuracy_test, 
-								   auc_train, test_results$auc_test, 
-								   log_loss_train, test_results$log_loss_test)
-	colnames(model_performance) <- c("model", "strategy:metric", "accuracy_train", "accuracy_test", "auc_train", "auc_test", "log_loss_train", "log_loss_test")
-	return(model_performance)
+	return(table5_model_call)
 }

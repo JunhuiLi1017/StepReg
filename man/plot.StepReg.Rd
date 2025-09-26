@@ -7,7 +7,7 @@
 \method{plot}{StepReg}(
   x,
   strategy = attr(x, "nonhidden"),
-  process = c("overview", "details"),
+  process = c("overview", "detail"),
   num_digits = 6,
   ...
 )
@@ -26,7 +26,7 @@ Default is the first strategy name in the StepReg object.}
 
 \item{process}{Character. Specifies the type of visualization to display:
 \itemize{
-  \item "details" - Shows detailed step-by-step selection process with variable entry/removal
+  \item "detail" - Shows detailed step-by-step selection process with variable entry/removal
   \item "overview" - Shows summary of the selection process with metric values
 }
 Default is "overview".}
@@ -34,12 +34,12 @@ Default is "overview".}
 \item{num_digits}{Integer. Number of decimal places to display in the plots.
 Default is 6.}
 
-\item{...}{Additional arguments passed to plotting functions (currently not used).}
+\item{...}{Additional argument passed to plotting functions (currently not used).}
 }
 \value{
 A ggplot object showing either:
   \itemize{
-    \item For "details" process: A heatmap showing variable selection status at each step
+    \item For "detail" process: A heatmap showing variable selection status at each step
     \item For "overview" process: A line plot showing metric values across steps
   }
 }
@@ -53,13 +53,13 @@ The function creates different types of visualizations based on the selection st
   \itemize{
     \item For forward/backward/bidirectional selection:
       \itemize{
-        \item Details view shows a heatmap with green tiles for added variables,
+        \item detail view shows a heatmap with green tiles for added variables,
               tan tiles for removed variables, and gray tiles for non-selected variables
         \item Overview shows metric values across steps with variable labels
       }
     \item For subset selection:
       \itemize{
-        \item Details view shows a heatmap of selected variables at each step
+        \item detail view shows a heatmap of selected variables at each step
         \item Overview shows metric values for different subset sizes
       }
   }
@@ -83,7 +83,7 @@ result <- stepwise(
 plot(result)
 
 # Generate detailed plot for forward selection
-plot(result, strategy = "forward", process = "details")
+plot(result, strategy = "forward", process = "detail")
 
 # Generate overview plot with 3 decimal places
 plot(result, strategy = "bidirection", process = "overview", num_digits = 3)

@@ -76,7 +76,7 @@ summary(res$bidirection$AIC)
 You can also visualize the variable selection procedures with:
 ```{r, message = FALSE}
 plot(res, strategy = "bidirection", process = "overview")
-plot(res, strategy = "bidirection", process = "details")
+plot(res, strategy = "bidirection", process = "detail")
 ```
 
 The `(+)1` refers to original model with intercept being added, `(+)` indicates variables being added to the model while `(-)` means variables being removed from the model.
@@ -294,14 +294,35 @@ In StepReg, [QC Matrix Decomposition](https://towardsdatascience.com/qr-matrix-f
 
 # StepReg output {#stepregoutput}
 
-StepReg offers a suite of functions to summarize and visualize model-building results. The core function, `stepwise()`, generates a list of data frames detailing the feature selection process and the final model. These results can be exported into various formats—such as "xlsx", "html", or "docx"—using the `report()` function, making it easy to share and collaborate. Additionally, the `plot()` function allows you to visualize and compare variable selection procedures across multiple strategies and metrics, providing further insights into the model-building process.
+This function creates a StepReg class object, which is a structured list containing both the input specifications and the outcomes of the stepwise regression analysis. The key components of this object are detailed below, providing a comprehensive framework for model exploration and validation.
 
-The `stepwise()` function produces optimal models based on the chosen regression strategies and metrics. You can further analyze these models using standard functions like `summary()`, `coeff()`, `residuals()`, and `fitted()`, which are applicable to each element of the output.
+- **`argument`**: A data.frame containing the user-specified settings and parameters used in the analysis, including the initial formula, regression type, selection strategy, chosen metrics, significance levels (sle/sls), tolerance threshold, test method, and other control parameters.
 
-StepReg enables to explore the arguments used in `stepwise()`, variable calsses, overviews and detailed process of model selection, and voted models. The `report()` function can export these results into multiple formats including "xlsx", "docx", "html", and "pptx" for enhanced usability. For example, running `report()` with the name "results" will generate both "results.xlsx" and "results.docx" files.
+- **`variable`**: A data.frame containing information about all variables in the model, including variable names, data types (numeric, factor, etc.), and their roles (Dependent/Independent) in the model.
+
+- **`performance`**: A data.frame providing detailed performance metrics for the selected models across different strategies and metrics. For both training and test data sets when `test_ratio` < 1, the output includes model-specific performance indicators:
+  - `For linear, poisson, gamma, and negative binomial regression`
+    - `"adj_r2_train/adj_r2_test"`: Adjusted R-squared measures the proportion of variance explained by the model, adjusted for the number of predictors. Values range from 0 to 1, with higher values indicating better fit. A well-performing model should exhibit high adjusted R-squared on both training and test data, with minimal difference between them. A large discrepancy suggests overfitting.
+    - `"mse_train/mse_test"`: Mean Squared Error (MSE) calculates the average squared difference between predicted and actual values. Lower values signify better model performance. The test MSE should be close to the training MSE; a significantly higher test MSE indicates potential overfitting.
+    - `"mae_train/mae_test"`: Mean Absolute Error (MAE) measures the average absolute difference between predicted and actual values. Lower values reflect better performance. Similar to MSE, the test MAE should be close to the training MAE to avoid overfitting.
+  - `For logistic regression`
+    - `"accuracy_train/accuracy_test"`: Accuracy represents the proportion of correct predictions (true positives + true negatives) divided by total predictions. Values range from 0 to 1, with higher values indicating better classification. Test accuracy should be close to training accuracy; a large gap suggests overfitting.
+    - `"auc_train/auc_test"`: Area Under the Curve (AUC) assesses the model's ability to distinguish between classes. Values range from 0.5 (random) to 1.0 (perfect discrimination). An AUC > 0.7 is acceptable, > 0.8 is good, and > 0.9 is excellent. Test AUC should be close to training AUC to avoid overfitting.
+    - `"log_loss_train/log_loss_test"`: Log Loss (logarithmic loss) penalizes confident incorrect predictions more heavily. Lower values indicate better performance, with values near 0 being ideal. Test log loss should be close to training log loss; a higher test log loss suggests overfitting.
+  - `For Cox regression`
+    - `"c-index_train/c-index_test"`: Concordance Index (C-index) evaluates the model's ability to correctly rank survival times. Values range from 0.5 (random) to 1.0 (perfect ranking). A C-index > 0.7 is acceptable, > 0.8 is good, and > 0.9 is excellent. Test C-index should be close to training C-index to avoid overfitting.
+    - `"auc_hc"`: Harrell's C-index for time-dependent AUC, measuring discrimination at specific time points. Higher values indicate better performance.
+    - `"auc_uno"`: Uno's C-index for time-dependent AUC, offering a robust alternative measure of discrimination, particularly under varying censoring patterns.
+    - `"auc_sh"`: Schemper and Henderson's C-index for time-dependent AUC, providing an additional perspective on model discrimination.
+
+- **`overview`**: A nested list organized by strategy and metric, containing step-by-step summaries of the model-building process. Each element shows which variables were entered or removed at each step along with the corresponding metric values (e.g., AIC, BIC, SBC).
+
+- **`detail`**: A nested list organized by strategy and metric, providing granular information about each candidate step. This includes which variables were tested, their evaluation statistics, p-values, and whether they were ultimately selected or rejected.
+
+- **`fitted model object within the strategy-specific list`**: A nested list object organized with a first layer representing the selection strategy (e.g., forward, backward, bidirection, subset) and a second layer representing the metric (e.g., AIC, BIC, SBC). For each strategy-metric combination, the function returns fitted model objects that can be further analyzed using S3 generic functions such as `summary`, `anova`, `plot`, or `coefficients`. These functions adapt to the model type (e.g., `coxph`, `lm`, `glm` through call-specific methods. Specific statistics can be directly retrieved using the `$` operator, such as `result$forward$AIC$coefficients`. The level of detail in these analyses depends on the model type: the \CRANpkg{survival} package enriches `coxph` objects with detailed statistics including hazard ratios, standard errors, z-statistics, p-values, and likelihood ratio tests, while base R functions like `lm` and `glm` offer basic output with coefficients by default, requiring `summary` or `anova` to reveal standard errors, t-values, p-values, and R-squared values.
 
 ```{r, eval = FALSE}
-report(res, report_name = "results", format = c("xlsx", "docx"))
+report(res, report_name = "results", format = c("html", "docx"))
 ```
 
 # Use cases {#usecases}
@@ -339,6 +360,7 @@ In this example, we employ "forward" strategy with "AIC" as the selection criter
 data(mtcars)
 ## make sure the categorical variable is a factor variable
 mtcars$am <- as.factor(mtcars$am)
+str(mtcars)
 
 formula <- mpg ~ am + cyl:am + disp:am + am:hp + drat:am + wt:am + qsec:am + vs:am + gear:am + carb:am
 res1 <- stepwise(formula = formula,
@@ -353,7 +375,7 @@ res1
 To visualize the selection process:
 ```{r plot_res1, warning = FALSE}
 plot_list <- list()
-plot_list[["forward"]][["details"]] <- plot(res1, process = "details")
+plot_list[["forward"]][["detail"]] <- plot(res1, process = "detail")
 plot_list[["forward"]][["overview"]] <- plot(res1, process = "overview")
 cowplot::plot_grid(plotlist = plot_list$forward, ncol = 1)
 ```
@@ -395,10 +417,10 @@ res2
 plot_list <- setNames(
   lapply(c("forward", "backward"),function(i){
     setNames(
-      lapply(c("details","overview"),function(j){
+      lapply(c("detail","overview"),function(j){
         plot(res2,strategy=i,process=j)
     }),
-    c("details","overview")
+    c("detail","overview")
     )
   }),
   c("forward", "backward")
@@ -423,10 +445,10 @@ res3
 plot_list <- setNames(
   lapply(c("bidirection"),function(i){
     setNames(
-      lapply(c("details","overview"),function(j){
+      lapply(c("detail","overview"),function(j){
         plot(res3,strategy=i,process=j)
     }),
-    c("details","overview")
+    c("detail","overview")
     )
   }),
   c("bidirection")
@@ -460,6 +482,7 @@ Logistic regression effectively captures the relationship between predictors and
 In this example, we employ a "forward" strategy with "AIC" as the selection criteria, while force ensuring that the "cell" variable is included in the model.
 ```{r, message = FALSE}
 data(remission)
+str(remission)
 
 formula <- remiss ~ .
 res4 <- stepwise(formula = formula,
@@ -473,10 +496,10 @@ res4
 plot_list <- setNames(
   lapply(c("forward"),function(i){
     setNames(
-      lapply(c("details","overview"),function(j){
+      lapply(c("detail","overview"),function(j){
         plot(res4,strategy=i,process=j)
     }),
-    c("details","overview")
+    c("detail","overview")
     )
   }),
   c("forward")
@@ -488,8 +511,6 @@ cowplot::plot_grid(plotlist = plot_list$forward, ncol = 1, rel_heights = c(2, 1)
 
 In this example, we employ a "subset" strategy, utilizing "SBC" as the selection criteria while excluding the intercept. Meanwhile, we set `best_n = 3` to restrict the output to the top 3 models for each number of variables.
 ```{r, message = FALSE}
-data(remission)
-
 formula <- remiss ~ . + 0
 res5 <- stepwise(formula = formula,
                   data = remission,
@@ -502,10 +523,10 @@ res5
 plot_list <- setNames(
   lapply(c("subset"),function(i){
     setNames(
-      lapply(c("details","overview"),function(j){
+      lapply(c("detail","overview"),function(j){
         plot(res5,strategy=i,process=j)
     }),
-    c("details","overview")
+    c("detail","overview")
     )
   }),
   c("subset")
@@ -517,11 +538,22 @@ Here, the `0` in the above plot means that there is no intercept in the model.
 
 ## Cox regression with the `lung` dataset
 
-In this example, we'll demonstrate how to perform Cox regression analysis using the [`lung`](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/lung.html) dataset. By setting `type = "cox"`, we instruct the function to conduct Cox regression.
+In this example, we'll demonstrate how to perform Cox regression analysis using the [`lung`] dataset. By setting `type = "cox"`, we instruct the function to conduct Cox regression.
 
 **Description of the `lung` dataset**
 
-The `lung` dataset, available in the `"survival"` R package, includes information on survival times for 228 patients with advanced lung cancer. It comprises ten variables, among which the "status" variable codes for censoring status (1 = censored, 2 = dead), and the "time" variable denotes the patient survival time in days. To learn more about the dataset, use `?survival::lung`.
+The `lung` dataset, available in the `"survival"` R package, includes information on survival times for 228 patients with advanced lung cancer. It comprises ten variables, among which the "status" variable codes for censoring status (1 = censored, 2 = dead), and the "time" variable denotes the patient survival time in days.
+
+1. inst: Institution code
+2. time: Survival time in days
+3. status: censoring status 1=censored, 2=dead
+4. age: Age in years
+5. sex: Male=1 Female=2
+6. ph.ecog: ECOG performance score as rated by the physician. 0=asymptomatic, 1= symptomatic but completely ambulatory, 2= in bed < 50\% of the day, 3= in bed > 50\% of the day but not bedbound, 4 = bedbound
+7. ph.karno: Karnofsky performance score (bad=0-good=100) rated by physician
+8. pat.karno: Karnofsky performance score as rated by patient
+9. meal.cal: Calories consumed at meals
+10. wt.loss: Weight loss in last six months (pounds)
 
 **Why choose Cox regression**
 
@@ -529,14 +561,13 @@ Cox regression, also termed the Cox proportional hazards model, is specifically 
 
 ### Example1: using "forward" strategy with strata function in the formula
 
-In this example, we employ a "forward" strategy with c("AICc", "SL") as the selection criteria. We set the significance level for entry to 0.05 (`sle = 0.05`). We also use the `strata` function in the formula to account for the stratified analysis.
+In this example, we employ a "forward" strategy with c("AICc", "SL") as the selection criteria. We set the significance level for entry to 0.1 (`sle = 0.1`). We also use the `strata` function in the formula to account for the stratified analysis.
 ```{r, message = FALSE}
-library(dplyr)
+data(lung)
 library(survival)
-# Preprocess:
-lung <- survival::lung %>%
-  mutate(sex = factor(sex, levels = c(1, 2))) %>% # make sex as factor
-  na.omit() # get rid of incomplete records
+lung <- na.omit(lung)
+lung$sex <- factor(lung$sex, levels = c(1, 2))
+str(lung)
 
 formula  =  Surv(time, status) ~ . + strata(sex)
 res6 <- stepwise(formula = formula,
@@ -550,10 +581,10 @@ res6
 plot_list <- setNames(
   lapply(c("forward"),function(i){
     setNames(
-      lapply(c("details","overview"),function(j){
+      lapply(c("detail","overview"),function(j){
         plot(res6,strategy=i,process=j)
     }),
-    c("details","overview")
+    c("detail","overview")
     )
   }),
   c("forward")
@@ -561,13 +592,28 @@ plot_list <- setNames(
 cowplot::plot_grid(plotlist = plot_list$forward, ncol = 1, rel_heights = c(2, 1))
 ```
 
+To be specified, the variable sex is coded as a factor, so sex2 appears in the results to represent the second level of the dummy-coded variable.
+
 ## Poisson regression with the `creditCard` dataset
 
 In this example, we'll demonstrate how to perform Poisson regression analysis using the [`creditCard`](https://search.r-project.org/CRAN/refmans/AER/html/CreditCard.html) dataset. We set `type = "poisson"` to direct the function to perform Poisson regression.
 
 **Descprition of the `creditCard` dataset**
 
-The `creditCard` dataset contains credit history information for a sample of applicants for a specific type of credit card, included in the `"AER"` package. It encompasses 1319 observations across 12 variables, including "reports", "age", "income", among others. The "reports" variable represents the number of major derogatory reports. For detailed information, refer to `?AER::CreditCard`.
+The `creditCard` dataset contains credit history information for a sample of applicants for a specific type of credit card, included in the `"AER"` package. It encompasses 1319 observations across 12 variables, including "reports", "age", "income", among others. The "reports" variable represents the number of major derogatory reports.
+
+1. card: Whether the credit card application was accepted (Yes/No)
+2. reports: Number of major derogatory reports on the applicant's credit history
+3. age: Age in years plus twelfths of a year (e.g., 30.5 represents 30 years and 6 months)
+4. income: Annual income in USD (divided by 10,000)
+5. share: Ratio of monthly credit card expenditure to yearly income
+6. expenditure: Average monthly credit card expenditure in USD
+7. owner: Home ownership status (Yes/No)
+8. selfemp: Self-employment status (Yes/No)
+9. dependents: Number of dependents
+10. months: Number of months living at current address
+11. majorcards: Number of major credit cards held
+12. active: Number of active credit accounts
 
 **Why choose Poisson regression**
 
@@ -578,6 +624,7 @@ Poisson regression is frequently employed method for analyzing count data, where
 In this example, we employ a "forward" strategy with "SL" as the selection criteria. We set the significance level for entry to 0.05 (`sle = 0.05`).
 ```{r, message = FALSE}
 data(creditCard)
+str(creditCard)
 
 formula  = reports ~ .
 res7 <- stepwise(formula = formula,
@@ -593,10 +640,10 @@ summary(res7$forward$SL)
 plot_list <- setNames(
   lapply(c("forward"),function(i){
     setNames(
-      lapply(c("details","overview"),function(j){
+      lapply(c("detail","overview"),function(j){
         plot(res7,strategy=i,process=j)
       }),
-      c("details","overview")
+      c("detail","overview")
     )
   }),
   c("forward")

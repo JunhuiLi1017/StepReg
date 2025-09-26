@@ -31,7 +31,6 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Kun Cheng [contributor]
   \item Sushmita N Nayak [contributor]
   \item Cesar Bautista Sotelo [contributor]
   \item Michael A Lodato [contributor]

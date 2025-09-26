@@ -85,79 +85,48 @@
 #'
 #' @param best_n Maximum number of models to retain for each variable count (default: 3)
 #' 
-#' @param test_ratio Ratio of training set to test set (default: 1)
+#' @param test Ratio of training set to test set (default: 1)
 #' 
 #' @param feature_ratio Ratio of feature selection to full model (default: 1), this is only valid when strategy is "forward".
 #' 
-#' @param seed Seed for random number generation (default: 123), this is only valid when test_ratio or feature_ratio is specified.
+#' @param seed Seed for random number generation (default: 123), this is only valid when test or feature_ratio is specified.
 #' 
 #' @param num_digits Number of decimal places to round results (default: 6)
 #'
-#' @return A StepReg class object, which is a structured list containing both the input specifications and the outcomes of the stepwise regression analysis. The key components of this object are detailed below, providing a comprehensive framework for model exploration and validation.
+#' @return A list containing:
 #'   \itemize{
-#'     \item \code{argument} A data.frame containing the user-specified settings and parameters used in the analysis, including the initial formula, regression type, selection strategy, chosen metrics, significance levels (sle/sls), tolerance threshold, test method, and other control parameters.
-#'     \item \code{variable} A data.frame containing information about all variables in the model, including variable names, data types (numeric, factor, etc.), and their roles (Dependent/Independent) in the model.
-#'     \item \code{performance} A data.frame providing detailed performance metrics for the selected models across different strategies and metrics. For both training and test datasets (when test_ratio < 1), the output includes model-specific performance indicators:
-#'       \itemize{
-#'         \item \strong{For linear, poisson, gamma, and negative binomial regression:}
-#'           \itemize{
-#'             \item \code{adj_r2_train/adj_r2_test}: Adjusted R-squared measures the proportion of variance explained by the model, adjusted for the number of predictors. Values range from 0 to 1, with higher values indicating better model fit. A good model should have high adjusted R-squared on both training and test data, with minimal difference between them. Large differences suggest overfitting.
-#'             \item \code{mse_train/mse_test}: Mean Squared Error measures the average squared difference between predicted and actual values. Lower values indicate better model performance. The test MSE should be close to training MSE; significantly higher test MSE suggests overfitting.
-#'             \item \code{mae_train/mae_test}: Mean Absolute Error measures the average absolute difference between predicted and actual values. Lower values indicate better model performance. Like MSE, test MAE should be close to training MAE to avoid overfitting.
-#'           }
-#'         \item \strong{For logistic regression:}
-#'           \itemize{
-#'             \item \code{accuracy_train/accuracy_test}: Accuracy measures the proportion of correct predictions (true positives + true negatives) / total predictions. Values range from 0 to 1, with higher values indicating better classification performance. Test accuracy should be close to training accuracy; large differences suggest overfitting.
-#'             \item \code{auc_train/auc_test}: Area Under the Curve measures the model's ability to distinguish between classes. Values range from 0.5 (random) to 1.0 (perfect discrimination). AUC > 0.7 is considered acceptable, > 0.8 is good, > 0.9 is excellent. Test AUC should be close to training AUC to avoid overfitting.
-#'             \item \code{log_loss_train/log_loss_test}: Log Loss (logarithmic loss) penalizes confident wrong predictions more heavily. Lower values indicate better model performance. Values close to 0 are ideal. Test log loss should be close to training log loss; higher test log loss suggests overfitting.
-#'           }
-#'         \item \strong{For Cox regression:}
-#'           \itemize{
-#'             \item \code{c-index_train/c-index_test}: Concordance Index (C-index) measures the model's ability to correctly rank survival times. Values range from 0.5 (random) to 1.0 (perfect ranking). C-index > 0.7 is considered acceptable, > 0.8 is good, > 0.9 is excellent. Test C-index should be close to training C-index to avoid overfitting.
-#'             \item \code{auc_hc}: Harrell's C-index for time-dependent AUC, measuring discrimination at specific time points. Higher values indicate better discrimination ability.
-#'             \item \code{auc_uno}: Uno's C-index for time-dependent AUC, providing an alternative measure of discrimination that may be more robust to censoring patterns.
-#'             \item \code{auc_sh}: Schemper and Henderson's C-index for time-dependent AUC, offering another perspective on model discrimination performance.
-#'           }
-#'       }
-#'     \item \code{overview} A nested list organized by strategy and metric, containing step-by-step summaries of the model-building process. Each element shows which variables were entered or removed at each step along with the corresponding metric values (e.g., AIC, BIC, SBC).
-#'     \item \code{detail} A nested list organized by strategy and metric, providing granular information about each candidate step. This includes which variables were tested, their evaluation statistics, p-values, and whether they were ultimately selected or rejected.
-#'     \item \code{fitted model object within the strategy-specific list} A nested list object organized with a first layer representing the selection strategy (e.g., forward, backward, bidirection, subset) and a second layer representing the metric (e.g., AIC, BIC, SBC). For each strategy-metric combination, the function returns fitted model objects that can be further analyzed using S3 generic functions such as \code{summary()}, \code{anova()}, or \code{coefficients()}. These functions adapt to the model type (e.g., \code{coxph}, \code{lm}, \code{glm}) through call-specific methods. Specific statistics can be directly retrieved using the \code{$} operator, such as \code{result$forward$AIC$coefficients}. The level of detail in these analyses depends on the model type: the \CRANpkg{survival} package enriches \code{coxph} objects with detailed statistics including hazard ratios, standard errors, z-statistics, p-values, and likelihood ratio tests, while base R functions like \code{lm} and \code{glm} offer basic output with coefficients by default, requiring \code{summary()} or \code{anova()} to reveal standard errors, t-values, p-values, and R-squared values.
+#'     \item Selected models for each strategy-metric combination
+#'     \item Model selection process details
+#'     \item Variable importance information
+#'     \item Model fit statistics
 #'   }
 #'
 #' @examples
 #' # Multivariate linear regression with bidirectional selection
 #' data(mtcars)
 #' formula <- cbind(mpg, drat) ~ . + 0
-#' result1 <- stepwise(
+#' stepwise(
 #'   formula = formula,
 #'   data = mtcars,
 #'   type = "linear",
 #'   strategy = "bidirection",
 #'   metric = "AIC"
 #' )
-#' 
-#' summary(result1$bidirection$AIC)
-#' anova(result1$bidirection$AIC)
-#' coefficients(result1$bidirection$AIC)
 #'
 #' # Linear regression with multiple strategies and metrics
 #' formula <- mpg ~ . + 1
-#' result2 <- stepwise(
+#' stepwise(
 #'   formula = formula,
 #'   data = mtcars,
 #'   type = "linear",
 #'   strategy = c("forward", "bidirection"),
 #'   metric = c("AIC", "SBC", "SL", "AICc", "BIC", "HQ")
 #' )
-#' 
-#' summary(result2$forward$AIC)
-#' anova(result2$forward$AIC)
-#' coefficients(result2$forward$AIC)
-#' 
+#'
 #' # Logistic regression with significance level criteria
 #' data(remission)
 #' formula <- remiss ~ .
-#' result3 <- stepwise(
+#' stepwise(
 #'   formula = formula,
 #'   data = remission,
 #'   type = "logit",
@@ -166,25 +135,17 @@
 #'   sle = 0.05,
 #'   sls = 0.05
 #' )
-#' 
-#' summary(result3$forward$SL)
-#' anova(result3$forward$SL)
-#' coefficients(result3$forward$SL)
-#' 
+#'
 #' # Linear regression with continuous-nested-within-class effects
 #' mtcars$am <- factor(mtcars$am)
 #' formula <- mpg ~ am + cyl + wt:am + disp:am + hp:am
-#' result4 <- stepwise(
+#' stepwise(
 #'   formula = formula,
 #'   data = mtcars,
 #'   type = "linear",
 #'   strategy = "bidirection",
 #'   metric = "AIC"
 #' )
-#' 
-#' summary(result4$bidirection$AIC)
-#' anova(result4$bidirection$AIC)
-#' coefficients(result4$bidirection$AIC)
 #' 
 #' @references
 #' \itemize{
@@ -210,11 +171,9 @@
 #'
 #' @keywords stepwise regression
 #'
-#' @importFrom survival coxph concordance
-#' @importFrom survAUC AUC.uno AUC.sh AUC.hc
+#' @importFrom survival coxph
 #' @importFrom stringr str_replace
 #' @importFrom utils combn
-#' @importFrom pROC auc roc
 #' @importFrom dplyr %>% mutate_if mutate
 #' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms deviance df.residual formula model.frame
 #' @importFrom MASS glm.nb
@@ -235,10 +194,11 @@ stepwise <- function(formula,
                      tolerance = 1e-7,
                      weight = NULL,
                      best_n = 3,
-                     test_ratio = 0,
+                     test_ratio = 1,
                      feature_ratio = 1,
                      seed = 123,
                      num_digits = 6) {
+
   type <- match.arg(type)
   strategy <- match_multiple_args(strategy, c("forward", "backward", "bidirection", "subset"))
   metric <- match_multiple_args(metric, c("AIC", "AICc", "BIC", "CP", "HQ", "adjRsq", "SL", "SBC", "IC(3/2)", "IC(1)"))
@@ -250,17 +210,15 @@ stepwise <- function(formula,
   if(test_ratio >= 1 | test_ratio < 0) {
     stop("test_ratio must be between 0 and 1")
   }
-  if(feature_ratio > 1 | feature_ratio <= 0) {
-    stop("feature_ratio must be between 0 and 1")
-  }
   data_train <- data
-  data_test <- NULL
-  if(test_ratio > 0) {
+  data_test <- data
+  if(test_ratio < 1) {
     set.seed(seed)
-    data_test <- data[sample(1:nrow(data), size = round(test_ratio * nrow(data), 0)), ]
-    data_train <- data[sample(1:nrow(data), size = round((1 - test_ratio) * nrow(data), 0)), ]
+    data_train <- data[sample(1:nrow(data), size = test_ratio * nrow(data)), ]
+    data_test <- data[sample(1:nrow(data), size = (1 - test_ratio) * nrow(data)), ]
   }
 
+  
   x_name_orig <- getXname(formula, data_train)
   y_name <- getYname(formula, data_train)
   intercept <- getIntercept(formula, data_train, type = type) # char type
@@ -283,25 +241,28 @@ stepwise <- function(formula,
   result <- list()
   ## table1
   table1_para_value <- getTable1SummaryOfParameters(formula, data_train, type, x_name_orig, y_name, merged_multico_x, merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept)
-  result$argument <- table1_para_value
+  result$arguments <- table1_para_value
   
   ## table2
   table2_class_table <- getTable2TypeOfVariables(model_raw)
-  result$variable <- table2_class_table
+  result$variables <- table2_class_table
   
   ## table3
-  table3_process <- getTable3ProcessSummary(data_train=data_train, data_test=data_test, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, best_n, test_method, sigma_value, num_digits)
+  table3_process <- getTable3ProcessSummary(data_train, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, best_n, test_method, sigma_value, num_digits)
   x_final_model_metric <- table3_process$final_variable
   result <- append(result,table3_process[which(names(table3_process) != "final_variable")])
   
   ## table4
   table4_model <- getTable4ModelCall(type, intercept, include, x_final_model_metric, y_name, n_y, data_train, weight, test_method, num_digits)
   result <- append(result,table4_model)
+  
+  ## table5
+  if(test_ratio < 1) {
+    table5_model <- getTable5ValidationSummary(result, data_test)
+    result <- append(result,table5_model)
+  }
 
   class(result) <- c("StepReg","list")
   attr(result, "nonhidden") <- strategy
   return(result)
 }
-
-
-

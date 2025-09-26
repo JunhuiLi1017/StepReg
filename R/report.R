@@ -64,11 +64,11 @@
 report <- function(x, report_name, format = c('html', 'docx', 'rtf', 'pptx')) {
   format <- match.arg(format, several.ok = TRUE)
   results <- list()
-  for (j in c("arguments","variables")) {
-    if(j == "arguments") {
+  for (j in c("argument","variable")) {
+    if(j == "argument") {
       j_name <- "Parameters and Values"
-    } else if(j == "variables"){
-      j_name <- "Variables and Class"
+    } else if(j == "variable"){
+      j_name <- "variable and Class"
     }
     results[j_name] <- list(process_table(x[[j]]))
   }
@@ -80,7 +80,7 @@ report <- function(x, report_name, format = c('html', 'docx', 'rtf', 'pptx')) {
       results[paste("Selection Overview: ",paste(i,j,sep="-"))] <- list(process_table(overview_sub_list[[j]]))
     }
   }
-  results["Model Vote"] <- list(process_table(vote(x)))
+  results["Model Performance"] <- list(process_table(performance(x)))
   names(results) <- paste("Table", paste(1:length(results),names(results)),sep="")
   
   if(!is.null(report_name)) {
