@@ -72,8 +72,13 @@ performance <- function(x, ...){
     performance_df[i,3:ncol(performance_mat)] <- performance_mat[which(performance_mat[,"model"] %in% uniq_model[i])[1],3:ncol(performance_mat)]
   }
   colnames(performance_df) <- colnames(performance_mat)
-  performance_df$model <- sub(".*cbind\\(", "cbind(", performance_df$model)
-  numeric_cols <- colnames(performance_df)[3:ncol(performance_df)]
+  if("response" %in% colnames(performance_df)) {
+    performance_df$model <- sub(".*cbind\\(", "cbind(", performance_df$model)
+    last_col <- ncol(performance_df) - 1
+  } else {
+    last_col <- ncol(performance_df)
+  }
+  numeric_cols <- colnames(performance_df)[3:last_col]
   
   performance_df[, numeric_cols] <- as.data.frame(
     lapply(performance_df[, numeric_cols], as.numeric)

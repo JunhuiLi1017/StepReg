@@ -1040,62 +1040,62 @@ lm_performance <- function(data_train, data_test, type, strategy, metric, model_
 		  rmse_test <- sqrt(mse_test)
 		  mae_test <- colMeans(abs(actual_test - pred_test))
 		  r2_test <- diag(cor(actual_test, pred_test)^2)
-		  n_test <- nrow(data_test)
-		  coef_df <- coef(model_train)
-		  p_test <- sum(!rownames(coef_df) %in% "(Intercept)")
-		  adj_r2_test <- 1 - ((1 - r2_test) * (n_test - 1) / (n_test - p_test - 1))
+		  # n_test <- nrow(data_test)
+		  # coef_df <- coef(model_train)
+		  # p_test <- sum(!rownames(coef_df) %in% "(Intercept)")
+		  # adj_r2_test <- 1 - ((1 - r2_test) * (n_test - 1) / (n_test - p_test - 1))
 		} else {
 		  mse_test <- mean((actual_test - pred_test)^2)
 		  rmse_test <- sqrt(mse_test)
 		  mae_test <- mean(abs(actual_test - pred_test))
 		  if(type == "linear") {
 		    r2_test <- cor(actual_test, pred_test)^2
-		    n_test <- nrow(data_test)
-		    coef_df <- coef(summary(model_train))
-		    p_test <- sum(!rownames(coef_df) %in% "(Intercept)")
-		    adj_r2_test <- 1 - ((1 - r2_test) * (n_test - 1) / (n_test - p_test - 1))
+		    # n_test <- nrow(data_test)
+		    # coef_df <- coef(summary(model_train))
+		    # p_test <- sum(!rownames(coef_df) %in% "(Intercept)")
+		    # adj_r2_test <- 1 - ((1 - r2_test) * (n_test - 1) / (n_test - p_test - 1))
 		  } else {
-		    adj_r2_test <- NA
+		    r2_test <- NA
 		  }
 		}
 		list(pred_test = pred_test, actual_test = actual_test, mse_test = mse_test, 
-			 rmse_test = rmse_test, mae_test = mae_test, adj_r2_test = adj_r2_test)
+			 rmse_test = rmse_test, mae_test = mae_test, r2_test = r2_test)
 	}, error = function(e) {
 		# Return NA values if test data operations fail
 		list(pred_test = NA, actual_test = NA, mse_test = NA, 
-			 rmse_test = NA, mae_test = NA, adj_r2_test = NA)
+			 rmse_test = NA, mae_test = NA, r2_test = NA)
 	})
   
 	if(is.matrix(pred_train)) {
 	  mse_train <- colMeans((model_train$residuals)^2)
 	  rmse_train <- sqrt(mse_train)
 	  mae_train <- colMeans(abs(model_train$residuals))
-	  #adj_r2_train <- model_train_summary$adj.r.squared # cannot access adj.r.squared of two response
-	  adj_r2_train <- NULL
+	  #r2_train <- model_train_summary$adj.r.squared # cannot access adj.r.squared of two response
+	  r2_train <- NULL
 	  for(i in 1:dim(pred_train)[2]) {
-	    adj_r2_train <- append(adj_r2_train, model_train_summary[[i]]$adj.r.squared)
+	    r2_train <- append(r2_train, model_train_summary[[i]]$r.squared)
 	  }
-	  names(adj_r2_train) <- y_name
+	  names(r2_train) <- y_name
 	} else {
 	  mse_train <- mean((model_train_summary$residuals)^2)
 	  rmse_train <- sqrt(mse_train)
 	  mae_train <- mean(abs(model_train_summary$residuals))
 	  if(type == "linear") {
-	    adj_r2_train <- model_train_summary$adj.r.squared
+	    r2_train <- model_train_summary$r.squared
 	  } else {
-	    adj_r2_train <- NA
+	    r2_train <- NA
 	  }
 	}
 
 	model_performance <- data.frame(deparse1(model_train$call$formula), paste0(strategy,":",metric), 
-								   adj_r2_train, test_results$adj_r2_test, 
+								   r2_train, test_results$r2_test, 
 								   mse_train, test_results$mse_test, 
 								   mae_train, test_results$mae_test)
 	if(is.matrix(pred_train)) {
 	  model_performance$response <- y_name
-	  colnames(model_performance) <- c("model", "strategy:metric", "adj_r2_train", "adj_r2_test", "mse_train", "mse_test", "mae_train", "mae_test", "response")
+	  colnames(model_performance) <- c("model", "strategy:metric", "r2_train", "r2_test", "mse_train", "mse_test", "mae_train", "mae_test", "response")
 	} else {
-	  colnames(model_performance) <- c("model", "strategy:metric", "adj_r2_train", "adj_r2_test", "mse_train", "mse_test", "mae_train", "mae_test")
+	  colnames(model_performance) <- c("model", "strategy:metric", "r2_train", "r2_test", "mse_train", "mse_test", "mae_train", "mae_test")
 	}
 	if(type != "linear") {
 	  model_performance <- model_performance[,-c(3:4)]

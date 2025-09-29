@@ -108,9 +108,9 @@ Only "Rao" available for subset strategy.}
 
 \item{best_n}{Maximum number of models to retain for each variable count (default: 3)}
 
-\item{test_ratio}{Ratio of training set to test set (default: 0)}
+\item{test_ratio}{Proportion of the dataset allocated for testing (e.g., 0.3, which means 30\% of the dataset is used for testing), with the remainder reserved for training, enabling train-test validation.}
 
-\item{feature_ratio}{Ratio of feature selection to full model (default: 1), this is only valid when strategy is "forward".}
+\item{feature_ratio}{Proportion of candidate features sampled uniformly at random during forward selection (default = 1). This randomized selection helps identify the best variables while reducing the risk of overfitting, and is only valid when strategy is "forward".}
 
 \item{seed}{Seed for random number generation (default: 123), this is only valid when test_ratio or feature_ratio is specified.}
 
