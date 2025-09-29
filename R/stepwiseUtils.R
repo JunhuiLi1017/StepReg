@@ -600,6 +600,7 @@ getInitialStepwise <- function(data, type, strategy, metric, intercept, include,
 		add_or_remove <- "add"
 		x_in_model <- NULL
 		x_notin_model <- setdiff(x_name, include)
+		#x_notin_model <- x_notin_model[sample(1:length(x_notin_model), size = round(feature_ratio * length(x_notin_model), 0))]
 		## for intercept
 		fit_intercept <- getModel(data = data, type = type, intercept = intercept, x_name = NULL, y_name = y_name, weight = weight, method = test_method)
 		pic <- getInitStepModelStat(fit_intercept = fit_intercept, fit_fm = fit_intercept, type = type, strategy = strategy, metric = metric, intercept = intercept, include = include, test_method = test_method, sigma_value)
@@ -619,11 +620,11 @@ getInitialStepwise <- function(data, type, strategy, metric, intercept, include,
 	return(list("add_or_remove" = add_or_remove, "x_in_model" = x_in_model, "x_notin_model" = x_notin_model, "process_table" = process_table))
 }
 
-getCandStepModel <- function(add_or_remove, data, type, metric, weight, y_name, x_in_model, x_notin_model, intercept, include, test_method, sigma_value) {
+getCandStepModel <- function(add_or_remove, data, type, metric, weight, y_name, x_in_model, x_notin_model, intercept, include, test_method, sigma_value, feature_ratio) {
 	fit_x_in_model <- getModel(data = data, type = type, intercept = intercept, x_name = c(include, x_in_model), y_name = y_name, weight = weight, method = test_method)
 	BREAK <- FALSE
 	if(add_or_remove == "add") {
-		x_test <- x_notin_model
+		x_test <- x_notin_model[sample(1:length(x_notin_model), size = round(feature_ratio * length(x_notin_model), 0))]
 	}else{
 		x_test <- x_in_model
 	}
@@ -767,10 +768,10 @@ updateXinModel <- function(add_or_remove, indicator, best_candidate_model, type,
 	return(list("BREAK" = BREAK, "process_table" = process_table, "x_in_model" = x_in_model, "x_notin_model" = x_notin_model, "pic_set" = pic_set))
 }
 
-getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, sls, weight, y_name, x_in_model, x_notin_model, intercept, include, process_table, test_method, sigma_value) {
+getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, sls, weight, y_name, x_in_model, x_notin_model, intercept, include, process_table, test_method, sigma_value, feature_ratio) {
 	pic_df <- NULL
 	while(TRUE) {
-		out_cand_stepwise <- getCandStepModel(add_or_remove, data, type, metric, weight = weight, y_name, x_in_model, x_notin_model, intercept, include, test_method, sigma_value)
+		out_cand_stepwise <- getCandStepModel(add_or_remove, data, type, metric, weight = weight, y_name, x_in_model, x_notin_model, intercept, include, test_method, sigma_value, feature_ratio)
 		BREAK <- out_cand_stepwise$BREAK
 		minmax_var <- out_cand_stepwise$minmax_var
 		if(BREAK == TRUE) {
@@ -843,8 +844,8 @@ getFinalStepModel <- function(add_or_remove, data, type, strategy, metric, sle, 
 	return(list("process_table" = process_table, "x_in_model" = x_in_model, "x_notin_model" = x_notin_model, "pic_df" = pic_df))
 }
 
-getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, test_method, sigma_value) {
-	fit_full <- getModel(data = data, type = type, intercept = intercept, x_name = c(include, x_name), y_name = y_name, weight = weight, method = test_method)
+getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, test_method, sigma_value, feature_ratio) {
+	#fit_full <- getModel(data = data, type = type, intercept = intercept, x_name = c(include, x_name), y_name = y_name, weight = weight, method = test_method)
 	out_init_stepwise <- getInitialStepwise(data, type = type, strategy, metric, intercept, include, x_name, y_name, weight = weight, test_method = test_method, sigma_value)
 	add_or_remove <- out_init_stepwise$add_or_remove
 	x_in_model <- out_init_stepwise$x_in_model
@@ -854,7 +855,7 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
 	pic_df_init <- data.frame(strategy, metric, process_table[,c(1:2,6)])
 	colnames(pic_df_init)[c(3:5)] <- c("step","variable","value")
 	## get final stepwise model
-	out_final_stepwise <- getFinalStepModel(add_or_remove, data, type = type, strategy, metric, sle, sls, weight = weight, y_name, x_in_model, x_notin_model, intercept, include, process_table, test_method, sigma_value)
+	out_final_stepwise <- getFinalStepModel(add_or_remove, data, type = type, strategy, metric, sle, sls, weight = weight, y_name, x_in_model, x_notin_model, intercept, include, process_table, test_method, sigma_value, feature_ratio)
 	
 	if(type == "cox") {
 		if(strategy == "backward"){
@@ -902,7 +903,7 @@ getStepwiseWrapper <- function(data, type, strategy, metric, sle, sls, weight, x
 	return(out_final_stepwise)
 }
 
-getTable3ProcessSummary <- function(data_train, data_test, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, best_n, test_method, sigma_value, num_digits) {
+getTable3ProcessSummary <- function(data_train, data_test, type, strategy, metric, sle, sls, weight, x_name, y_name, intercept, include, best_n, test_method, sigma_value, num_digits, feature_ratio) {
 	overview_table_metric <- list()
 	x_final_model_metric <- list()
 	detail <- list()
@@ -917,7 +918,7 @@ getTable3ProcessSummary <- function(data_train, data_test, type, strategy, metri
 					x_final_model <- getXNameSelected(overview_table,met)
 				}
 			} else {
-				out_final_stepwise <- getStepwiseWrapper(data_train, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value)
+				out_final_stepwise <- getStepwiseWrapper(data_train, type = type, stra, met, sle, sls, weight = weight, x_name, y_name, intercept, include, test_method, sigma_value, feature_ratio)
 				detail[[stra]][[met]] <- out_final_stepwise$pic_df
 				overview_table <- out_final_stepwise$process_table
 				remove_col <- NULL
@@ -1009,6 +1010,7 @@ cox_performance <- function(data_train, data_test, strategy, metric, model_train
 								   cindex_train, test_results$cindex_test, 
 								   test_results$auc_hc, test_results$auc_uno, test_results$auc_sh)
 	colnames(model_performance) <- c("model", "strategy:metric", "c-index_train", "c-index_test", "auc_hc", "auc_uno", "auc_sh")
+	model_performance <- model_performance[,c(1:5)]
 	return(model_performance)
 }
 

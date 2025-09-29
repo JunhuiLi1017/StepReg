@@ -68,7 +68,7 @@ The output consists of final model, which can be viewed using:
 res
 ```
 
-You can further explore the results with generic functions such as `summary()`, `coeff()`, and others. For example:
+You can further explore the results with S3 generic functions such as `summary()`, `coeff()`, and others. For example:
 ```{r, message = FALSE}
 summary(res$bidirection$AIC)
 ```
@@ -312,8 +312,6 @@ This function creates a StepReg class object, which is a structured list contain
   - `For Cox regression`
     - `"c-index_train/c-index_test"`: Concordance Index (C-index) evaluates the model's ability to correctly rank survival times. Values range from 0.5 (random) to 1.0 (perfect ranking). A C-index > 0.7 is acceptable, > 0.8 is good, and > 0.9 is excellent. Test C-index should be close to training C-index to avoid overfitting.
     - `"auc_hc"`: Harrell's C-index for time-dependent AUC, measuring discrimination at specific time points. Higher values indicate better performance.
-    - `"auc_uno"`: Uno's C-index for time-dependent AUC, offering a robust alternative measure of discrimination, particularly under varying censoring patterns.
-    - `"auc_sh"`: Schemper and Henderson's C-index for time-dependent AUC, providing an additional perspective on model discrimination.
 
 - **`overview`**: A nested list organized by strategy and metric, containing step-by-step summaries of the model-building process. Each element shows which variables were entered or removed at each step along with the corresponding metric values (e.g., AIC, BIC, SBC).
 
@@ -370,6 +368,16 @@ res1 <- stepwise(formula = formula,
                  strategy = "forward",
                  metric = "AIC")
 res1
+```
+
+To get the summary of the model:
+```{r, eval = FALSE}
+summary(res1$forward$AIC)
+```
+
+The performance of the model:
+```{r, eval = FALSE}
+performance(res1)
 ```
 
 To visualize the selection process:
@@ -430,6 +438,16 @@ cowplot::plot_grid(plotlist = plot_list$forward, ncol = 1, rel_heights = c(2, 1)
 cowplot::plot_grid(plotlist = plot_list$backward, ncol = 1, rel_heights = c(2, 1))
 ```
 
+To get the summary of the model:
+```{r, eval = FALSE}
+summary(res2$forward$SL)
+```
+
+The performance of the model:
+```{r, eval = FALSE}
+performance(res2)
+```
+
 ### Example2: multivariate regression ("mpg" and "drat")
 
 In this scenario, there are two dependent variables, "mpg" and "drat". The model selection aims to identify the most influential predictors that affect both variables.
@@ -455,6 +473,16 @@ plot_list <- setNames(
 )
 
 cowplot::plot_grid(plotlist = plot_list$bidirection, ncol = 1, rel_heights = c(2, 1))
+```
+
+To get the summary of the model:
+```{r, eval = FALSE}
+summary(res3$bidirection$AIC)
+```
+
+The performance of the model:
+```{r, eval = FALSE}
+performance(res3)
 ```
 
 ## Logistic regression with the _remission_ dataset
@@ -592,6 +620,17 @@ plot_list <- setNames(
 cowplot::plot_grid(plotlist = plot_list$forward, ncol = 1, rel_heights = c(2, 1))
 ```
 
+To get the summary of the model:
+```{r, eval = FALSE}
+summary(res6$forward$AICc)
+summary(res6$forward$SL)
+```
+
+The performance of the model:
+```{r, eval = FALSE}
+performance(res6)
+```
+
 To be specified, the variable sex is coded as a factor, so sex2 appears in the results to represent the second level of the dummy-coded variable.
 
 ## Poisson regression with the `creditCard` dataset
@@ -633,7 +672,7 @@ res7 <- stepwise(formula = formula,
                  strategy = "forward",
                  metric = "SL",
                  sle = 0.05)
-summary(res7$forward$SL)
+res7
 ```
 
 ```{r, message = FALSE}
@@ -649,6 +688,16 @@ plot_list <- setNames(
   c("forward")
 )
 cowplot::plot_grid(plotlist = plot_list$forward, ncol = 1, rel_heights = c(2, 1))
+```
+
+To get the summary of the model:
+```{r, eval = FALSE}
+summary(res7$forward$SL)
+```
+
+The performance of the model:
+```{r, eval = FALSE}
+performance(res7)
 ```
 
 # Interactive app {#shinyapp}

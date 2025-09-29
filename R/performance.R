@@ -73,8 +73,12 @@ performance <- function(x, ...){
   }
   colnames(performance_df) <- colnames(performance_mat)
   performance_df$model <- sub(".*cbind\\(", "cbind(", performance_df$model)
+  numeric_cols <- colnames(performance_df)[3:ncol(performance_df)]
+  
+  performance_df[, numeric_cols] <- as.data.frame(
+    lapply(performance_df[, numeric_cols], as.numeric)
+  )
+  performance_df[, numeric_cols] <- round(performance_df[, numeric_cols], digits = 4)
   #class(vote_reform) <- c("StepReg")
   return(performance_df)
 }
-
-
