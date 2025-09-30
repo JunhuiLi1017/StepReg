@@ -97,8 +97,12 @@ res <- stepwise(
 
 ## Documentation
 
-- [Vignette](https://cran.r-project.org/web/packages/StepReg/vignettes/StepReg.html) - Comprehensive guide with examples
-- [Reference Manual](https://cran.r-project.org/web/packages/StepReg/StepReg.pdf) - Function documentation
+- [Vignette](https://CRAN.R-project.org/package=StepReg) - Comprehensive guide with examples
+- [Reference Manual](https://CRAN.R-project.org/package=StepReg) - Function documentation
+
+## Shiny Application
+
+- [StepReg](https://junhuili1017.shinyapps.io/StepReg/) - StepReg Shiny Appliction
 
 ## Important Note
 
@@ -111,11 +115,6 @@ If you use StepReg in your research, please cite:
 ```r
 citation("StepReg")
 ```
-
-## Detailed usage
-For released version, refer to CRAN [vignettes](https://CRAN.R-project.org/package=StepReg/vignettes/StepReg.html).
-
-For development version, refer to this [vignettes](https://mccbbioinfo.github.io/tutorials/StepReg).
 
 ## Questions?
 Please raise an issue [here](https://github.com/JunhuiLi1017/StepReg/issues/new).

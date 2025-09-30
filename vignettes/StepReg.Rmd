@@ -302,7 +302,7 @@ This function creates a StepReg class object, which is a structured list contain
 
 - **`performance`**: A data.frame providing detailed performance metrics for the selected models across different strategies and metrics. For both training and test data sets when `test_ratio` < 1, the output includes model-specific performance indicators:
   - `For linear, poisson, gamma, and negative binomial regression`
-    - `"adj_r2_train/adj_r2_test"`: Adjusted R-squared measures the proportion of variance explained by the model, adjusted for the number of predictors. Values range from 0 to 1, with higher values indicating better fit. A well-performing model should exhibit high adjusted R-squared on both training and test data, with minimal difference between them. A large discrepancy suggests overfitting.
+    - `"r2_train/r2_test"`: R-squared measures the proportion of variance explained by the model. Values range from 0 to 1, with higher values indicating better fit. A well-performing model should exhibit high R-squared on both training and test data, with minimal difference between them. A large discrepancy suggests overfitting.
     - `"mse_train/mse_test"`: Mean Squared Error (MSE) calculates the average squared difference between predicted and actual values. Lower values signify better model performance. The test MSE should be close to the training MSE; a significantly higher test MSE indicates potential overfitting.
     - `"mae_train/mae_test"`: Mean Absolute Error (MAE) measures the average absolute difference between predicted and actual values. Lower values reflect better performance. Similar to MSE, the test MAE should be close to the training MAE to avoid overfitting.
   - `For logistic regression`
