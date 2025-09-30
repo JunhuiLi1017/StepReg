@@ -285,7 +285,7 @@ stepwise <- function(formula,
   
   result <- list()
   ## table1
-  table1_para_value <- getTable1SummaryOfParameters(formula, data_train, type, x_name_orig, y_name, merged_multico_x, merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept)
+  table1_para_value <- getTable1SummaryOfParameters(formula, data_train, type, x_name_orig, y_name, merged_multico_x, merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept, test_ratio, feature_ratio, seed)
   result$argument <- table1_para_value
   
   ## table2

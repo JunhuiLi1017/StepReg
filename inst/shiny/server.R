@@ -114,32 +114,37 @@ server <- function(input, output, session) {
 
   # Enable run button if all required fields are specified by user:
   run_analysis_enabled <- reactive({
-    tryCatch({
-      # Check if formula is provided
-      if (is.null(input$formula_input) || input$formula_input == "") {
-        return(FALSE)
-      }
-      # Check if strategy is selected
-      if (is.null(input$strategy) || length(input$strategy) == 0) return(FALSE)
-      # Check if metric is selected based on detected type
-      if (is.null(input$type)) return(FALSE)
-      
-      if (input$type == "linear") {
-        # Check if it's multivariate by looking for cbind in the formula
-        if (grepl("cbind\\(", input$formula_input)) {
-          if (is.null(input$metric_multivariate_linear) || length(input$metric_multivariate_linear) == 0) return(FALSE)
-        } else {
-          if (is.null(input$metric_univariate_linear) || length(input$metric_univariate_linear) == 0) return(FALSE)
-        }
-      } else if (input$type %in% c("logit", "cox", "poisson", "gamma", "negbin")) {
-        if (is.null(input$metric_glm_cox) || length(input$metric_glm_cox) == 0) return(FALSE)
-      } else {
-        return(FALSE)
-      }
-      return(TRUE)
-    }, error = function(e) {
+    # Check if formula is provided
+    if (is.null(input$formula_input) || input$formula_input == "") {
       return(FALSE)
-    })
+    }
+    # Check if strategy is selected
+    if (is.null(input$strategy) || length(input$strategy) == 0) {
+      return(FALSE)
+    }
+    # Check if metric is selected based on detected type
+    if (is.null(input$type)) {
+      return(FALSE)
+    } 
+    if (input$type == "linear") {
+      # Check if it's multivariate by looking for cbind in the formula
+      if (grepl("cbind\\(", input$formula_input)) {
+        if (is.null(input$metric_multivariate_linear) || length(input$metric_multivariate_linear) == 0) {
+          return(FALSE)
+        }
+      } else {
+        if (is.null(input$metric_univariate_linear) || length(input$metric_univariate_linear) == 0) {
+          return(FALSE)
+        }
+      }
+    } else if (input$type %in% c("logit", "cox", "poisson", "gamma", "negbin")) {
+      if (is.null(input$metric_glm_cox) || length(input$metric_glm_cox) == 0) {
+        return(FALSE)
+      }
+    } else {
+      return(FALSE)
+    }
+    return(TRUE)
   })
   
   exploratory_plot_enabled <- reactive({
@@ -349,9 +354,7 @@ server <- function(input, output, session) {
         include = input$include_input,
         test_method_linear = input$Approx_F,
         test_method_glm = input$glm_test,
-        test_method_cox = input$cox_test,
-        test_ratio = input$test_ratio,
-        feature_ratio = ifelse(any(input$strategy %in% c('forward','bidirection')) && !is.null(input$feature_ratio), input$feature_ratio, 1)
+        test_method_cox = input$cox_test
     )
     
     summary_list <- setNames(
@@ -365,10 +368,10 @@ server <- function(input, output, session) {
     process_plot <- setNames(
       lapply(attr(res,"nonhidden"),function(i){
         setNames(
-          lapply(c("details","overview"),function(j){
+          lapply(c("detail","overview"),function(j){
             plot(res,strategy=i,process=j)
           }),
-          c("details","overview")
+          c("detail","overview")
         )
       }),
       attr(res,"nonhidden")
@@ -377,9 +380,9 @@ server <- function(input, output, session) {
     if(all(input$strategy %in% 'subset') & all(metric %in% 'SL')) {
       model_vote <- NULL
     } else {
-      model_vote <- vote(res)
+      model_vote <- performance(res)
     }
-    results <- list(summary_list, process_plot, model_vote,res$arguments,res$variables)
+    results <- list(summary_list, process_plot, model_vote,res$argument,res$variable)
     
     enable("download")
     enable("download_process_plot")

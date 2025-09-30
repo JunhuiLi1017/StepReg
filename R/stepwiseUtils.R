@@ -349,7 +349,7 @@ formatTable <- function(tbl, tbl_name = "Test") {
 
 getTable1SummaryOfParameters <- function(formula, data, type, x_name, y_name, merged_multico_x, 
 																				 merged_include, strategy, metric, sle, sls, 
-																				 test_method, tolerance, intercept) {
+																				 test_method, tolerance, intercept, test_ratio, feature_ratio, seed) {
 	# generate: table1: Summary of Parameters
 	table_1_summary_of_parameters <- data.frame(
 		Parameter = c("initial formula",
@@ -362,7 +362,10 @@ getTable1SummaryOfParameters <- function(formula, data, type, x_name, y_name, me
 									"test method", 
 									"tolerance of multicollinearity", 
 									"multicollinearity variable", 
-									"intercept"),
+									"intercept",
+									"test ratio",
+									"feature ratio",
+									"seed"),
 		Value = c(paste0(deparse(formula), collapse = ""),
 							type,
 							paste0(strategy, collapse=" & "), 
@@ -373,11 +376,14 @@ getTable1SummaryOfParameters <- function(formula, data, type, x_name, y_name, me
 							test_method, 
 							tolerance, 
 							merged_multico_x, 
-							intercept)
+							intercept,
+							test_ratio,
+							feature_ratio,
+							seed)
 	)
 	if(type == 'cox') {
 		# "intercept" is not relevant
-		table_1_summary_of_parameters <- table_1_summary_of_parameters[-nrow(table_1_summary_of_parameters), ]
+		table_1_summary_of_parameters <- table_1_summary_of_parameters[-11, ]
 	}
 	# get rid of unrelevant variables from table 1:
 	nrow_sls <- which(table_1_summary_of_parameters$Parameter %in% "significance level for stay (sls)")

@@ -623,49 +623,7 @@ ui <- tagList(
           ),
           tags$div(
             class = "step-indicator",
-            tags$h5("Step 5: data-splitting and randomlized forward selection")
-          ),
-          sliderInput(
-            "test_ratio",
-            label = tags$span(
-              "test ratio (holdout)",
-              tags$i(
-                class = "glyphicon glyphicon-question-sign centered-icon",
-                style = "color:#0072B2;",
-                title = paste(c(
-                  "Proportion of data reserved for testing (0 ≤ r < 1).",
-                  "Rows are randomly split into train/test using a fixed seed for reproducibility.",
-                  "Set to 0 to disable holdout validation."), collapse = "\n")
-              )
-            ),
-            min = 0,
-            max = 0.99,
-            value = 0,
-            step = 0.05
-          ),
-          conditionalPanel(
-            condition = "input.strategy.indexOf('forward') != -1",
-            sliderInput(
-              "feature_ratio",
-              label = tags$span(
-                "feature ratio (forward only)",
-                tags$i(
-                  class = "glyphicon glyphicon-question-sign centered-icon",
-                  style = "color:#0072B2;",
-                  title = paste(c(
-                    "Proportion of candidate features sampled uniformly at random",
-                    "during each forward add step (0 < r ≤ 1). r = 1 disables sampling."), collapse = "\n")
-                )
-              ),
-              min = 0.1,
-              max = 1,
-              value = 1,
-              step = 0.1
-            )
-          ),
-          tags$div(
-            class = "step-indicator",
-            tags$h5("Step 6: Run Analysis")
+            tags$h5("Step 5: Run Analysis")
           ),
           tags$div(
             style = "display: flex; justify-content: space-between;",
