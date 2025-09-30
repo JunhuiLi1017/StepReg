@@ -336,7 +336,8 @@ server <- function(input, output, session) {
       "cox" = input$metric_glm_cox,
       "logit" = input$metric_glm_cox,
       "poisson" = input$metric_glm_cox,
-      "gamma" = input$metric_glm_cox
+      "gamma" = input$metric_glm_cox,
+      "negbin" = input$metric_glm_cox
     )
     rv$nmetric <- length(metric)
     rv$nvar <- ncol(df$data)/10
@@ -354,7 +355,9 @@ server <- function(input, output, session) {
         include = input$include_input,
         test_method_linear = input$Approx_F,
         test_method_glm = input$glm_test,
-        test_method_cox = input$cox_test
+        test_method_cox = input$cox_test,
+        test_ratio = input$test_ratio,
+        feature_ratio = ifelse(any(input$strategy %in% c('forward','bidirection')) && !is.null(input$feature_ratio), input$feature_ratio, 1)
     )
     
     summary_list <- setNames(
