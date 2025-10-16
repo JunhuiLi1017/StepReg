@@ -981,17 +981,17 @@ cox_performance <- function(data_train, data_test, strategy, metric, model_train
 		y_vars <- sub("Surv\\((.*)\\)", "\\1", y_name)
 		time_var <- trimws(strsplit(y_vars, ",")[[1]][1])
 		status_var <- trimws(strsplit(y_vars, ",")[[1]][2])
-		surv_obj <- Surv(data_test[[time_var]], data_test[[status_var]])
-		lp_test <- predict(model_train, newdata = data_test, type = "lp", weights=weight)
+		surv_obj <- Surv(data_test[,time_var], data_test[,status_var])
+		lp_test <- predict(model_train, newdata = data_test, weights=weight)
 		cindex_test <- concordance(surv_obj ~ lp_test, data = data_test)$concordance
 		
 		# 3. Time-Dependent AUC
 		data <- rbind(data_train, data_test)
-		times <- seq(min(data[[time_var]]), max(data[[time_var]]), by = 100)
+		times <- seq(min(data[,time_var]), max(data[,time_var]), by = round((max(data[,time_var]) - min(data[,time_var]))/100))
 		lp_train <- predict(model_train, weights=weight)
 		lp_test <- predict(model_train, newdata=data_test, weights=weight)
-		Surv_rsp_train <- Surv(data_train[[time_var]], data_train[[status_var]])
-		Surv_rsp_test <- Surv(data_test[[time_var]], data_test[[status_var]])
+		Surv_rsp_train <- Surv(data_train[,time_var], data_train[,status_var])
+		Surv_rsp_test <- Surv(data_test[,time_var], data_test[,status_var])
 		
 		auc_uno <- AUC.uno(Surv_rsp_train, Surv_rsp_test, lp_test, times)
 		auc_sh <- AUC.sh(Surv_rsp_train, Surv_rsp_test, lp_train, lp_test, times)
@@ -1016,7 +1016,7 @@ cox_performance <- function(data_train, data_test, strategy, metric, model_train
 								   cindex_train, test_results$cindex_test, 
 								   test_results$auc_hc, test_results$auc_uno, test_results$auc_sh)
 	colnames(model_performance) <- c("model", "strategy:metric", "c-index_train", "c-index_test", "auc_hc", "auc_uno", "auc_sh")
-	model_performance <- model_performance[,c(1:5)]
+	model_performance <- model_performance[,c(1:3,7)]
 	return(model_performance)
 }
 

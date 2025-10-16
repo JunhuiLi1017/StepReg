@@ -7,7 +7,7 @@ StepReg is an R package that streamlines stepwise regression analysis by support
 
 ## Key Features
 
-- **Multiple Regression Types**: Linear, logistic, Cox, Poisson, and Gamma regression
+- **Multiple Regression Types**: Linear, logistic, Cox, Poisson, Gamma, and negative binomial regression
 - **Selection Strategies**: Forward selection, backward elimination, bidirectional elimination, and best subsets
 - **Selection Metrics**: AIC, AICc, BIC, CP, HQ, adjRsq, SL, SBC, IC(3/2), IC(1)
 - **Advanced Features**: 

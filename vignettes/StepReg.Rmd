@@ -284,13 +284,11 @@ kable(df, format = "html", caption = 'Formula syntax supported by StepReg') %>% 
 
 ## Multicollinearity {#multicollinearity}
 
-This [blog](https://statisticsbyjim.com/regression/multicollinearity-in-regression-analysis/) by Jim Frost gives an excellent overview of multicollinearity and when it is necessary to remove it.
+Multicollinearity arises when independent variables in a regression model are correlated with each other. Ideally, predictors should be independent to allow a clear understanding of how each variable relates to the outcome. When the correlations between predictors are strong, it can create significant issues for model fitting and interpretation. In such cases, changes in one input variable can be associated with changes in others, which makes it difficult to assess each variable's individual contribution to the dependent variable.
 
-Simply put, a dataset contains multicollinearity when input predictors are correlated. When multicollinearity occurs, the interpretability of predictors will be badly affected because changes in one input variable lead to changes in other input variables. Therefore, it is hard to individually estimate the relationship between each input variable and the dependent variable.
+Severe multicollinearity reduces the precision of estimated regression coefficients, thereby complicating model selection and interpretation. It can lead to unreliable estimates and inflated standard errors. However, it is important to note that multicollinearity primarily affects the interpretation of coefficients and their statistical significance. If the main objective is to predict outcomes accurately, and interpretation of individual predictors is not required, addressing multicollinearity may not be necessary because it does not impact prediction accuracy or the goodness-of-fit of the model.
 
-Multicollinearity can dramatically reduce the precision of the estimated regression coefficients of correlated input variables, making it hard to find the correct model. However, as Jim pointed out, “Multicollinearity affects the coefficients and p-values, but it does not influence the predictions, precision of the predictions, and the goodness-of-fit statistics. If your primary goal is to make predictions, and you don’t need to understand the role of each independent variable, you don’t need to reduce severe multicollinearity.”
-
-In StepReg, [QC Matrix Decomposition](https://towardsdatascience.com/qr-matrix-factorization-15bae43a6b2#:~:text=The%20QR%20matrix%20decomposition%20allows%20one%20to%20express%20a%20matrix,zero%2C%20it%20is%20also%20invertible.) is performed ahead of time to detect and remove input variables causing multicollinearity.
+In StepReg, QC Matrix Decomposition is performed ahead of time to detect and remove input variables causing multicollinearity.
 
 # StepReg output {#stepregoutput}
 
@@ -325,7 +323,7 @@ report(res, report_name = "results", format = c("html", "docx"))
 
 # Use cases {#usecases}
 
-Below, we present various examples illustrating the application of different models tailored to specific datasets. Please note that stepwise regression should never be used for statistical inference unless the variable selection process is properly accounted for, as it can invalidate the results. However, this issue does not arise when stepwise regression is used for prediction. It is essential to select the regression model that best suits the type of response variable. For detailed guidance, refer to section @ref(regressioncategories).
+Below, we present various examples illustrating the application of different models tailored to specific datasets. Please note that stepwise regression should never be used for statistical inference unless the variable selection process is properly accounted for, as it can invalidate the results. However, this issue does not arise when stepwise regression is used for prediction. It is essential to select the regression model that best suits the type of response variable. For detailed guidance, refer to section \@ref(regressioncategories).
 
 ## Linear regression with the _mtcars_ dataset
 
