@@ -6,9 +6,11 @@
 }
 \details{
   \itemize{
-    \item \strong{Q: How do I install StepReg efficiently and avoid the dependency issues?} \cr
+    \item \strong{Q: How do I install StepReg efficiently?} \cr
       A: You can install StepReg using the following command:
       \code{pak::pkg_install("StepReg")}.
+      or
+      \code{pak::pkg_install("JunhuiLi1017/StepReg")}.
       or
       \code{install.packages("StepReg")}.
       or
@@ -24,5 +26,9 @@
       installation examples:
       Ubuntu/Debian:
       \code{sudo apt-get install libcairo2-dev libwebp-dev libmagick++-dev}
+      Red Hat/CentOS:
+      \code{sudo yum install cairo-devel libwebp-devel ImageMagick-c++-devel ImageMagick-devel}
+      macOS:
+      \code{brew install cairo imagemagick webp}
   }
 }

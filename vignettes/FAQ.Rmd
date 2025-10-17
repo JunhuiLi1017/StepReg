@@ -7,6 +7,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+Below are some Frequently Asked Questions about StepReg. If you have a question that you think would fit well here please open an issue[here](https://github.com/JunhuiLi1017/StepReg/issues/new).
+
 # Frequently Asked Questions
 
 **Q: How do I install StepReg efficiently?**  
@@ -14,6 +16,12 @@ A: You can install StepReg using the following command:
 
 ```r
 pak::pkg_install("StepReg")
+```
+
+or
+
+```r
+pak::pkg_install("JunhuiLi1017/StepReg")
 ```
 
 or
@@ -27,7 +35,13 @@ or
 ```r
 devtools::install_github("JunhuiLi1017/StepReg")
 ```
-we recommend using `pak::pkg_install("StepReg")` to install StepReg to avoid the dependency issues.
+we recommend using `pak::pkg_install("StepReg")` or `pak::pkg_install("JunhuiLi1017/StepReg")` to install StepReg to avoid the dependency issues.
+
+**Q: How to use StepReg?**  
+A: You can refer to the [StepReg vignette](https://CRAN.R-project.org/package=StepReg/vignettes/StepReg.html) for detailed examples.
+
+**Q: How to use the interactive Shiny application?**  
+A: You can refer to the [StepReg Shiny application](https://junhuili1017.shinyapps.io/StepReg/) for detailed examples.
 
 **Q: I encounter a missing system libraries error when installing StepReg. What should I do?**  
 A: Some dependencies of StepReg require additional system libraries to be installed on your computer. If you see an error message about missing system packages, you may need to manually install them using your system package manager.
