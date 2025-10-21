@@ -70,3 +70,9 @@ You can use Homebrew to install the dependencies (cairo, imagemagick, and webp):
 ```sh
 brew install cairo imagemagick webp
 ```
+
+**Q: How to use StepReg?**    
+A: You can refer to the [StepReg vignette](https://CRAN.R-project.org/package=StepReg/vignettes/StepReg.html) for detailed examples.
+
+**Q: How to use the interactive Shiny application?** 
+A: You can refer to the [StepReg Shiny application](https://junhuili1017.shinyapps.io/StepReg/) for detailed examples.
