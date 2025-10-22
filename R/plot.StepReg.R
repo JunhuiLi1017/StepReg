@@ -49,8 +49,6 @@
 #'   }
 #' 
 #' @import ggplot2
-#' @importFrom stringr str_split
-#' @importFrom dplyr group_by filter
 #' @importFrom ggrepel geom_label_repel
 #' 
 #' @export
@@ -90,7 +88,7 @@ plot.StepReg <- function(x, strategy = attr(x,"nonhidden"), process = c("overvie
   argument <- x$argument
   test_method <- argument[argument$Parameter %in% "test method",2]
   overview_list <- x$overview
-  strategy_vec <- unlist(str_split(argument[argument$Parameter %in% "selection strategy",2]," & "))
+  strategy_vec <- unlist(strsplit(argument[argument$Parameter %in% "selection strategy",2]," & "))
   
   if(!strategy %in% strategy_vec){
     stop(paste0(strategy," is not found in StepReg object"))
@@ -133,9 +131,11 @@ plot.StepReg <- function(x, strategy = attr(x,"nonhidden"), process = c("overvie
       p1 <- plotStepwiseDetail(plot_detail, num_digits)
     } else {
       #From SAS description: For two models A and B, each having the same number of explanatory variables, model A is considered to be better than model B if the global score chi-square statistic for A exceeds that for B.
-      plot_overview <- plot_overview %>%
-        group_by(.data$Step, .data$Metric) %>%
-        filter(ifelse(.data$Metric == "SL", .data$MetricValue == max(.data$MetricValue), .data$MetricValue == min(.data$MetricValue)))
+      # Group by Step and Metric, then filter based on condition
+      # For SL metric, keep rows with max MetricValue; for others, keep rows with min MetricValue
+      plot_overview <- plot_overview[order(plot_overview$Step, plot_overview$Metric, 
+                                          ifelse(plot_overview$Metric == "SL", -plot_overview$MetricValue, plot_overview$MetricValue)), ]
+      plot_overview <- plot_overview[!duplicated(plot_overview[, c("Step", "Metric")]), ]
       p1 <- plotSubsetDetail(plot_overview)
     }
     return(p1)

@@ -940,8 +940,13 @@ getTable3ProcessSummary <- function(data_train, data_test, type, strategy, metri
 				x_final_model <- c(intercept, include, out_final_stepwise$x_in_model)
 			}
 			#overview_table[,met] <- overview_table[,met] %>% as.numeric() %>% round(num_digits) %>% as.character()
-			overview_table[,met] <- overview_table[,met] %>% as.numeric()
-			overview[[stra]][[met]] <- overview_table %>% mutate_if(is.numeric, round, num_digits) %>% mutate_if(is.numeric,as.character) # to keep digits as we expected, convert numeric to character for html output.
+			overview_table[,met] <- as.numeric(overview_table[,met])
+			# Apply round to numeric columns, then convert to character
+			temp_table <- overview_table
+			numeric_cols <- sapply(temp_table, is.numeric)
+			temp_table[numeric_cols] <- lapply(temp_table[numeric_cols], round, num_digits)
+			temp_table[numeric_cols] <- lapply(temp_table[numeric_cols], as.character)
+			overview[[stra]][[met]] <- temp_table # to keep digits as we expected, convert numeric to character for html output.
 			
 			if(!(stra == "subset" & met == "SL")) {
 				model_train <- getModel(data_train, type, intercept, c(x_final_model[!x_final_model %in% intercept]), y_name, weight, method = test_method)

@@ -13,8 +13,8 @@ Authors@R: c(
     person("Wenxin", "Liu", , role = c("aut")),
     person("Lihua", "Julie Zhu", , role = c("aut"))
   )
-Date: 2025-10-16
-Description: Stepwise regression is a statistical technique used for model selection. This package streamlines stepwise regression analysis by supporting multiple regression types(linear, Cox, logistic, Poisson, Gamma, and negative binomial), incorporating popular selection strategies(forward, backward, bidirectional, and subset), and offering essential metrics. It enables users to apply multiple selection strategies and metrics in a single function call, visualize variable selection processes, and export results in various formats. StepReg offers a data-splitting option to address potential issues with invalid statistical inference and a randomized forward selection option to avoid overfitting. We validated StepReg's accuracy using public datasets within the SAS software environment. Additionally, StepReg features an interactive Shiny application to enhance usability and accessibility.
+Date: 2025-10-22
+Description: Stepwise regression is a statistical technique used for model selection. This package streamlines stepwise regression analysis by supporting multiple regression types(linear, Cox, logistic, Poisson, Gamma, and negative binomial), incorporating popular selection strategies(forward, backward, bidirectional, and subset), and offering essential metrics. It enables users to apply multiple selection strategies and metrics in a single function call, visualize variable selection processes, and export results in various formats. StepReg offers a data-splitting option to address potential issues with invalid statistical inference and a randomized forward selection option to avoid overfitting. We validated StepReg's accuracy using public datasets within the SAS software environment. For an interactive web interface, users can install the companion StepRegShiny package.
 License: MIT + file LICENSE
 BugReports: https://github.com/JunhuiLi1017/StepReg/issues
 VignetteBuilder: knitr
@@ -22,25 +22,14 @@ Suggests:
     knitr,
     testthat,
     BiocStyle,
-    kableExtra
+    kableExtra,
+    cowplot
 Imports:
-    dplyr,
     ggplot2,
     ggrepel,
     MASS,
-    stringr,
     survival,
     flextable,
-    cowplot,
-    shiny,
-    ggcorrplot,
-    tidyr,
-    summarytools,
-    shinythemes,
-    rmarkdown,
-    DT,
-    shinycssloaders,
-    shinyjs,
     pROC,
     survAUC
 Encoding: UTF-8
