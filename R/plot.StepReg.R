@@ -157,7 +157,7 @@ plot.StepReg <- function(x, strategy = attr(x,"nonhidden"), process = c("overvie
     }
     p2 <- p2 +
       scale_x_continuous(breaks = plot_overview$Step) + 
-      labs(title =paste0("Overview of Selection: ",strategy)) + 
+      labs(title =paste0("Selection Overview: ",strategy)) + 
       theme_light()
     return(p2)
   }
@@ -262,7 +262,7 @@ plotStepwiseDetail <- function(df, num_digits) {
           strip.text = element_text(color = "black")) +  # Adjust text color in facet labels
     facet_wrap(~ .data$metric, ncol=1) + 
     theme(strip.background = element_rect(colour = "black", fill = "gray80")) +
-    ggtitle(paste0("Detail of Selection: ", df$strategy[1])) + 
+    ggtitle(paste0("Selection Details: ", df$strategy[1])) + 
     ylab("Predictors") + 
     xlab("Step")
   return(p1)
@@ -284,7 +284,7 @@ plotSubsetDetail <- function(plot_overview) {
   p1 <- ggplot(tile_df, aes(x = .data$Step, y = .data$Variable, fill = .data$Selection)) +
     geom_tile(width = 0.99, height = 0.95, color = "black") +
     scale_fill_manual(values = c("Entry" = "palegreen2", "No" = "gray80")) +
-    labs(x = "Step", y = "Predictors", title = "Detail of Selection: subset") +
+    labs(x = "Step", y = "Predictors", title = "Selection Details: subset") +
     scale_x_continuous(breaks = plot_overview$Step) + 
     xlab("Variable number") +
     facet_wrap(~ .data$Metric, ncol=1) + 
