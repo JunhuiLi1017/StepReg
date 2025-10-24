@@ -1021,7 +1021,7 @@ cox_performance <- function(data_train, data_test, strategy, metric, model_train
 								   cindex_train, test_results$cindex_test, 
 								   test_results$auc_hc, test_results$auc_uno, test_results$auc_sh)
 	colnames(model_performance) <- c("model", "strategy:metric", "c-index_train", "c-index_test", "auc_hc", "auc_uno", "auc_sh")
-	model_performance <- model_performance[,c(1:3,7)]
+	model_performance <- model_performance[,c(1:4,7)]
 	return(model_performance)
 }
 
@@ -1108,9 +1108,9 @@ lm_performance <- function(data_train, data_test, type, strategy, metric, model_
 	} else {
 	  colnames(model_performance) <- c("model", "strategy:metric", "r2_train", "r2_test", "mse_train", "mse_test", "mae_train", "mae_test")
 	}
-	if(type != "linear") {
+	#if(type != "linear") {
 	  model_performance <- model_performance[,-c(3:4)]
-	}
+	#}
 	return(model_performance)
 }
 
