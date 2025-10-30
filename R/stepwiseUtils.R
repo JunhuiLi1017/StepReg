@@ -51,7 +51,7 @@ getIntercept <- function(formula, data, type) {
 		if(any(grepl("strata\\(", x_name))) {
 			intercept <- x_name[grepl("strata\\(", x_name)]
 		}else{
-			intercept <- '0'
+			intercept <- '1'
 		}
 	}
 	return(intercept)
@@ -347,25 +347,23 @@ formatTable <- function(tbl, tbl_name = "Test") {
 	return(tbl_list)
 }
 
-getTable1SummaryOfParameters <- function(formula, data, type, x_name, y_name, merged_multico_x, 
-																				 merged_include, strategy, metric, sle, sls, 
-																				 test_method, tolerance, intercept, test_ratio, feature_ratio, seed) {
+getTable1SummaryOfParameters <- function(formula, data, type, x_name, y_name, merged_multico_x,merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept, test_ratio, feature_ratio, seed) {
 	# generate: table1: Summary of Parameters
 	table_1_summary_of_parameters <- data.frame(
-		Parameter = c("initial formula",
-									"regression type",
-									"selection strategy", 
-									"stepwise metric", 
-									"significance level for entry (sle)", 
-									"significance level for stay (sls)",
-									"included variable",
-									"test method", 
-									"tolerance of multicollinearity", 
-									"multicollinearity variable", 
-									"intercept",
-									"test ratio",
-									"feature ratio",
-									"seed"),
+		Parameter = c(  "initial formula",
+						"regression type",
+						"selection strategy", 
+						"stepwise metric", 
+						"significance level for entry (sle)", 
+						"significance level for stay (sls)",
+						"included variable",
+						"test method", 
+						"tolerance of multicollinearity", 
+						"multicollinearity variable", 
+						"intercept",
+						"test ratio",
+						"feature ratio",
+						"seed"),
 		Value = c(paste0(deparse(formula), collapse = ""),
 							type,
 							paste0(strategy, collapse=" & "), 
@@ -971,6 +969,9 @@ getTable4ModelCall <- function(type, intercept, include, x_final_model_metric, y
 		x_final_model_strategy <- x_final_model_metric[[stra]]
 		for(met in names(x_final_model_strategy)) {
 			x_in_model <- x_final_model_strategy[[met]]
+			if(type == 'cox') {
+				x_in_model <- x_in_model[!x_in_model %in% c("1", "0", "-1")]
+			}
 			table4_model_call[[stra]][[met]] <- getModel(data, type, intercept = NULL, x_name = c(x_in_model), y_name, weight = weight,	method = test_method)
 		}
 	}
