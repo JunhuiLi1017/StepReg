@@ -1,5 +1,9 @@
 # StepReg NEWS
 
+## Version 1.6.2 (2025-10-30)
+- **UPDATE**: Removed "+ 0" , "-1", and "+1" in final cox regression model
+
+
 ## Version 1.6.1 (2025-10-22)
 
 ### Major Changes
