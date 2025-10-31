@@ -51,7 +51,7 @@ getIntercept <- function(formula, data, type) {
 		if(any(grepl("strata\\(", x_name))) {
 			intercept <- x_name[grepl("strata\\(", x_name)]
 		}else{
-			intercept <- '1'
+			intercept <- '0'
 		}
 	}
 	return(intercept)
@@ -947,8 +947,11 @@ getTable3ProcessSummary <- function(data_train, data_test, type, strategy, metri
 			overview[[stra]][[met]] <- temp_table # to keep digits as we expected, convert numeric to character for html output.
 			
 			if(!(stra == "subset" & met == "SL")) {
-				model_train <- getModel(data_train, type, intercept, c(x_final_model[!x_final_model %in% intercept]), y_name, weight, method = test_method)
-				x_final_model_metric[[stra]][[met]] <- x_final_model
+				if(type == 'cox') {
+					x_final_model <- x_final_model[!x_final_model %in% c("1", "0", "-1")]
+				}
+				model_train <- getModel(data_train, type, intercept = NULL, x_name = x_final_model, y_name = y_name, weight = weight, method = test_method)
+				x_final_model_metric[[stra]][[met]] <- x_final_model	
 				if(type == "cox") {
 				  model_performance <- cox_performance(data_train, data_test, stra, met, model_train, y_name, weight)
 				} else if(type == "linear" | type == "gamma" |type == "negbin" | type == "poisson"){
