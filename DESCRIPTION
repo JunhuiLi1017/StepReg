@@ -23,7 +23,8 @@ Suggests:
     testthat,
     BiocStyle,
     kableExtra,
-    cowplot
+    cowplot,
+    rmarkdown
 Imports:
     ggplot2,
     ggrepel,
