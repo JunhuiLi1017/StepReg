@@ -164,10 +164,14 @@ plot.StepReg <- function(x, strategy = attr(x,"nonhidden"), process = c("overvie
 }
 
 plotStepwiseSummaryDualY <- function(x, df, a, b, n){
+  # Filter out rows with empty or NA Variable values for label repelling
+  df_labels <- df[!is.na(df$Variable) & df$Variable != "", ]
+  
   if(all(df$Metric %in% "SL")) {
     p2 <- ggplot(df, aes(x = .data$Step, group = .data$Metric)) +
       geom_point(aes(y = (log10(.data$MetricValue) - a[1])/diff(a), color = .data$Metric)) + 
-      geom_label_repel(aes(y = (log10(.data$MetricValue) - a[1])/diff(a), color = .data$Metric, label = .data$Variable),
+      geom_label_repel(data = df_labels,
+                       aes(y = (log10(.data$MetricValue) - a[1])/diff(a), color = .data$Metric, label = .data$Variable),
                        label.size = 0.05,
                        show.legend = FALSE) + 
       scale_y_continuous(
@@ -178,7 +182,8 @@ plotStepwiseSummaryDualY <- function(x, df, a, b, n){
   } else {
     p2 <- ggplot(df, aes(x = .data$Step, group = .data$Metric)) +
       geom_point(aes(y = ifelse(.data$Metric == "SL", (log10(.data$MetricValue) - a[1])/diff(a), (.data$MetricValue - b[1])/diff(b)), color = .data$Metric)) + 
-      geom_label_repel(aes(y = ifelse(.data$Metric == "SL", (log10(.data$MetricValue) - a[1])/diff(a), (.data$MetricValue - b[1])/diff(b)), color = .data$Metric, label = .data$Variable),
+      geom_label_repel(data = df_labels,
+                       aes(y = ifelse(.data$Metric == "SL", (log10(.data$MetricValue) - a[1])/diff(a), (.data$MetricValue - b[1])/diff(b)), color = .data$Metric, label = .data$Variable),
                        label.size = 0.05,
                        show.legend = FALSE) + 
       scale_y_continuous(
@@ -212,6 +217,9 @@ plotStepwiseSummaryDualY <- function(x, df, a, b, n){
 }
 
 plotStepwiseSummarySingleY <- function(df){
+  # Filter out rows with empty or NA Variable values for label repelling
+  df_labels <- df[!is.na(df$Variable) & df$Variable != "", ]
+  
   metricValue <- unique(df$Metric)
   if("SL" %in% metricValue){
     metricValue[which(metricValue %in% "SL")] <- "SL (p value)"
@@ -223,7 +231,8 @@ plotStepwiseSummarySingleY <- function(df){
         group = .data$Metric) + 
     geom_point(aes(color = .data$Metric)) + 
     geom_line(aes(linetype = .data$Metric, color = .data$Metric)) +
-    geom_label_repel(label.size = 0.05,
+    geom_label_repel(data = df_labels,
+                     label.size = 0.05,
                      aes(color = .data$Metric),
                      show.legend = FALSE) + 
     xlab("Step") +
