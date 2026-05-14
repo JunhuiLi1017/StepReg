@@ -1173,11 +1173,11 @@ lm_performance <- function(data_train, data_test, type, strategy, metric, model_
 								   row.names = NULL,
 								   stringsAsFactors = FALSE
 								   )
-	if(is_multi) {
-	  colnames(model_performance) <- c("model", "strategy:metric", "adjR-squared_train", "adjR-squared_test", "mse_train", "mse_test", "mae_train", "mae_test", "response")
-	} else {
-	  colnames(model_performance) <- c("model", "strategy:metric", "adjR-squared_train", "adjR-squared_test", "mse_train", "mse_test", "mae_train", "mae_test")
-	}
+	#if(is_multi) {
+	colnames(model_performance) <- c("model", "strategy:metric", "adjR-squared_train", "adjR-squared_test", "mse_train", "mse_test", "mae_train", "mae_test", "response")
+	#} else {
+	#  colnames(model_performance) <- c("model", "strategy:metric", "adjR-squared_train", "adjR-squared_test", "mse_train", "mse_test", "mae_train", "mae_test")
+	#}
 	if(type != "linear") {
 	  model_performance <- model_performance[,-c(3:4)]
 	}
