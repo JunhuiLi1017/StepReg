@@ -1,5 +1,5 @@
 Package: StepReg
-Version: 1.6.5
+Version: 1.6.6
 Title: Stepwise Regression Analysis
 Authors@R: c(
     person("Junhui", "Li", , "junhui.li11@umassmed.edu", role = c("cre"),
@@ -7,10 +7,13 @@ Authors@R: c(
     person("Junhui", "Li", , "junhui.li11@umassmed.edu", role = c("aut")),
     person("Kai", "Hu", , "kai.hu@umassmed.edu", role = c("aut")),
     person("Xiaohuan", "Lu", , role = c("aut")),
+    person("Sushmita", "N Nayak", , role = c("ctb")),
+    person("Cesar", "Bautista Sotelo", , role = c("ctb")),
+    person("Michael", "A Lodato", , role = c("ctb")),
     person("Wenxin", "Liu", , role = c("aut")),
     person("Lihua", "Julie Zhu", , role = c("aut"))
   )
-Date: 2026-05-14
+Date: 2026-06-10
 Description: Stepwise regression is a statistical technique used for model selection. This package streamlines stepwise regression analysis by supporting multiple regression types(linear, Cox, logistic, Poisson, Gamma, and negative binomial), incorporating popular selection strategies(forward, backward, bidirectional, and subset), and offering essential metrics. It enables users to apply multiple selection strategies and metrics in a single function call, visualize variable selection processes, and export results in various formats. StepReg offers a data-splitting option to address potential issues with invalid statistical inference and a randomized forward selection option to avoid overfitting. We validated StepReg's accuracy using public datasets within the SAS software environment. For an interactive web interface, users can install the companion 'StepRegShiny' package.
 License: MIT + file LICENSE
 BugReports: https://github.com/JunhuiLi1017/StepReg/issues
