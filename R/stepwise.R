@@ -211,10 +211,10 @@
 #' @keywords stepwise regression
 #'
 #' @importFrom survival coxph concordance Surv
-#' @importFrom survAUC AUC.uno AUC.sh AUC.hc
+#' @importFrom survAUC AUC.sh
 #' @importFrom utils combn
-#' @importFrom pROC auc roc
 #' @importFrom stats anova coef glm lm logLik pf reformulate sigma terms deviance df.residual formula model.frame predict cor
+#' @importFrom stats glm.fit binomial poisson Gamma model.matrix model.response na.pass pchisq pnorm pt setNames
 #' @importFrom MASS glm.nb
 #'
 #' @export
@@ -282,7 +282,15 @@ stepwise <- function(formula,
   x_name <- setdiff(x_name_orig, multico_x)
 
   dummy_name_list <- dummyNameList(x_name, data_train)
-  
+
+  ## design matrix built once for the fast candidate evaluators (NULL when the
+  ## formula-based refitting path has to be used, see fastUtils.R);
+  ## options(StepReg.fast = FALSE) forces the refitting path
+  ctx <- NULL
+  if(isTRUE(getOption("StepReg.fast", TRUE))) {
+    ctx <- buildDesignContext(data_train, type, intercept, x_name, y_name, include, weight, n_y)
+  }
+
   result <- list()
   ## table1
   table1_para_value <- getTable1SummaryOfParameters(formula, data_train, type, x_name_orig, y_name, merged_multico_x, merged_include, strategy, metric, sle, sls, test_method, tolerance, intercept, test_ratio, feature_ratio, seed)
@@ -293,7 +301,7 @@ stepwise <- function(formula,
   result$variable <- table2_class_table
   
   ## table3
-  table3_process <- getTable3ProcessSummary(data_train=data_train, data_test=data_test, type, strategy, metric, sle, sls, weight=weight, x_name, y_name, intercept, include=include, best_n, test_method, sigma_value, num_digits, feature_ratio, dummy_name_list)
+  table3_process <- getTable3ProcessSummary(data_train=data_train, data_test=data_test, type, strategy, metric, sle, sls, weight=weight, x_name, y_name, intercept, include=include, best_n, test_method, sigma_value, num_digits, feature_ratio, dummy_name_list, ctx = ctx)
   x_final_model_metric <- table3_process$final_variable
   result <- append(result,table3_process[which(names(table3_process) != "final_variable")])
   

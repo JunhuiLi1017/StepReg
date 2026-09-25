@@ -33,8 +33,6 @@
 #' @return Creates report file(s) in the specified format(s) in the current working directory.
 #' The file name will be \code{report_name.format} (e.g., "myreport.html", "myreport.docx").
 #'
-#' @importFrom flextable save_as_html save_as_pptx save_as_rtf save_as_docx autofit flextable align
-#' 
 #' @export
 #'
 #' @examples
@@ -65,6 +63,11 @@
 
 report <- function(x, report_name, format = c('html', 'docx', 'rtf', 'pptx')) {
   format <- match.arg(format, several.ok = TRUE)
+  
+  # flextable is only needed for report(), so it is a suggested package
+  if (!requireNamespace("flextable", quietly = TRUE)) {
+    stop("The 'flextable' package is required by report(). Please install it with: install.packages('flextable')")
+  }
   
   # Check if pandoc is available (required for flextable export functions)
   if (any(c('html', 'docx', 'rtf', 'pptx') %in% format)) {
@@ -105,19 +108,19 @@ report <- function(x, report_name, format = c('html', 'docx', 'rtf', 'pptx')) {
     if (any(c('html', 'docx', 'rtf', 'pptx') %in% format)) {
       for (i in format) {
         if (i %in% 'html') {
-          save_as_html(values = results,
+          flextable::save_as_html(values = results,
                        path = paste0(report_name, ".html"))
         } 
         if (i %in% 'docx') {
-          save_as_docx(values = results,
+          flextable::save_as_docx(values = results,
                        path = paste0(report_name, ".docx"))
         } 
         if (i %in% 'rtf') {
-          save_as_rtf(values=results,
+          flextable::save_as_rtf(values=results,
                       path = paste0(report_name, ".rtf"))
         } 
         if (i %in% 'pptx') {
-          save_as_pptx(values = results,
+          flextable::save_as_pptx(values = results,
                        path = paste0(report_name, ".pptx"))
         }
         # if (i %in% 'xlsx') {
@@ -141,5 +144,5 @@ report <- function(x, report_name, format = c('html', 'docx', 'rtf', 'pptx')) {
 }
 
 process_table <- function(data) {
-  align(autofit(flextable(as.data.frame(data))), align = "center", part = "all")
+  flextable::align(flextable::autofit(flextable::flextable(as.data.frame(data))), align = "center", part = "all")
 }
